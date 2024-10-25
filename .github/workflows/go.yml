@@ -20,8 +20,14 @@ jobs:
     - name: Install dependencies
       run: go mod tidy
 
+    - name: Install golint
+      run: go install golang.org/x/lint/golint@latest
+
+    - name: Add Go bin to PATH
+      run: echo "$GOPATH/bin" >> $GITHUB_ENV
+
     - name: Lint
-      run: go get -u golang.org/x/lint/golint && golint ./...
+      run: golint ./...
 
     - name: Build
       run: go build -v ./...
