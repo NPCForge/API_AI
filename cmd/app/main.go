@@ -1,26 +1,23 @@
 package main
 
 import (
-	"fmt"
 	"log"
+	"my-api/internal/handlers"
+	"net/http"
 
-	"github.com/gofiber/fiber/v2"
-	"github.com/joho/godotenv"
+	"github.com/gorilla/mux"
 )
 
 func main() {
-	app := fiber.New()
+	// Crée un nouveau routeur
+	r := mux.NewRouter()
 
-	if err := godotenv.Load(".env.local"); err != nil {
-		log.Fatal("Erreur de chargement du fichier .env.local")
+	// Associe le handler `ConnectHandler` à la route `/connect`
+	r.HandleFunc("/connect", handlers.ConnectHandler).Methods("POST")
+
+	// Lance le serveur
+	log.Println("Serveur démarré sur le port 8080")
+	if err := http.ListenAndServe(":8080", r); err != nil {
+		log.Fatalf("Erreur lors du lancement du serveur : %v", err)
 	}
-
-	// Route principale
-	app.Get("/", func(c *fiber.Ctx) error {
-		fmt.Println("Message sended!")
-		return c.SendString("Hello, World!")
-	})
-
-	// Démarrer le serveur
-	log.Fatal(app.Listen(":3000"))
 }
