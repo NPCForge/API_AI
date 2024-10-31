@@ -5,6 +5,7 @@ import (
 	"log"
 	"my-api/config"
 	"my-api/internal/models"
+	"my-api/internal/services"
 	"net/http"
 )
 
@@ -32,10 +33,19 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	private, err := services.RegisterService(req)
+
+	// Vérifie si le token à bien été crée
+	if err != nil {
+		http.Error(w, "Internal Server Error", 500)
+		return
+	}
+
 	// Crée la réponse
 	res := models.RegisterResponse{
 		Message: "Connexion réussie",
 		Status:  200,
+		Private: private,
 	}
 
 	// Définit l'en-tête Content-Type à application/json et envoie la réponse JSON
