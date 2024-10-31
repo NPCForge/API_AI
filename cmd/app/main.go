@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"my-api/config"
 	"my-api/internal/handlers"
 	"net/http"
 
@@ -11,9 +12,11 @@ import (
 func main() {
 	// Crée un nouveau routeur
 	r := mux.NewRouter()
+	config.InitClient()
 
-	// Associe le handler `ConnectHandler` à la route `/connect`
+	// Associe le handler à la route /internal/handlers/RouteHandler.go
 	r.HandleFunc("/connect", handlers.ConnectHandler).Methods("POST")
+	r.HandleFunc("/Register", handlers.RegisterHandler).Methods("POST")
 
 	// Lance le serveur
 	log.Println("Serveur démarré sur le port 8080")
