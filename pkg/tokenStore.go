@@ -52,3 +52,16 @@ func UpdateToken(userID, newToken string) bool {
 	}
 	return exists
 }
+
+func IsValidToken(token string) bool {
+	mu.Lock()
+	defer mu.Unlock()
+
+	// Parcours des valeurs dans tokenStore pour vérifier si le token existe
+	for _, storedToken := range tokenStore {
+		if storedToken == token {
+			return true // Le token est valide
+		}
+	}
+	return false // Le token n'est pas trouvé
+}
