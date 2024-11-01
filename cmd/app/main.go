@@ -15,7 +15,7 @@ func main() {
 	config.InitClient()
 
 	// Associe le handler à la route /internal/handlers/RouteHandler.go
-	r.HandleFunc("/connect", handlers.ConnectHandler).Methods("POST")
+	r.HandleFunc("/Connect", handlers.ConnectHandler).Methods("POST")
 	r.HandleFunc("/Register", handlers.RegisterHandler).Methods("POST")
 
 	// Lance le serveur
