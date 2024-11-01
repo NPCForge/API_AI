@@ -17,3 +17,8 @@ type BodyEntity struct {
 	Prompt string `json:"prompt"`
 	Name   string `json:"name"`
 }
+
+type DisconnectResponse struct {
+	Message string `json:"message"`
+	Status  int    `json:"status"`
+}
