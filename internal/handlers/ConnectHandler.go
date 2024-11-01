@@ -3,8 +3,8 @@ package handlers
 import (
 	"encoding/json"
 	"log"
-	"my-api/config"
 	"my-api/internal/models"
+	"my-api/internal/services"
 	"net/http"
 )
 
@@ -24,18 +24,21 @@ func ConnectHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	apiKey := config.GetEnvVariable("API_KEY_REGISTER")
+	pass, err := services.UserConnect(req)
+	var res models.ConnectResponse
 
-	// Vérifie si le token est valide
-	if req.Token != apiKey {
-		http.Error(w, "Token invalide", http.StatusUnauthorized)
-		return
-	}
-
-	// Crée la réponse
-	res := models.ConnectResponse{
-		Message: "Connexion réussie",
-		Status:  200,
+	if err != nil {
+		res = models.ConnectResponse{
+			Message:  "Unauthorized",
+			Status:   401,
+			TmpToken: "",
+		}
+	} else {
+		res = models.ConnectResponse{
+			Message:  "Connexion réussie",
+			Status:   200,
+			TmpToken: pass,
+		}
 	}
 
 	// Définit l'en-tête Content-Type à application/json et envoie la réponse JSON
