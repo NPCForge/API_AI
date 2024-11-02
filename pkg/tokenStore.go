@@ -31,6 +31,19 @@ func GetToken(userID string) (string, bool) {
 	return token, exists
 }
 
+func GetUserID(token string) (string, bool) {
+	mu.Lock()
+	defer mu.Unlock()
+
+	// Parcours du store pour trouver le token
+	for userID, storedToken := range tokenStore {
+		if storedToken == token {
+			return userID, true // Renvoie l'ID de l'utilisateur si trouvé
+		}
+	}
+	return "", false // Renvoie une chaîne vide si le token n'est pas trouvé
+}
+
 // Supprime le token d'un utilisateur
 func DeleteToken(userID string) bool {
 	mu.Lock()
