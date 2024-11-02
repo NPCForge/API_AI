@@ -24,7 +24,8 @@ func main() {
 
 	// Route Protégé par le middleware
 	protected.HandleFunc("/Disconnect", handlers.DisconnectHandler).Methods("POST")
-	protected.HandleFunc("/GetPopulation", handlers.GetPopulationHandler).Methods("GET")
+	// protected.HandleFunc("/GetPopulation", handlers.GetPopulationHandler).Methods("GET")
+	protected.HandleFunc("/Remove", handlers.GetPopulationHandler).Methods("POST")
 
 	// Lance le serveur
 	log.Println("Serveur démarré sur le port 8080")
