@@ -5,11 +5,15 @@ type AuthResponse struct {
 }
 
 type ViewReponse struct {
-	Page       int           `json:"page"`
-	PerPage    int           `json:"perPage"`
-	TotalItems int           `json:"totalItems"`
-	TotalPages int           `json:"totalPages"`
-	Items      []interface{} `json:"items"` // Utilise un type adapté selon ta structure d'élément
+	Page       int    `json:"page"`
+	PerPage    int    `json:"perPage"`
+	TotalItems int    `json:"totalItems"`
+	TotalPages int    `json:"totalPages"`
+	Items      []Item `json:"items"`
+}
+
+type Item struct {
+	ID string `json:"id"`
 }
 
 type BodyEntity struct {
@@ -19,6 +23,11 @@ type BodyEntity struct {
 }
 
 type DisconnectResponse struct {
+	Message string `json:"message"`
+	Status  int    `json:"status"`
+}
+
+type RemoveResponse struct {
 	Message string `json:"message"`
 	Status  int    `json:"status"`
 }

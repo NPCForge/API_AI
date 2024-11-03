@@ -4,13 +4,33 @@ import (
 	"encoding/json"
 	"log"
 	"my-api/internal/models"
+	"my-api/internal/services"
 	"net/http"
 )
 
 func RemoveHandler(w http.ResponseWriter, r *http.Request) {
-	res := models.DisconnectResponse{
-		Message: "Deconnexion réussie",
+	res := models.RemoveResponse{
+		Message: "Suppression réussie",
 		Status:  200,
+	}
+
+	token := r.Header.Get("Authorization")
+	_, err := services.Remove(token)
+
+	if err != nil {
+		res = models.RemoveResponse{
+			Message: "Erreur lors de la suppression",
+			Status:  401,
+		}
+	}
+
+	_, err = services.Disconnect(token)
+
+	if err != nil {
+		res = models.RemoveResponse{
+			Message: "Erreur lors de la deconnexion",
+			Status:  401,
+		}
 	}
 
 	w.Header().Set("Content-Type", "application/json")
