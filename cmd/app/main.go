@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"my-api/config"
 	"my-api/internal/handlers"
@@ -11,9 +12,11 @@ import (
 )
 
 func main() {
-	// Crée un nouveau routeur
+
+	fmt.Println("Register api key: ", config.GetEnvVariable("API_KEY_REGISTER"))
+
 	r := mux.NewRouter()
-	config.InitClient()
+	config.InitDB()
 
 	protected := r.PathPrefix("/").Subrouter()
 	protected.Use(services.LoggingMiddleware)

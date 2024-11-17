@@ -16,6 +16,11 @@ type Item struct {
 	ID string `json:"id"`
 }
 
+type ConnectConfigPocketbase struct {
+	Identity string `json:"identity"`
+	Password string `json:"password"`
+}
+
 type BodyEntity struct {
 	Token  string `json:"token"`
 	Prompt string `json:"prompt"`
