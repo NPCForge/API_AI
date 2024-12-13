@@ -1,123 +1,25 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"log"
-	"my-api/internal/models"
-	"my-api/internal/services"
+
+	"my-api/internal/handlers/websocket"
+	
 	"net/http"
 
 	"github.com/gorilla/mux"
-	"github.com/gorilla/websocket"
 )
-
-func MakeDecisionWebSocketHandler(conn *websocket.Conn, message string) {
-	// Créer une requête à partir du message
-	req := models.MakeDecisionRequest{
-		Message: message,
-	}
-
-	// Appeler le service MakeDecision
-	back, err := services.MakeDecisionService(req.Message)
-	if err != nil {
-		sendError(conn, "Erreur lors de l'appel au service MakeDecision")
-		return
-	}
-
-	// Créer la réponse
-	res := models.MakeDecisionResponse{
-		Message: back,
-		Status:  200,
-	}
-
-	log.Printf("back = %s", back)
-
-	// Envoyer la réponse via WebSocket
-	sendResponse(conn, res)
-}
-
-var upgrader = websocket.Upgrader{
-	CheckOrigin: func(r *http.Request) bool {
-		return true // Permet toutes les origines (CORS)
-	},
-}
-
-func sendResponse(conn *websocket.Conn, response interface{}) {
-	resp := map[string]interface{}{
-		"status": "success",
-		"data":   response,
-	}
-	conn.WriteJSON(resp)
-}
-
-func sendError(conn *websocket.Conn, errorMessage string) {
-	resp := map[string]interface{}{
-		"status":  "error",
-		"message": errorMessage,
-	}
-	conn.WriteJSON(resp)
-}
-
-func handleWebSocketMessage(conn *websocket.Conn, messageType int, message []byte) {
-	// Log du message brut reçu
-	log.Printf("Message brut reçu : %s", message)
-
-	// Décode le message JSON avec la structure correcte
-	var msg struct {
-		Action  string `json:"action"`
-		Message string `json:"message"`
-	}
-
-	err := json.Unmarshal(message, &msg)
-	if err != nil {
-		sendError(conn, "Erreur de décodage du message JSON")
-		return
-	}
-
-	// Log les champs décodés
-	log.Printf("Action : %s, Message : %s", msg.Action, msg.Message)
-
-	// Traite l'action
-	switch msg.Action {
-	case "TakeDecision":
-		MakeDecisionWebSocketHandler(conn, msg.Message)
-	default:
-		sendError(conn, "Action non reconnue")
-	}
-}
-
-func websocketHandler(w http.ResponseWriter, r *http.Request) {
-	conn, err := upgrader.Upgrade(w, r, nil)
-	if err != nil {
-		log.Println("Erreur lors de l'upgrade :", err)
-		return
-	}
-	defer conn.Close()
-
-	log.Println("Nouvelle connexion WebSocket établie")
-
-	for {
-		messageType, message, err := conn.ReadMessage()
-		if err != nil {
-			log.Println("Erreur lors de la lecture :", err)
-			break
-		}
-
-		// Gestion des messages WebSocket
-		handleWebSocketMessage(conn, messageType, message)
-	}
-}
 
 func main() {
 	r := mux.NewRouter()
 
-	r.HandleFunc("/ws", websocketHandler).Methods("GET")
+	r.HandleFunc("/ws", websocket.WebsocketHandler).Methods("GET")
 
 	port := ":3000"
-	fmt.Printf("Serveur démarré sur http://localhost%s\n", port)
+	fmt.Printf("Server started on http://localhost%s\n", port)
 	if err := http.ListenAndServe(port, r); err != nil {
-		log.Fatal("Erreur du serveur :", err)
+		log.Fatal("Error on server :", err)
 	}
 }
 
