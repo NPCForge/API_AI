@@ -1,11 +1,13 @@
-package websocket
+package handlers
 
 import (
 	"encoding/json"
 	"log"
 
+	"my-api/internal/models"
 	"my-api/internal/services"
 	"my-api/internal/utils"
+
 	"net/http"
 
 	"github.com/gorilla/websocket"
@@ -17,13 +19,22 @@ var upgrader = websocket.Upgrader{
 	},
 }
 
-func handleWebSocketMessage(conn *websocket.Conn, messageType int, message []byte) {
-	// Log hard message
-	log.Printf("Message : %s", message)
+var actions = []models.WebSocketDispatcher{
+	{
+		Name:      "TakeDecision",
+		Handler:   services.MakeDecisionWebSocket,
+		Protected: true,
+	},
+	{
+		Name:      "Register",
+		Handler:   services.RegisterServiceWebSocket,
+		Protected: false,
+	},
+}
 
-	// Decode Json message
+func handleWebSocketMessage(conn *websocket.Conn, messageType int, message []byte) {
 	var msg struct {
-		Action  string `json:"action"`
+		Action string `json:"action"`
 	}
 
 	err := json.Unmarshal(message, &msg)
@@ -32,15 +43,19 @@ func handleWebSocketMessage(conn *websocket.Conn, messageType int, message []byt
 		return
 	}
 
-	// Log decoded messages
-	log.Printf("Action : %s", msg.Action)
-
-	// Traite l'action
-	switch msg.Action {
-        case "TakeDecision":
-            services.MakeDecisionWebSocket(conn, message, utils.SendResponse, utils.SendError)
-        default:
-            utils.SendError(conn, "Unknown Action")
+	// Handle action
+	for _, action := range actions {
+		if action.Name == msg.Action {
+			if action.Protected {
+				// Call login middleware
+				if !services.LoginMiddlewareWebSocket(conn, message, utils.SendResponse, utils.SendError) {
+					return
+				}
+			}
+			// Call action handler
+			action.Handler(conn, message, utils.SendResponse, utils.SendError)
+			return
+		}
 	}
 }
 

@@ -13,8 +13,8 @@ def on_close(ws, close_status_code, close_msg):
 def on_open(ws):
     print("Connexion ouverte")
     message = json.dumps({
-        "action": "TakeDecision",
-        "message": "Votre message ici"
+        "action": "Register",
+        
     })
     ws.send(message)
 

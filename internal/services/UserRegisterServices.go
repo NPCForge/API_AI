@@ -1,44 +1,74 @@
 package services
 
 import (
+	"encoding/json"
 	"errors"
 	"my-api/internal/models"
 	"my-api/pkg"
+	"strconv"
+
+	"github.com/gorilla/websocket"
 )
 
-func SaveInDatabase(token string, entity models.RegisterRequest) (string, error) {
-	response, err := IsExist(token)
+func SaveInDatabase(entity models.RegisterRequest) (int64, error) {
+	response, err := IsExist(entity.Token)
 
 	if err != nil {
-		return "", errors.New("error searching in table")
+		return -1, errors.New("error searching in table")
 	}
 
 	if response {
-		return "", errors.New("error entry already exist in database")
+		return -1, errors.New("error entry already exist in database")
 	}
 
-	response, err = Register(token, entity)
+	id, err := Register(entity.Token, entity)
 
-	if err != nil || !response {
-		return "", errors.New("error creating entry")
+	if err != nil {
+		return -1, errors.New("error while registering")
 	}
 
-	return token, nil
+	return id, nil
+}
+
+func RegisterServiceWebSocket(conn *websocket.Conn, message []byte, sendResponse func(*websocket.Conn, interface{}), sendError func(*websocket.Conn, string)) {
+	var msg models.RegisterRequest
+
+	err := json.Unmarshal(message, &msg)
+	if err != nil {
+		sendError(conn, "Error while decoding JSON message")
+		return
+	}
+
+	id, err := SaveInDatabase(msg)
+
+	if err != nil {
+		sendError(conn, "Error saving in database")
+		return
+	}
+
+	pass, err := pkg.GenerateJWT(strconv.FormatInt(id, 10))
+
+	if err != nil {
+		sendError(conn, "Unable to generate Token")
+		return
+	}
+
+	sendResponse(conn, pass)
 }
 
 // Generation d'un token, et enregistrement de l'entité dans la base de donnée
-func RegisterService(entity models.RegisterRequest) (string, error) {
-	pass, err := pkg.GenerateJWT(entity.Name)
+// func RegisterService(entity models.RegisterRequest) (string, error) {
+// 	pass, err := pkg.GenerateJWT(entity.Name)
 
-	if err != nil {
-		return "", errors.New("error generating JWT")
-	}
+// 	if err != nil {
+// 		return "", errors.New("error generating JWT")
+// 	}
 
-	pass, err = SaveInDatabase(pass, entity)
+// 	pass, err = SaveInDatabase(pass, entity)
 
-	if err != nil {
-		return "", errors.New("error saving in database")
-	}
+// 	if err != nil {
+// 		return "", errors.New("error saving in database")
+// 	}
 
-	return pass, nil
-}
+// 	return pass, nil
+// }

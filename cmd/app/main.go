@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"log"
 
-	"my-api/internal/handlers/websocket"
-	
+	"my-api/internal/handlers"
+
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -14,7 +14,7 @@ import (
 func main() {
 	r := mux.NewRouter()
 
-	r.HandleFunc("/ws", websocket.WebsocketHandler).Methods("GET")
+	r.HandleFunc("/ws", handlers.WebsocketHandler).Methods("GET")
 
 	port := ":3000"
 	fmt.Printf("Server started on http://localhost%s\n", port)

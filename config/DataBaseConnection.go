@@ -19,7 +19,7 @@ func InitDB() {
 		// Configuration de la connexion
 		connStr := "user=" + GetEnvVariable("POSTGRES_USER")
 		connStr += " password=" + GetEnvVariable("POSTGRES_PASSWORD")
-		connStr += " dbname=" + GetEnvVariable("POSTGRES_NAME")
+		connStr += " dbname=" + GetEnvVariable("POSTGRES_DB")
 		connStr += " host=" + GetEnvVariable("POSTGRES_HOST")
 		connStr += " port=" + GetEnvVariable("POSTGRES_PORT")
 		connStr += " sslmode=disable"
