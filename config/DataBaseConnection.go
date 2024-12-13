@@ -17,11 +17,11 @@ var (
 func InitDB() {
 	once.Do(func() {
 		// Configuration de la connexion
-		connStr := "user=" + GetEnvVariable("DB_USER")
-		connStr += " password=" + GetEnvVariable("DB_PASSWORD")
-		connStr += " dbname=" + GetEnvVariable("DB_NAME")
-		connStr += " host=" + GetEnvVariable("DB_HOST")
-		connStr += " port=" + GetEnvVariable("DB_PORT")
+		connStr := "user=" + GetEnvVariable("POSTGRES_USER")
+		connStr += " password=" + GetEnvVariable("POSTGRES_PASSWORD")
+		connStr += " dbname=" + GetEnvVariable("POSTGRES_NAME")
+		connStr += " host=" + GetEnvVariable("POSTGRES_HOST")
+		connStr += " port=" + GetEnvVariable("POSTGRES_PORT")
 		connStr += " sslmode=disable"
 
 		// Se connecter à la base de données
