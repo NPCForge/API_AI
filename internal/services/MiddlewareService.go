@@ -24,10 +24,14 @@ func LoginMiddlewareWebSocket(conn *websocket.Conn, message []byte, sendResponse
 		sendError(conn, "No token in request body")
 		return false
 	}
-	if !pkg.IsValidToken(msg.Token) {
+
+	_, err = pkg.VerifyJWT(msg.Token)
+
+	if err != nil {
 		sendError(conn, "Invalid Token")
 		return false
 	}
+
 	return true
 }
 

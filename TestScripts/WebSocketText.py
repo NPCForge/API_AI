@@ -18,9 +18,15 @@ def on_open(ws):
     #     "name": "tom",
     #     "prompt": "juste le boss",
     # })
+    # message = json.dumps({
+    #     "action": "Connection",
+    #     "checksum": "azerty"
+    # })
+
     message = json.dumps({
-        "action": "Connection",
-        "checksum": "azerty"
+        "action": "TakeDecision",
+        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MzQ2OTQ3MzksInVzZXJfaWQiOiIxIn0.GliQPDHz9UnKIfXkrECqC1TpdeJSqON8dkmla186JrI",
+        "message": "Hello World"
     })
     ws.send(message)
 

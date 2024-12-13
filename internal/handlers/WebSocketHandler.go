@@ -21,19 +21,19 @@ var upgrader = websocket.Upgrader{
 
 var actions = []models.WebSocketDispatcher{
 	{
-		Name:      "TakeDecision",
-		Handler:   services.MakeDecisionWebSocket,
-		Protected: true,
-	},
-	{
 		Name:      "Register",
 		Handler:   services.RegisterServiceWebSocket,
 		Protected: false,
 	},
-    {
+	{
 		Name:      "Connection",
 		Handler:   services.UserConnectWebSocket,
 		Protected: false,
+	},
+	{
+		Name:      "TakeDecision",
+		Handler:   services.MakeDecisionWebSocket,
+		Protected: true,
 	},
 }
 
