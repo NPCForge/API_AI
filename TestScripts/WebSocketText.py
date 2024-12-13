@@ -12,9 +12,15 @@ def on_close(ws, close_status_code, close_msg):
 
 def on_open(ws):
     print("Connexion ouverte")
+    # message = json.dumps({
+    #     "action": "Register",
+    #     "checksum": "azerty",
+    #     "name": "tom",
+    #     "prompt": "juste le boss",
+    # })
     message = json.dumps({
-        "action": "Register",
-        
+        "action": "Connection",
+        "checksum": "azerty"
     })
     ws.send(message)
 

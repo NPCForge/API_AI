@@ -39,6 +39,11 @@ func RegisterServiceWebSocket(conn *websocket.Conn, message []byte, sendResponse
 		return
 	}
 
+    if msg.Action == "" || msg.Token == "" || msg.Name == "" || msg.Prompt == "" {
+        sendError(conn, "Missing required fields in the JSON message")
+        return
+    }
+
 	id, err := SaveInDatabase(msg)
 
 	if err != nil {

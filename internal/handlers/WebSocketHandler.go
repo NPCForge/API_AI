@@ -30,6 +30,11 @@ var actions = []models.WebSocketDispatcher{
 		Handler:   services.RegisterServiceWebSocket,
 		Protected: false,
 	},
+    {
+		Name:      "Connection",
+		Handler:   services.UserConnectWebSocket,
+		Protected: false,
+	},
 }
 
 func handleWebSocketMessage(conn *websocket.Conn, messageType int, message []byte) {

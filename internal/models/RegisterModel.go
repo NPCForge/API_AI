@@ -2,7 +2,7 @@ package models
 
 // RegisterRequest représente la structure des données attendues dans la requête
 type RegisterRequest struct {
-	Action string `json:"Action"`
+	Action string `json:"action"`
 	Token  string `json:"checksum"`
 	Name   string `json:"name"`
 	Prompt string `json:"prompt"`
