@@ -1,4 +1,4 @@
-package handlers
+package websocket
 
 import (
 	"encoding/json"
@@ -22,22 +22,22 @@ var upgrader = websocket.Upgrader{
 var actions = []models.WebSocketDispatcher{
 	{
 		Name:      "Register",
-		Handler:   services.RegisterServiceWebSocket,
+		Handler:   RegisterHandlerWebsocket,
 		Protected: false,
 	},
 	{
 		Name:      "Connection",
-		Handler:   services.UserConnectWebSocket,
+		Handler:   ConnectHandlerWebSocket,
 		Protected: false,
 	},
 	{
 		Name:      "Disconnect",
-		Handler:   services.DisconnectWebSocket,
+		Handler:   DisconnectHandlerWebsocket,
 		Protected: true,
 	},
 	{
 		Name:      "TakeDecision",
-		Handler:   services.MakeDecisionWebSocket,
+		Handler:   MakeDecisionHandlerWebSocket,
 		Protected: true,
 	},
 }

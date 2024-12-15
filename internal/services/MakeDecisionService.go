@@ -1,7 +1,6 @@
 package services
 
 import (
-	"encoding/json"
 	"errors"
 
 	"my-api/internal/models"
@@ -9,20 +8,7 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-func MakeDecisionWebSocket(conn *websocket.Conn, message []byte, sendResponse func(*websocket.Conn, interface{}), sendError func(*websocket.Conn, string)) {
-	var msg models.MakeDecisionRequest
-
-	err := json.Unmarshal(message, &msg)
-	if err != nil {
-		sendError(conn, "Error while decoding JSON message")
-		return
-	}
-
-	if msg.Message == "" {
-		sendError(conn, "Missing required fields in the JSON message")
-		return
-	}
-
+func MakeDecisionWebSocket(conn *websocket.Conn, msg models.MakeDecisionRequest, sendResponse func(*websocket.Conn, interface{}), sendError func(*websocket.Conn, string)) {
 	back, err := MakeDecisionService(msg.Message)
 	if err != nil {
 		sendError(conn, "Error while calling MakeDecision service")

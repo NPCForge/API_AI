@@ -1,7 +1,6 @@
 package services
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/gorilla/websocket"
@@ -9,20 +8,7 @@ import (
 	"my-api/pkg"
 )
 
-func DisconnectWebSocket(conn *websocket.Conn, message []byte, sendResponse func(*websocket.Conn, interface{}), sendError func(*websocket.Conn, string)) {
-	var msg models.DisconnectRequest
-
-	err := json.Unmarshal(message, &msg)
-	if err != nil {
-		sendError(conn, "Error while decoding JSON message")
-		return
-	}
-
-	if msg.Token == "" {
-		sendError(conn, "Missing required fields in the JSON message")
-		return
-	}
-
+func DisconnectWebSocket(conn *websocket.Conn, msg models.DisconnectRequest, sendResponse func(*websocket.Conn, interface{}), sendError func(*websocket.Conn, string)) {
 	result, err := pkg.VerifyJWT(msg.Token)
 
 	if err != nil {

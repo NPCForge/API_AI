@@ -1,4 +1,4 @@
-package handlers
+package http
 
 import (
 	"encoding/json"
@@ -8,26 +8,17 @@ import (
 	"net/http"
 )
 
-func RemoveHandler(w http.ResponseWriter, r *http.Request) {
-	res := models.RemoveResponse{
-		Message: "Suppression réussie",
+func DisconnectHandler(w http.ResponseWriter, r *http.Request) {
+	res := models.DisconnectResponse{
+		Message: "Deconnexion réussie",
 		Status:  200,
 	}
 
 	token := r.Header.Get("Authorization")
-	_, err := services.Remove(token)
+	_, err := services.Disconnect(token)
 
 	if err != nil {
-		res = models.RemoveResponse{
-			Message: "Erreur lors de la suppression",
-			Status:  401,
-		}
-	}
-
-	_, err = services.Disconnect(token)
-
-	if err != nil {
-		res = models.RemoveResponse{
+		res = models.DisconnectResponse{
 			Message: "Erreur lors de la deconnexion",
 			Status:  401,
 		}

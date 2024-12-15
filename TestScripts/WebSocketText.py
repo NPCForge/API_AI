@@ -4,13 +4,14 @@ import threading
 
 # Variable globale pour stocker le token reçu
 token = None
+action = ""
 
 def on_message(ws, message):
     global token
     print(f"Message reçu : {message}")
     try:
         message_dict = json.loads(message)
-        if "data" in message_dict:
+        if "data" in message_dict and (action == "register" or action == "disconnect" or action == "connection"):
             token = message_dict["data"]
             print(f"Token mis à jour : {token}")
     except json.JSONDecodeError:
@@ -27,7 +28,7 @@ def on_open(ws):
     print("Entrez une commande (Register, Connection, TakeDecision, Disconnect) ou 'exit' pour quitter.")
 
 def listen_to_stdin(ws):
-    global token
+    global token, action  # Ajout de 'action' à la liste des variables globales
     while True:
         user_input = input("Commande : ").strip()
 
@@ -72,6 +73,7 @@ def listen_to_stdin(ws):
             print("Commande inconnue. Essayez 'Register', 'Connection', 'TakeDecision', 'Disconnect', ou 'exit'.")
             continue
 
+        action = user_input.lower()  # Mise à jour correcte de la variable globale 'action'
         ws.send(message)
 
 # Initialisation du WebSocket

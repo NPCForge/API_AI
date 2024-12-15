@@ -1,7 +1,6 @@
 package services
 
 import (
-	"encoding/json"
 	"errors"
 	"my-api/internal/models"
 	"my-api/pkg"
@@ -10,15 +9,7 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-func UserConnectWebSocket(conn *websocket.Conn, message []byte, sendResponse func(*websocket.Conn, interface{}), sendError func(*websocket.Conn, string)) {
-	var msg models.ConnectRequest
-
-	err := json.Unmarshal(message, &msg)
-	if err != nil {
-		sendError(conn, "Error while decoding JSON message")
-		return
-	}
-
+func UserConnectWebSocket(conn *websocket.Conn, msg models.ConnectRequest, sendResponse func(*websocket.Conn, interface{}), sendError func(*websocket.Conn, string)) {
 	if msg.Action == "" || msg.Token == "" {
 		sendError(conn, "Missing required fields in the JSON message")
 		return

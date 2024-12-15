@@ -4,8 +4,7 @@ import (
 	"fmt"
 	"log"
 	"my-api/config"
-
-	"my-api/internal/handlers"
+	"my-api/internal/handlers/websocket"
 
 	"net/http"
 
@@ -16,7 +15,7 @@ func main() {
 	r := mux.NewRouter()
 	config.InitDB()
 
-	r.HandleFunc("/ws", handlers.WebsocketHandler).Methods("GET")
+	r.HandleFunc("/ws", websocket.WebsocketHandler).Methods("GET")
 
 	port := ":3000"
 	fmt.Printf("Server started on http://localhost%s\n", port)
