@@ -12,6 +12,7 @@ type MakeDecisionRequest struct {
 
 type ChatGptSimpleRequestBodyMessage struct {
 	Role    string `json:"role"`
+	Token   string `json:"token"`
 	Content string `json:"content"`
 }
 

@@ -31,6 +31,11 @@ var actions = []models.WebSocketDispatcher{
 		Protected: false,
 	},
 	{
+		Name:      "Disconnect",
+		Handler:   services.DisconnectWebSocket,
+		Protected: true,
+	},
+	{
 		Name:      "TakeDecision",
 		Handler:   services.MakeDecisionWebSocket,
 		Protected: true,

@@ -23,6 +23,13 @@ func VerifyJWT(tokenString string) (*models.CustomClaims, error) {
 		return nil, err
 	}
 
+	// Check if token is stored in connected tokens
+	_, isStored := GetUserID(tokenString)
+
+	if !isStored {
+		return nil, fmt.Errorf("invalid token")
+	}
+
 	// Vérifie si le token est valide et les claims
 	if claims, ok := token.Claims.(*models.CustomClaims); ok && token.Valid {
 		return claims, nil

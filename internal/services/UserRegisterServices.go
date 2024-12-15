@@ -39,41 +39,45 @@ func RegisterServiceWebSocket(conn *websocket.Conn, message []byte, sendResponse
 		return
 	}
 
-    if msg.Action == "" || msg.Token == "" || msg.Name == "" || msg.Prompt == "" {
-        sendError(conn, "Missing required fields in the JSON message")
-        return
-    }
+	if msg.Action == "" || msg.Token == "" || msg.Name == "" || msg.Prompt == "" {
+		sendError(conn, "Missing required fields in the JSON message")
+		return
+	}
 
 	id, err := SaveInDatabase(msg)
+
+	var stringId = strconv.FormatInt(id, 10)
 
 	if err != nil {
 		sendError(conn, "Error saving in database")
 		return
 	}
 
-	pass, err := pkg.GenerateJWT(strconv.FormatInt(id, 10))
+	pass, err := pkg.GenerateJWT(stringId)
 
 	if err != nil {
 		sendError(conn, "Unable to generate Token")
 		return
 	}
 
+	pkg.SetToken(stringId, pass)
+
 	sendResponse(conn, pass)
 }
 
 // Generation d'un token, et enregistrement de l'entité dans la base de donnée
-// func RegisterService(entity models.RegisterRequest) (string, error) {
-// 	pass, err := pkg.GenerateJWT(entity.Name)
-
-// 	if err != nil {
-// 		return "", errors.New("error generating JWT")
-// 	}
-
-// 	pass, err = SaveInDatabase(pass, entity)
-
-// 	if err != nil {
-// 		return "", errors.New("error saving in database")
-// 	}
-
-// 	return pass, nil
-// }
+//func RegisterService(entity models.RegisterRequest) (string, error) {
+//	pass, err := pkg.GenerateJWT(entity.Name)
+//
+//	if err != nil {
+//		return "", errors.New("error generating JWT")
+//	}
+//
+//	pass, err = SaveInDatabase(pass, entity)
+//
+//	if err != nil {
+//		return "", errors.New("error saving in database")
+//	}
+//
+//	return pass, nil
+//}

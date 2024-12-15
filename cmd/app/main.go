@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"my-api/config"
 
 	"my-api/internal/handlers"
 
@@ -13,6 +14,7 @@ import (
 
 func main() {
 	r := mux.NewRouter()
+	config.InitDB()
 
 	r.HandleFunc("/ws", handlers.WebsocketHandler).Methods("GET")
 
@@ -28,7 +30,7 @@ func main() {
 // 	fmt.Println("Register api key: ", config.GetEnvVariable("API_KEY_REGISTER"))
 
 // 	r := mux.NewRouter()
-// 	config.InitDB()
+//	config.InitDB()
 
 // 	protected := r.PathPrefix("/").Subrouter()
 // 	protected.Use(services.LoggingMiddleware)
