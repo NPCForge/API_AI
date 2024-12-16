@@ -1,57 +1,55 @@
-package http
+package httpHandlers
 
 import (
 	"encoding/json"
 	"log"
 	"my-api/config"
-	"my-api/internal/models"
-	"my-api/internal/services"
+	"my-api/internal/models/http"
+	"my-api/internal/services/http"
 	"net/http"
 )
 
-// ConnectHandler gère la requête pour la route Connect
 func RegisterHandler(w http.ResponseWriter, r *http.Request) {
-	// Vérifie que la méthode est POST
 	if r.Method != http.MethodPost {
-		http.Error(w, "Méthode non autorisée", http.StatusMethodNotAllowed)
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
 
-	// Décode le corps de la requête
-	var req models.RegisterRequest
+	// Decode the request body
+	var req httpModels.RegisterRequest
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
-		http.Error(w, "Erreur de décodage du JSON", http.StatusBadRequest)
+		http.Error(w, "JSON decoding error", http.StatusBadRequest)
 		return
 	}
 
 	apiKey := config.GetEnvVariable("API_KEY_REGISTER")
 
-	// Vérifie si le token est valide
+	// Check if the token is valid
 	if req.Token != apiKey {
-		http.Error(w, "Token invalide", http.StatusUnauthorized)
+		http.Error(w, "Invalid token", http.StatusUnauthorized)
 		return
 	}
 
-	private, err := services.RegisterServiceWeb(req)
+	private, err := httpServices.RegisterService(req)
 
-	// Vérifie si le token à bien été crée
+	// Check if the token was successfully created
 	if err != nil {
 		http.Error(w, "Internal Server Error", 500)
 		return
 	}
 
-	// Crée la réponse
-	res := models.RegisterResponse{
-		Message: "Connexion réussie",
+	// Create the response
+	res := httpModels.RegisterResponse{
+		Message: "Connection successful",
 		Status:  200,
 		Private: private,
 	}
 
-	// Définit l'en-tête Content-Type à application/json et envoie la réponse JSON
+	// Set the Content-Type header to application/json and send the JSON response
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	if err := json.NewEncoder(w).Encode(res); err != nil {
-		log.Printf("Erreur lors de l'envoi de la réponse JSON : %v", err)
+		log.Printf("Error while sending JSON response: %v", err)
 	}
 }

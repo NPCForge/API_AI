@@ -1,15 +1,15 @@
-package websocket
+package websocketHandlers
 
 import (
 	"encoding/json"
-	"my-api/internal/models"
-	"my-api/internal/services"
+	"my-api/internal/models/websocket"
+	"my-api/internal/services/websocket"
 
 	"github.com/gorilla/websocket"
 )
 
 func RegisterHandlerWebsocket(conn *websocket.Conn, message []byte, sendResponse func(*websocket.Conn, interface{}), sendError func(*websocket.Conn, string)) {
-	var msg models.RegisterRequest
+	var msg websocketModels.RegisterRequest
 
 	err := json.Unmarshal(message, &msg)
 	if err != nil {
@@ -22,5 +22,5 @@ func RegisterHandlerWebsocket(conn *websocket.Conn, message []byte, sendResponse
 		return
 	}
 
-	services.RegisterServiceWebSocket(conn, msg, sendResponse, sendError)
+	websocketServices.RegisterServiceWebSocket(conn, msg, sendResponse, sendError)
 }

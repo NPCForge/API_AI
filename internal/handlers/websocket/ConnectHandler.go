@@ -1,15 +1,15 @@
-package websocket
+package websocketHandlers
 
 import (
 	"encoding/json"
-	"my-api/internal/models"
-	"my-api/internal/services"
+	"my-api/internal/models/websocket"
+	"my-api/internal/services/websocket"
 
 	"github.com/gorilla/websocket"
 )
 
 func ConnectHandlerWebSocket(conn *websocket.Conn, message []byte, sendResponse func(*websocket.Conn, interface{}), sendError func(*websocket.Conn, string)) {
-	var msg models.ConnectRequest
+	var msg websocketModels.ConnectRequest
 
 	err := json.Unmarshal(message, &msg)
 	if err != nil {
@@ -17,5 +17,5 @@ func ConnectHandlerWebSocket(conn *websocket.Conn, message []byte, sendResponse 
 		return
 	}
 
-	services.UserConnectWebSocket(conn, msg, sendResponse, sendError)
+	websocketServices.UserConnectWebSocket(conn, msg, sendResponse, sendError)
 }
