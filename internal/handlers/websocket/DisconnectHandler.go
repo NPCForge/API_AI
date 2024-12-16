@@ -8,13 +8,15 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-func DisconnectHandlerWebsocket(conn *websocket.Conn, message []byte, sendResponse func(*websocket.Conn, string, string), sendError func(*websocket.Conn, string, string)) {
+func DisconnectHandlerWebsocket(conn *websocket.Conn, message []byte, sendResponse func(*websocket.Conn, string, map[string]interface{}), sendError func(*websocket.Conn, string, map[string]interface{})) {
 	var msg websocketModels.DisconnectRequest
 	var initialRoute = "Disconnect"
 
 	err := json.Unmarshal(message, &msg)
 	if err != nil {
-		sendError(conn, "Error while decoding JSON message", initialRoute)
+		sendError(conn, initialRoute, map[string]interface{}{
+			"message": "Error while decoding JSON message",
+		})
 		return
 	}
 

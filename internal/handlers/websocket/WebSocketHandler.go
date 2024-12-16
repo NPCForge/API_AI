@@ -48,12 +48,16 @@ func handleWebSocketMessage(conn *websocket.Conn, messageType int, message []byt
 
 	err := json.Unmarshal(message, &msg)
 	if err != nil {
-		utils.SendError(conn, "Error while decoding JSON message", initialRoute)
+		utils.SendError(conn, initialRoute, map[string]interface{}{
+			"message": "Error while decoding JSON message",
+		})
 		return
 	}
 
 	if msg.Action == "" {
-		utils.SendError(conn, "Missing required fields in the JSON message", initialRoute)
+		utils.SendError(conn, initialRoute, map[string]interface{}{
+			"message": "Missing required fields in the JSON message",
+		})
 		return
 	}
 

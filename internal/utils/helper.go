@@ -4,20 +4,28 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-func SendResponse(conn *websocket.Conn, response string, initialRoute string) {
+func SendResponse(conn *websocket.Conn, initialRoute string, fields map[string]interface{}) {
 	resp := map[string]interface{}{
 		"status": "success",
 		"route":  initialRoute,
-		"data":   response,
 	}
+
+	for key, value := range fields {
+		resp[key] = value
+	}
+
 	conn.WriteJSON(resp)
 }
 
-func SendError(conn *websocket.Conn, errorMessage string, initialRoute string) {
+func SendError(conn *websocket.Conn, initialRoute string, fields map[string]interface{}) {
 	resp := map[string]interface{}{
-		"status":  "error",
-		"route":   initialRoute,
-		"message": errorMessage,
+		"status": "error",
+		"route":  initialRoute,
 	}
+
+	for key, value := range fields {
+		resp[key] = value
+	}
+
 	conn.WriteJSON(resp)
 }

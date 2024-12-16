@@ -30,25 +30,31 @@ func SaveInDatabase(entity websocketModels.RegisterRequest) (int64, error) {
 	return id, nil
 }
 
-func RegisterServiceWebSocket(conn *websocket.Conn, msg websocketModels.RegisterRequest, sendResponse func(*websocket.Conn, string, string), sendError func(*websocket.Conn, string, string)) {
+func RegisterServiceWebSocket(conn *websocket.Conn, msg websocketModels.RegisterRequest, sendResponse func(*websocket.Conn, string, map[string]interface{}), sendError func(*websocket.Conn, string, map[string]interface{})) {
 	var initialRoute = "Register"
 	id, err := SaveInDatabase(msg)
 
 	var stringId = strconv.FormatInt(id, 10)
 
 	if err != nil {
-		sendError(conn, "Error saving in database", initialRoute)
+		sendError(conn, initialRoute, map[string]interface{}{
+			"message": "Error saving in database",
+		})
 		return
 	}
 
 	pass, err := pkg.GenerateJWT(stringId)
 
 	if err != nil {
-		sendError(conn, "Unable to generate Token", initialRoute)
+		sendError(conn, initialRoute, map[string]interface{}{
+			"message": "Unable to generate Token",
+		})
 		return
 	}
 
 	pkg.SetToken(stringId, pass)
 
-	sendResponse(conn, pass, initialRoute)
+	sendResponse(conn, initialRoute, map[string]interface{}{
+		"token": pass,
+	})
 }

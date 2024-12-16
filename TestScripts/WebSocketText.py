@@ -11,8 +11,8 @@ def on_message(ws, message):
     print(f"Message reçu : {message}")
     try:
         message_dict = json.loads(message)
-        if "data" in message_dict and (action == "register" or action == "disconnect" or action == "connection"):
-            token = message_dict["data"]
+        if "token" in message_dict and (action == "register" or action == "disconnect" or action == "connection"):
+            token = message_dict["token"]
             print(f"Token mis à jour : {token}")
     except json.JSONDecodeError:
         print("Erreur de décodage JSON du message reçu.")
