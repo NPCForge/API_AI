@@ -1,10 +1,10 @@
-package http
+package httpHandlers
 
 import (
 	"encoding/json"
 	"log"
-	http3 "my-api/internal/models/http"
-	http2 "my-api/internal/services/http"
+	"my-api/internal/models/http"
+	"my-api/internal/services/http"
 	"net/http"
 )
 
@@ -17,24 +17,24 @@ func ConnectHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Décode le corps de la requête
-	var req http3.ConnectRequest
+	var req httpModels.ConnectRequest
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
 		http.Error(w, "Erreur de décodage du JSON", http.StatusBadRequest)
 		return
 	}
 
-	pass, err := http2.UserConnect(req)
-	var res http3.ConnectResponse
+	pass, err := httpServices.UserConnect(req)
+	var res httpModels.ConnectResponse
 
 	if err != nil {
-		res = http3.ConnectResponse{
+		res = httpModels.ConnectResponse{
 			Message:  "Unauthorized",
 			Status:   401,
 			TmpToken: "",
 		}
 	} else {
-		res = http3.ConnectResponse{
+		res = httpModels.ConnectResponse{
 			Message:  "Connexion réussie",
 			Status:   200,
 			TmpToken: pass,

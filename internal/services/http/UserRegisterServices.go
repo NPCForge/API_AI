@@ -1,4 +1,4 @@
-package http
+package httpServices
 
 import (
 	"errors"
@@ -8,7 +8,7 @@ import (
 	"strconv"
 )
 
-func SaveInDatabase(entity http.RegisterRequest) (int64, error) {
+func SaveInDatabase(entity httpModels.RegisterRequest) (int64, error) {
 	response, err := services.IsExist(entity.Token)
 
 	if err != nil {
@@ -16,10 +16,10 @@ func SaveInDatabase(entity http.RegisterRequest) (int64, error) {
 	}
 
 	if response {
-		return -1, errors.New("error entry already exist in database")
+		return -1, errors.New("entry already exists in the database")
 	}
 
-	id, err := services.Register(entity.Token, entity)
+	id, err := services.Register(entity.Checksum, entity)
 
 	if err != nil {
 		return -1, errors.New("error while registering")
@@ -28,8 +28,8 @@ func SaveInDatabase(entity http.RegisterRequest) (int64, error) {
 	return id, nil
 }
 
-// Generation d'un token, et enregistrement de l'entité dans la base de donnée
-func RegisterService(entity http.RegisterRequest) (string, error) {
+// Token generation and entity registration in the database
+func RegisterService(entity httpModels.RegisterRequest) (string, error) {
 	id, err := SaveInDatabase(entity)
 
 	if err != nil {
@@ -41,6 +41,8 @@ func RegisterService(entity http.RegisterRequest) (string, error) {
 	if err != nil {
 		return "", errors.New("error generating JWT")
 	}
+
+	pkg.SetToken(strconv.FormatInt(id, 10), pass)
 
 	return pass, nil
 }

@@ -1,13 +1,14 @@
-package http
+package httpServices
 
 import (
 	"errors"
 	"my-api/internal/models/http"
 	"my-api/internal/services"
 	"my-api/pkg"
+	"strconv"
 )
 
-func UserConnect(req http.ConnectRequest) (string, error) {
+func UserConnect(req httpModels.ConnectRequest) (string, error) {
 	response, err := services.IsExist(req.Token)
 
 	if err != nil {
@@ -18,13 +19,21 @@ func UserConnect(req http.ConnectRequest) (string, error) {
 		return "", errors.New("account didn't exist")
 	}
 
-	pass, err := pkg.GenerateJWT(req.Token)
+	id, err := services.GetIDFromDB(req.Token)
 
-	pkg.SetToken(req.Token, pass)
+	var stringId = strconv.Itoa(id)
+
+	if err != nil {
+		return "", errors.New("Error searching in database")
+	}
+
+	pass, err := pkg.GenerateJWT(stringId)
 
 	if err != nil {
 		return "", errors.New("error generating JWT")
 	}
+
+	pkg.SetToken(stringId, pass)
 
 	return pass, nil
 }

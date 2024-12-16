@@ -3,8 +3,13 @@ package main
 import (
 	"fmt"
 	"log"
+
 	"my-api/config"
+
+	"my-api/internal/handlers/http"
 	"my-api/internal/handlers/websocket"
+
+	"my-api/internal/services/http"
 
 	"net/http"
 
@@ -15,37 +20,21 @@ func main() {
 	r := mux.NewRouter()
 	config.InitDB()
 
-	r.HandleFunc("/ws", websocket_api.WebsocketHandler).Methods("GET")
+	r.HandleFunc("/ws", websocketHandlers.WebsocketHandler).Methods("GET")
+
+	protected := r.PathPrefix("/").Subrouter()
+	protected.Use(httpServices.LoggingMiddleware)
+
+	r.HandleFunc("/Connect", httpHandlers.ConnectHandler).Methods("POST")
+	r.HandleFunc("/Register", httpHandlers.RegisterHandler).Methods("POST")
+
+	protected.HandleFunc("/Disconnect", httpHandlers.DisconnectHandler).Methods("POST")
+	protected.HandleFunc("/Remove", httpHandlers.RemoveHandler).Methods("POST")
+	protected.HandleFunc("/MakeDecision", httpHandlers.MakeDecisionHandler).Methods("POST")
 
 	port := ":3000"
-	fmt.Printf("Server started on http://localhost%s\n", port)
+	fmt.Printf("Serveur démarré sur http://localhost%s\n", port)
 	if err := http.ListenAndServe(port, r); err != nil {
-		log.Fatal("Error on server :", err)
+		log.Fatalf("Erreur lors du lancement du serveur : %v", err)
 	}
 }
-
-// func main() {
-
-// 	fmt.Println("Register api key: ", config.GetEnvVariable("API_KEY_REGISTER"))
-
-// 	r := mux.NewRouter()
-//	config.InitDB()
-
-// 	protected := r.PathPrefix("/").Subrouter()
-// 	protected.Use(services.LoggingMiddleware)
-
-// 	// Associe le handler à la route /internal/handlers/RouteHandler.go
-// 	r.HandleFunc("/Connect", handlers.ConnectHandler).Methods("POST")
-// 	r.HandleFunc("/Register", handlers.RegisterHandler).Methods("POST")
-
-// 	// Route Protégé par le middleware
-// 	protected.HandleFunc("/Disconnect", handlers.DisconnectHandler).Methods("POST")
-// 	protected.HandleFunc("/Remove", handlers.RemoveHandler).Methods("POST")
-// 	protected.HandleFunc("/MakeDecision", handlers.MakeDecisionHandler).Methods("POST")
-
-// 	// Lance le serveur
-// 	log.Println("Serveur démarré sur le port 8080")
-// 	if err := http.ListenAndServe(":8080", r); err != nil {
-// 		log.Fatalf("Erreur lors du lancement du serveur : %v", err)
-// 	}
-// }

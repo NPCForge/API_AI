@@ -1,27 +1,27 @@
-package http
+package httpServices
 
 import (
 	"my-api/pkg"
 	"net/http"
 )
 
-// LoggingMiddleware est un middleware qui journalise chaque requête HTTP.
+// LoggingMiddleware is a middleware that logs each HTTP request.
 func LoggingMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// Récupère le token de l'en-tête Authorization
+		// Retrieve the token from the Authorization header
 		token := r.Header.Get("Authorization")
 
-		// Vérifie si le token est présent
+		// Check if the token is present
 		if token == "" {
-			http.Error(w, "Token manquant dans l'en-tête Authorization", http.StatusUnauthorized)
+			http.Error(w, "Missing token in the Authorization header", http.StatusUnauthorized)
 			return
 		}
 
-		// Vérifie si le token est valide (cette étape dépend de ton application)
+		// Check if the token is valid (this step depends on your application)
 		if !pkg.IsValidToken(token) {
-			http.Error(w, "Token non valide", http.StatusForbidden)
+			http.Error(w, "Invalid token", http.StatusForbidden)
 			return
 		}
-		next.ServeHTTP(w, r) // Appel du prochain handler
+		next.ServeHTTP(w, r) // Call the next handler
 	})
 }

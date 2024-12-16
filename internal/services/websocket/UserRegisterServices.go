@@ -21,7 +21,7 @@ func SaveInDatabase(entity websocketModels.RegisterRequest) (int64, error) {
 		return -1, errors.New("error entry already exist in database")
 	}
 
-	id, err := services.RegisterWebsocket(entity.Token, entity)
+	id, err := services.RegisterWebsocket(entity.Checksum, entity)
 
 	if err != nil {
 		return -1, errors.New("error while registering")

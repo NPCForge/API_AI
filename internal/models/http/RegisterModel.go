@@ -1,15 +1,16 @@
 package httpModels
 
-// RegisterRequest représente la structure des données attendues dans la requête
+// RegisterRequest represents the structure of the expected data in the request
 type RegisterRequest struct {
-	Token  string `json:"BearerToken"`
-	Name   string `json:"name"`
-	Prompt string `json:"prompt"`
+	Token    string `json:"API_KEY"`
+	Checksum string `json:"checksum"`
+	Name     string `json:"name"`
+	Prompt   string `json:"prompt"`
 }
 
-// RegisterResponse représente la structure de la réponse à renvoyer
+// RegisterResponse represents the structure of the response to return
 type RegisterResponse struct {
 	Message string `json:"message"`
 	Status  int    `json:"status"`
-	Private string `json:"private"`
+	Private string `json:"token"`
 }
