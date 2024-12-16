@@ -29,7 +29,7 @@ COPY --from=builder /app/main .
 COPY ./.env.local .env.local
 
 # Exposer le port sur lequel l'application écoute (ex. : 8080)
-EXPOSE 8080
+EXPOSE 3000
 
 # Commande pour démarrer l'application
 CMD ["./main"]

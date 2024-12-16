@@ -1,4 +1,4 @@
-package services
+package httpServices
 
 import (
 	"errors"

@@ -1,4 +1,4 @@
-package models
+package httpModels
 
 type AuthResponse struct {
 	Token string `json:"token"`

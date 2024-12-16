@@ -3,23 +3,22 @@ package services
 import (
 	"encoding/json"
 	"fmt"
-	"my-api/config"
-	"my-api/internal/models"
-
 	"github.com/go-resty/resty/v2"
+	"my-api/config"
+	"my-api/internal/models/http"
 )
 
 func GptSimpleRequest(message string) (string, error) {
 	GptClient := resty.New()
 
-	var Messages = []models.ChatGptSimpleRequestBodyMessage{ // Utilise un slice ici
+	var Messages = []httpModels.ChatGptSimpleRequestBodyMessage{ // Utilise un slice ici
 		{
 			Role:    "user",
 			Content: message,
 		},
 	}
 
-	var body models.ChatGptSimpleRequestBody = models.ChatGptSimpleRequestBody{
+	var body httpModels.ChatGptSimpleRequestBody = httpModels.ChatGptSimpleRequestBody{
 		Model:    "gpt-3.5-turbo",
 		Messages: Messages, // Envoie le slice de messages
 	}
@@ -34,7 +33,7 @@ func GptSimpleRequest(message string) (string, error) {
 		return "", fmt.Errorf("erreur lors de la requête : %w", err)
 	}
 
-	var response models.ChatGPTResponse
+	var response httpModels.ChatGPTResponse
 	if err := json.Unmarshal(resp.Body(), &response); err != nil {
 		return "", fmt.Errorf("erreur lors du déchiffrage de la réponse : %w", err)
 	}

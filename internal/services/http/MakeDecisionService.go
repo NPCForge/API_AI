@@ -1,9 +1,12 @@
-package services
+package httpServices
 
-import "errors"
+import (
+	"errors"
+	"my-api/internal/services"
+)
 
 func MakeDecisionService(req string) (string, error) {
-	res, err := GptSimpleRequest(req)
+	res, err := services.GptSimpleRequest(req)
 
 	if err != nil {
 		return "", errors.New("error requesting Chatgpt")
