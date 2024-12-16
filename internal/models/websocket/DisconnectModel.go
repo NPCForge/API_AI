@@ -1,4 +1,4 @@
-package models
+package websocketModels
 
 type DisconnectRequest struct {
 	Action string `json:"action"`

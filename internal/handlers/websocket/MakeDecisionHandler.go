@@ -1,15 +1,15 @@
-package websocket
+package websocketHandlers
 
 import (
 	"encoding/json"
-	"my-api/internal/models"
-	"my-api/internal/services"
+	"my-api/internal/models/websocket"
+	"my-api/internal/services/websocket"
 
 	"github.com/gorilla/websocket"
 )
 
 func MakeDecisionHandlerWebSocket(conn *websocket.Conn, message []byte, sendResponse func(*websocket.Conn, interface{}), sendError func(*websocket.Conn, string)) {
-	var msg models.MakeDecisionRequest
+	var msg websocketModels.MakeDecisionRequest
 
 	err := json.Unmarshal(message, &msg)
 	if err != nil {
@@ -22,5 +22,5 @@ func MakeDecisionHandlerWebSocket(conn *websocket.Conn, message []byte, sendResp
 		return
 	}
 
-	services.MakeDecisionWebSocket(conn, msg, sendResponse, sendError)
+	websocketServices.MakeDecisionWebSocket(conn, msg, sendResponse, sendError)
 }

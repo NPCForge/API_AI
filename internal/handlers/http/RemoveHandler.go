@@ -1,15 +1,16 @@
-package http
+package httpHandlers
 
 import (
 	"encoding/json"
 	"log"
-	"my-api/internal/models"
+	http3 "my-api/internal/models/http"
 	"my-api/internal/services"
+	http2 "my-api/internal/services/http"
 	"net/http"
 )
 
 func RemoveHandler(w http.ResponseWriter, r *http.Request) {
-	res := models.RemoveResponse{
+	res := http3.RemoveResponse{
 		Message: "Suppression réussie",
 		Status:  200,
 	}
@@ -18,16 +19,16 @@ func RemoveHandler(w http.ResponseWriter, r *http.Request) {
 	_, err := services.Remove(token)
 
 	if err != nil {
-		res = models.RemoveResponse{
+		res = http3.RemoveResponse{
 			Message: "Erreur lors de la suppression",
 			Status:  401,
 		}
 	}
 
-	_, err = services.Disconnect(token)
+	_, err = http2.Disconnect(token)
 
 	if err != nil {
-		res = models.RemoveResponse{
+		res = http3.RemoveResponse{
 			Message: "Erreur lors de la deconnexion",
 			Status:  401,
 		}
