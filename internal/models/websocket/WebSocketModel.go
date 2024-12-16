@@ -10,6 +10,6 @@ type WebSocketMessage struct {
 
 type WebSocketDispatcher struct {
 	Name      string
-	Handler   func(*websocket.Conn, []byte, func(*websocket.Conn, interface{}), func(*websocket.Conn, string))
+	Handler   func(*websocket.Conn, []byte, func(*websocket.Conn, string, string), func(*websocket.Conn, string, string))
 	Protected bool
 }

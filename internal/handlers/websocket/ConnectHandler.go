@@ -8,12 +8,13 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-func ConnectHandlerWebSocket(conn *websocket.Conn, message []byte, sendResponse func(*websocket.Conn, interface{}), sendError func(*websocket.Conn, string)) {
+func ConnectHandlerWebSocket(conn *websocket.Conn, message []byte, sendResponse func(*websocket.Conn, string, string), sendError func(*websocket.Conn, string, string)) {
 	var msg websocketModels.ConnectRequest
+	var initialRoute = "Connection"
 
 	err := json.Unmarshal(message, &msg)
 	if err != nil {
-		sendError(conn, "Error while decoding JSON message")
+		sendError(conn, "Error while decoding JSON message", initialRoute)
 		return
 	}
 

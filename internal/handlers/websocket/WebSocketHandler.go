@@ -44,15 +44,16 @@ var actions = []websocketModels.WebSocketDispatcher{
 
 func handleWebSocketMessage(conn *websocket.Conn, messageType int, message []byte) {
 	var msg websocketModels.WebSocketMessage
+	var initialRoute = "root"
 
 	err := json.Unmarshal(message, &msg)
 	if err != nil {
-		utils.SendError(conn, "Error while decoding JSON message")
+		utils.SendError(conn, "Error while decoding JSON message", initialRoute)
 		return
 	}
 
 	if msg.Action == "" {
-		utils.SendError(conn, "Missing required fields in the JSON message")
+		utils.SendError(conn, "Missing required fields in the JSON message", initialRoute)
 		return
 	}
 

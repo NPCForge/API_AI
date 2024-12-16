@@ -7,17 +7,14 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-func MakeDecisionWebSocket(conn *websocket.Conn, msg websocketModels.MakeDecisionRequest, sendResponse func(*websocket.Conn, interface{}), sendError func(*websocket.Conn, string)) {
+func MakeDecisionWebSocket(conn *websocket.Conn, msg websocketModels.MakeDecisionRequest, sendResponse func(*websocket.Conn, string, string), sendError func(*websocket.Conn, string, string)) {
+	var initialRoute = "MakeDecision"
+
 	back, err := services.GptSimpleRequest(msg.Message)
 	if err != nil {
-		sendError(conn, "Error while calling MakeDecision service")
+		sendError(conn, "Error while calling MakeDecision service", initialRoute)
 		return
 	}
 
-	res := websocketModels.MakeDecisionResponse{
-		Message: back,
-		Status:  200,
-	}
-
-	sendResponse(conn, res)
+	sendResponse(conn, back, initialRoute)
 }

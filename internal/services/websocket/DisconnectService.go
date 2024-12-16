@@ -6,19 +6,20 @@ import (
 	"my-api/pkg"
 )
 
-func DisconnectWebSocket(conn *websocket.Conn, msg websocketModels.DisconnectRequest, sendResponse func(*websocket.Conn, interface{}), sendError func(*websocket.Conn, string)) {
+func DisconnectWebSocket(conn *websocket.Conn, msg websocketModels.DisconnectRequest, sendResponse func(*websocket.Conn, string, string), sendError func(*websocket.Conn, string, string)) {
+	var initialRoute = "Disconnect"
 	result, err := pkg.VerifyJWT(msg.Token)
 
 	if err != nil {
-		sendError(conn, "Error while verifying JWT")
+		sendError(conn, "Error while verifying JWT", initialRoute)
 		return
 	}
 
 	if result != nil {
 		pkg.DeleteToken(result.UserID)
-		sendResponse(conn, "Disconnected")
+		sendResponse(conn, "Disconnected", initialRoute)
 	} else {
-		sendError(conn, "Failed to disconnect")
+		sendError(conn, "Failed to disconnect", initialRoute)
 	}
 
 }
