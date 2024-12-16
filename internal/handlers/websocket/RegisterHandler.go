@@ -2,10 +2,10 @@ package websocketHandlers
 
 import (
 	"encoding/json"
+	"github.com/gorilla/websocket"
+	"my-api/config"
 	"my-api/internal/models/websocket"
 	"my-api/internal/services/websocket"
-
-	"github.com/gorilla/websocket"
 )
 
 func RegisterHandlerWebsocket(conn *websocket.Conn, message []byte, sendResponse func(*websocket.Conn, interface{}), sendError func(*websocket.Conn, string)) {
@@ -17,8 +17,16 @@ func RegisterHandlerWebsocket(conn *websocket.Conn, message []byte, sendResponse
 		return
 	}
 
-	if msg.Action == "" || msg.Token == "" || msg.Name == "" || msg.Prompt == "" {
+	if msg.Action == "" || msg.Token == "" || msg.Checksum == "" || msg.Name == "" || msg.Prompt == "" {
 		sendError(conn, "Missing required fields in the JSON message")
+		return
+	}
+
+	apiKey := config.GetEnvVariable("API_KEY_REGISTER")
+
+	// Check if the token is valid
+	if msg.Token != apiKey {
+		sendError(conn, "Invalid API Key")
 		return
 	}
 

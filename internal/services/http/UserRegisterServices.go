@@ -9,7 +9,7 @@ import (
 )
 
 func SaveInDatabase(entity httpModels.RegisterRequest) (int64, error) {
-	response, err := services.IsExist(entity.Token)
+	response, err := services.IsExist(entity.Checksum)
 
 	if err != nil {
 		return -1, errors.New("error searching in table")

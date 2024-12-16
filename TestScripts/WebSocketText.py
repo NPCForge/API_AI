@@ -41,6 +41,7 @@ def listen_to_stdin(ws):
         if user_input.lower() == "register":
             message = json.dumps({
                 "action": "Register",
+                "API_KEY": "VDCAjPZ8jhDmXfsSufW2oZyU8SFZi48dRhA8zyKUjSRU3T1aBZ7E8FFIjdEM2X1d",
                 "checksum": "azerty",
                 "name": "tom",
                 "prompt": "juste le boss",
