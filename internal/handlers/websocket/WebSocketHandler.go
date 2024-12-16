@@ -1,11 +1,11 @@
-package websocket
+package websocket_api
 
 import (
 	"encoding/json"
 	"log"
+	"my-api/internal/models/websocket"
+	"my-api/internal/services/websocket"
 
-	"my-api/internal/models"
-	"my-api/internal/services"
 	"my-api/internal/utils"
 
 	"net/http"
@@ -19,7 +19,7 @@ var upgrader = websocket.Upgrader{
 	},
 }
 
-var actions = []models.WebSocketDispatcher{
+var actions = []websocketModels.WebSocketDispatcher{
 	{
 		Name:      "Register",
 		Handler:   RegisterHandlerWebsocket,
@@ -43,13 +43,16 @@ var actions = []models.WebSocketDispatcher{
 }
 
 func handleWebSocketMessage(conn *websocket.Conn, messageType int, message []byte) {
-	var msg struct {
-		Action string `json:"action"`
-	}
+	var msg websocketModels.WebSocketMessage
 
 	err := json.Unmarshal(message, &msg)
 	if err != nil {
 		utils.SendError(conn, "Error while decoding JSON message")
+		return
+	}
+
+	if msg.Action == "" {
+		utils.SendError(conn, "Missing required fields in the JSON message")
 		return
 	}
 
@@ -58,7 +61,7 @@ func handleWebSocketMessage(conn *websocket.Conn, messageType int, message []byt
 		if action.Name == msg.Action {
 			if action.Protected {
 				// Call login middleware
-				if !services.LoginMiddlewareWebSocket(conn, message, utils.SendResponse, utils.SendError) {
+				if !websocketServices.LoginMiddlewareWebSocket(conn, message, utils.SendResponse, utils.SendError) {
 					return
 				}
 			}

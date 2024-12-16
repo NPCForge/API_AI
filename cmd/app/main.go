@@ -15,7 +15,7 @@ func main() {
 	r := mux.NewRouter()
 	config.InitDB()
 
-	r.HandleFunc("/ws", websocket.WebsocketHandler).Methods("GET")
+	r.HandleFunc("/ws", websocket_api.WebsocketHandler).Methods("GET")
 
 	port := ":3000"
 	fmt.Printf("Server started on http://localhost%s\n", port)

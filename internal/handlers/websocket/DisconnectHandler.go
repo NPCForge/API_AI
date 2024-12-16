@@ -1,15 +1,15 @@
-package websocket
+package websocket_api
 
 import (
 	"encoding/json"
-	"my-api/internal/models"
-	"my-api/internal/services"
+	"my-api/internal/models/websocket"
+	"my-api/internal/services/websocket"
 
 	"github.com/gorilla/websocket"
 )
 
 func DisconnectHandlerWebsocket(conn *websocket.Conn, message []byte, sendResponse func(*websocket.Conn, interface{}), sendError func(*websocket.Conn, string)) {
-	var msg models.DisconnectRequest
+	var msg websocketModels.DisconnectRequest
 
 	err := json.Unmarshal(message, &msg)
 	if err != nil {
@@ -17,5 +17,5 @@ func DisconnectHandlerWebsocket(conn *websocket.Conn, message []byte, sendRespon
 		return
 	}
 
-	services.DisconnectWebSocket(conn, msg, sendResponse, sendError)
+	websocketServices.DisconnectWebSocket(conn, msg, sendResponse, sendError)
 }

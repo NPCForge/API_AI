@@ -1,9 +1,8 @@
-package models
+package httpModels
 
 // RegisterRequest représente la structure des données attendues dans la requête
 type RegisterRequest struct {
-	Action string `json:"action"`
-	Token  string `json:"checksum"`
+	Token  string `json:"BearerToken"`
 	Name   string `json:"name"`
 	Prompt string `json:"prompt"`
 }

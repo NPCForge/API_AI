@@ -3,22 +3,22 @@ package http
 import (
 	"encoding/json"
 	"log"
-	"my-api/internal/models"
-	"my-api/internal/services"
+	http3 "my-api/internal/models/http"
+	http2 "my-api/internal/services/http"
 	"net/http"
 )
 
 func DisconnectHandler(w http.ResponseWriter, r *http.Request) {
-	res := models.DisconnectResponse{
+	res := http3.DisconnectResponse{
 		Message: "Deconnexion réussie",
 		Status:  200,
 	}
 
 	token := r.Header.Get("Authorization")
-	_, err := services.Disconnect(token)
+	_, err := http2.Disconnect(token)
 
 	if err != nil {
-		res = models.DisconnectResponse{
+		res = http3.DisconnectResponse{
 			Message: "Erreur lors de la deconnexion",
 			Status:  401,
 		}

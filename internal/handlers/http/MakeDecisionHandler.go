@@ -3,28 +3,28 @@ package http
 import (
 	"encoding/json"
 	"log"
-	"my-api/internal/models"
-	"my-api/internal/services"
+	http3 "my-api/internal/models/http"
+	http2 "my-api/internal/services/http"
 	"net/http"
 )
 
 func MakeDecisionHandler(w http.ResponseWriter, r *http.Request) {
 
-	var req models.MakeDecisionRequest
+	var req http3.MakeDecisionRequest
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
 		http.Error(w, "Erreur de décodage du JSON", http.StatusBadRequest)
 		return
 	}
 
-	back, err := services.MakeDecisionService(req.Message)
+	back, err := http2.MakeDecisionService(req.Message)
 
 	if err != nil {
 		http.Error(w, "Erreur using chatgpt api", http.StatusBadRequest)
 		return
 	}
 
-	res := models.MakeDecisionResponse{
+	res := http3.MakeDecisionResponse{
 		Message: back,
 		Status:  200,
 	}

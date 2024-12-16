@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"log"
 	"my-api/config"
-	"my-api/internal/models"
+	http2 "my-api/internal/models/http"
 	"my-api/internal/services"
 	"net/http"
 )
@@ -18,7 +18,7 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Décode le corps de la requête
-	var req models.RegisterRequest
+	var req http2.RegisterRequest
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
 		http.Error(w, "Erreur de décodage du JSON", http.StatusBadRequest)
@@ -42,7 +42,7 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Crée la réponse
-	res := models.RegisterResponse{
+	res := http2.RegisterResponse{
 		Message: "Connexion réussie",
 		Status:  200,
 		Private: private,

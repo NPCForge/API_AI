@@ -1,4 +1,4 @@
-package models
+package httpModels
 
 type MakeDecisionResponse struct {
 	Message string `json:"message"`
@@ -6,13 +6,11 @@ type MakeDecisionResponse struct {
 }
 
 type MakeDecisionRequest struct {
-	Action  string `json:"action"`
 	Message string `json:"message"`
 }
 
 type ChatGptSimpleRequestBodyMessage struct {
 	Role    string `json:"role"`
-	Token   string `json:"token"`
 	Content string `json:"content"`
 }
 

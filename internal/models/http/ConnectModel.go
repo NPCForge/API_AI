@@ -1,9 +1,8 @@
-package models
+package httpModels
 
 // ConnectRequest représente la structure des données attendues dans la requête
 type ConnectRequest struct {
-	Action string `json:"action"`
-	Token  string `json:"checksum"`
+	Token string `json:"token"`
 }
 
 // ConnectResponse représente la structure de la réponse à renvoyer
