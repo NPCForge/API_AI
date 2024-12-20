@@ -14,6 +14,9 @@ func SendResponse(conn *websocket.Conn, initialRoute string, fields map[string]i
 		resp[key] = value
 	}
 
+	println("Sending success response:")
+	println(resp)
+
 	conn.WriteJSON(resp)
 }
 
@@ -26,6 +29,9 @@ func SendError(conn *websocket.Conn, initialRoute string, fields map[string]inte
 	for key, value := range fields {
 		resp[key] = value
 	}
+
+	println("Sending error response:")
+	println(resp)
 
 	conn.WriteJSON(resp)
 }

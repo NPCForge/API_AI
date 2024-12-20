@@ -61,6 +61,8 @@ func handleWebSocketMessage(conn *websocket.Conn, messageType int, message []byt
 		return
 	}
 
+	println("Message received: " + msg.Action)
+
 	// Handle action
 	for _, action := range actions {
 		if action.Name == msg.Action {
