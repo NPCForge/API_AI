@@ -12,6 +12,7 @@ func MakeDecisionWebSocket(conn *websocket.Conn, msg websocketModels.MakeDecisio
 
 	back, err := services.GptSimpleRequest(msg.Message)
 	if err != nil {
+		println("Error in MakeDecisionWebSocket: " + err.Error())
 		sendError(conn, initialRoute, map[string]interface{}{
 			"message": "Error while calling MakeDecision service",
 		})

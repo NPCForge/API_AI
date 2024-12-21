@@ -56,7 +56,7 @@ def listen_to_stdin(ws):
                 message = json.dumps({
                     "action": "TakeDecision",
                     "token": token,
-                    "message": "Hello World"
+                    "message": "Nearby Entities: {[Name = Arthur], [Name = Emma]}"
                 })
             else:
                 print("Erreur : Aucun token disponible. Veuillez vous connecter ou vous enregistrer d'abord.")
