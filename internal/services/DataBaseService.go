@@ -4,7 +4,8 @@ import (
 	"database/sql"
 	"fmt"
 	"my-api/config"
-	"my-api/internal/models"
+	"my-api/internal/models/http"
+	websocketModels "my-api/internal/models/websocket"
 )
 
 // GetIDFromDB récupère l'ID correspondant à un token donné
@@ -64,15 +65,32 @@ func IsExist(token string) (bool, error) {
 }
 
 // Register insère une nouvelle entité dans la base de données
-func Register(token string, entity models.RegisterRequest) (bool, error) {
+func Register(token string, entity httpModels.RegisterRequest) (int64, error) {
 	db := config.GetDB()
 
-	query := `INSERT INTO entity (nom, token, prompt, created) VALUES ($1, $2, $3, CURRENT_DATE)`
-	_, err := db.Exec(query, entity.Name, token, entity.Prompt)
+	query := `INSERT INTO entity (name, token, prompt, created) VALUES ($1, $2, $3, CURRENT_DATE) RETURNING id`
+
+	var id int64
+	err := db.QueryRow(query, entity.Name, token, entity.Prompt).Scan(&id)
 
 	if err != nil {
-		return false, fmt.Errorf("erreur lors de l'enregistrement de l'entité : %w", err)
+		return 0, fmt.Errorf("Error while registering entity : %w", err)
 	}
 
-	return true, nil
+	return id, nil
+}
+
+func RegisterWebsocket(token string, entity websocketModels.RegisterRequest) (int64, error) {
+	db := config.GetDB()
+
+	query := `INSERT INTO entity (name, token, prompt, created) VALUES ($1, $2, $3, CURRENT_DATE) RETURNING id`
+
+	var id int64
+	err := db.QueryRow(query, entity.Name, token, entity.Prompt).Scan(&id)
+
+	if err != nil {
+		return 0, fmt.Errorf("Error while registering entity : %w", err)
+	}
+
+	return id, nil
 }
