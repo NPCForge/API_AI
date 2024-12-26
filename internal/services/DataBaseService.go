@@ -3,8 +3,9 @@ package services
 import (
 	"database/sql"
 	"fmt"
+	"log"
 	"my-api/config"
-	"my-api/internal/models/http"
+	httpModels "my-api/internal/models/http"
 	websocketModels "my-api/internal/models/websocket"
 )
 
@@ -81,6 +82,7 @@ func Register(token string, entity httpModels.RegisterRequest) (int64, error) {
 }
 
 func RegisterWebsocket(token string, entity websocketModels.RegisterRequest) (int64, error) {
+	log.Println("RegisterWebsocket")
 	db := config.GetDB()
 
 	query := `INSERT INTO entity (name, token, prompt, created) VALUES ($1, $2, $3, CURRENT_DATE) RETURNING id`

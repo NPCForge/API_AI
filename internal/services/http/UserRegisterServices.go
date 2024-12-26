@@ -2,7 +2,7 @@ package httpServices
 
 import (
 	"errors"
-	"my-api/internal/models/http"
+	httpModels "my-api/internal/models/http"
 	"my-api/internal/services"
 	"my-api/pkg"
 	"strconv"

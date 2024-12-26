@@ -3,8 +3,8 @@ package httpHandlers
 import (
 	"encoding/json"
 	"log"
-	"my-api/internal/models/http"
-	"my-api/internal/services/http"
+	httpModels "my-api/internal/models/http"
+	httpServices "my-api/internal/services/http"
 	"net/http"
 )
 

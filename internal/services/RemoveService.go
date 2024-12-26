@@ -7,9 +7,9 @@ import (
 )
 
 func Remove(token string) (string, error) {
-	log.SetFlags(log.LstdFlags)
 
 	UserId, err := pkg.GetUserID(token)
+	log.Println("Tentative de suppression de : " + UserId)
 
 	if !err {
 		return "failed", errors.New("error getting userid")
@@ -21,11 +21,11 @@ func Remove(token string) (string, error) {
 		return "failed", errors.New("error using DB")
 	}
 
+	log.Println(UserId, "exist")
+
 	if !exist {
 		return "Success", nil
 	}
-
-	log.Println("Tentative de suppression de : " + UserId)
 
 	response, err_ := DropUser(UserId)
 

@@ -1,27 +1,29 @@
 package main
 
 import (
-	"fmt"
 	"log"
-
 	"my-api/config"
-
-	"my-api/internal/handlers/http"
-	"my-api/internal/handlers/websocket"
-
-	"my-api/internal/services/http"
-
 	"net/http"
+
+	httpHandlers "my-api/internal/handlers/http"
+	websocketHandlers "my-api/internal/handlers/websocket"
+	httpServices "my-api/internal/services/http"
+	"my-api/internal/utils"
 
 	"github.com/gorilla/mux"
 )
 
 func main() {
 	r := mux.NewRouter()
+	config.DrawLogo()
 	config.InitDB()
 
+	go utils.Commande()
+
+	// Websocket handler
 	r.HandleFunc("/ws", websocketHandlers.WebsocketHandler).Methods("GET")
 
+	// Http handler
 	protected := r.PathPrefix("/").Subrouter()
 	protected.Use(httpServices.LoggingMiddleware)
 
@@ -33,7 +35,7 @@ func main() {
 	protected.HandleFunc("/MakeDecision", httpHandlers.MakeDecisionHandler).Methods("POST")
 
 	port := ":3000"
-	fmt.Printf("Serveur démarré sur http://localhost%s\n", port)
+	log.Printf("Serveur démarré sur http://localhost%s\n", port)
 	if err := http.ListenAndServe(port, r); err != nil {
 		log.Fatalf("Erreur lors du lancement du serveur : %v", err)
 	}

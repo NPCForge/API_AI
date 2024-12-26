@@ -63,7 +63,7 @@ func InitDB() {
 				// Tester la connexion
 				err = dbClient.Ping()
 				if err == nil {
-					fmt.Println("Connexion à PostgreSQL réussie !")
+					log.Println("Connexion à PostgreSQL réussie !")
 					return
 				}
 

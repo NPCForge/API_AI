@@ -2,7 +2,8 @@ package websocketServices
 
 import (
 	"errors"
-	"my-api/internal/models/websocket"
+	"log"
+	websocketModels "my-api/internal/models/websocket"
 	"my-api/internal/services"
 	"my-api/pkg"
 	"strconv"
@@ -11,6 +12,7 @@ import (
 )
 
 func SaveInDatabase(entity websocketModels.RegisterRequest) (int64, error) {
+	log.Println("SaveInDatabase")
 	response, err := services.IsExist(entity.Checksum)
 
 	if err != nil {
@@ -31,6 +33,7 @@ func SaveInDatabase(entity websocketModels.RegisterRequest) (int64, error) {
 }
 
 func RegisterServiceWebSocket(conn *websocket.Conn, msg websocketModels.RegisterRequest, sendResponse func(*websocket.Conn, string, map[string]interface{}), sendError func(*websocket.Conn, string, map[string]interface{})) {
+	log.Println("RegisterServiceWebSocket")
 	var initialRoute = "Register"
 	id, err := SaveInDatabase(msg)
 

@@ -1,6 +1,7 @@
 package pkg
 
 import (
+	"log"
 	"sync"
 	"time"
 )
@@ -11,6 +12,7 @@ var (
 )
 
 func SetToken(userID, token string) {
+	log.Println("entity", userID, "connected.")
 	mu.Lock()
 	defer mu.Unlock()
 	tokenStore[userID] = token
@@ -29,6 +31,12 @@ func GetToken(userID string) (string, bool) {
 	defer mu.Unlock()
 	token, exists := tokenStore[userID]
 	return token, exists
+}
+
+func GetPopulation() map[string]string {
+	mu.Lock()
+	defer mu.Unlock()
+	return tokenStore
 }
 
 func GetUserID(token string) (string, bool) {
