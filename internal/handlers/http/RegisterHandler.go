@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"log"
 	"my-api/config"
-	"my-api/internal/models/http"
-	"my-api/internal/services/http"
+	httpModels "my-api/internal/models/http"
+	httpServices "my-api/internal/services/http"
 	"net/http"
 )
 
@@ -27,6 +27,7 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Check if the token is valid
 	if req.Token != apiKey {
+		println(req.Token)
 		http.Error(w, "Invalid token", http.StatusUnauthorized)
 		return
 	}

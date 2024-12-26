@@ -10,6 +10,7 @@ import (
 )
 
 func RemoveHandler(w http.ResponseWriter, r *http.Request) {
+	log.Println("RemoveHandler")
 	res := http3.RemoveResponse{
 		Message: "Suppression réussie",
 		Status:  200,

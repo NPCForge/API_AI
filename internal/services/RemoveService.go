@@ -2,10 +2,13 @@ package services
 
 import (
 	"errors"
+	"log"
 	"my-api/pkg"
 )
 
 func Remove(token string) (string, error) {
+	log.SetFlags(log.LstdFlags)
+
 	UserId, err := pkg.GetUserID(token)
 
 	if !err {
@@ -21,6 +24,8 @@ func Remove(token string) (string, error) {
 	if !exist {
 		return "Success", nil
 	}
+
+	log.Println("Tentative de suppression de : " + UserId)
 
 	response, err_ := DropUser(UserId)
 
