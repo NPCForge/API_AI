@@ -1,33 +1,30 @@
-package services
+package httpServices
 
 import (
 	"errors"
-	"log"
+	"my-api/internal/services"
 	"my-api/pkg"
 )
 
 func Remove(token string) (string, error) {
 
-	UserId, err := pkg.GetUserID(token)
-	log.Println("Tentative de suppression de : " + UserId)
+	UserId, err := pkg.GetUserIDFromJWT(token)
 
-	if !err {
+	if err != nil {
 		return "failed", errors.New("error getting userid")
 	}
 
-	exist, err_ := IsExist(UserId)
+	exist, err_ := services.IsExistById(UserId)
 
 	if err_ != nil {
 		return "failed", errors.New("error using DB")
 	}
 
-	log.Println(UserId, "exist")
-
 	if !exist {
 		return "Success", nil
 	}
 
-	response, err_ := DropUser(UserId)
+	response, err_ := services.DropUser(UserId)
 
 	if err_ != nil || response == "" {
 		return "failed", errors.New("error droping DB")

@@ -1,7 +1,7 @@
 package websocketServices
 
 import (
-	"my-api/internal/models/websocket"
+	websocketModels "my-api/internal/models/websocket"
 	"my-api/internal/services"
 	"my-api/pkg"
 	"strconv"

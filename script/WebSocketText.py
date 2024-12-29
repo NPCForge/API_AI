@@ -11,7 +11,7 @@ def on_message(ws, message):
     print(f"Message reçu : {message}")
     try:
         message_dict = json.loads(message)
-        if "token" in message_dict and (action == "register" or action == "disconnect" or action == "connection"):
+        if "token" in message_dict and (action == "register" or action == "disconnect" or action == "connection" or action == "remove"):
             token = message_dict["token"]
             print(f"Token mis à jour : {token}")
     except json.JSONDecodeError:
@@ -25,7 +25,7 @@ def on_close(ws, close_status_code, close_msg):
 
 def on_open(ws):
     print("Connexion ouverte")
-    print("Entrez une commande (Register, Connection, TakeDecision, Disconnect) ou 'exit' pour quitter.")
+    print("Entrez une commande (Register, Connection, TakeDecision, Disconnect, Remove) ou 'exit' pour quitter.")
 
 def listen_to_stdin(ws):
     global token, action  # Ajout de 'action' à la liste des variables globales
@@ -70,8 +70,17 @@ def listen_to_stdin(ws):
             else:
                 print("Erreur : Aucun token disponible. Veuillez vous connecter ou vous enregistrer d'abord.")
                 continue
+        elif user_input.lower() == "remove":
+            if token:
+                message = json.dumps({
+                    "action": "Remove",
+                    "token": token
+                })
+            else:
+                print("Erreur : Aucun token disponible. Veuillez vous connecter ou vous enregistrer d'abord.")
+                continue
         else:
-            print("Commande inconnue. Essayez 'Register', 'Connection', 'TakeDecision', 'Disconnect', ou 'exit'.")
+            print("Commande inconnue. Essayez 'Register', 'Connection', 'TakeDecision', 'Disconnect', 'Remove', ou 'exit'.")
             continue
 
         action = user_input.lower()  # Mise à jour correcte de la variable globale 'action'

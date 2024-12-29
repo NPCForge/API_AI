@@ -14,10 +14,12 @@ import (
 )
 
 func main() {
+	log.SetFlags(log.Lshortfile)
 	r := mux.NewRouter()
 	config.DrawLogo()
 	config.InitDB()
 
+	// Goroutine pour les commandes
 	go utils.Commande()
 
 	// Websocket handler

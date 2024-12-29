@@ -3,7 +3,6 @@ package services
 import (
 	"database/sql"
 	"fmt"
-	"log"
 	"my-api/config"
 	httpModels "my-api/internal/models/http"
 	websocketModels "my-api/internal/models/websocket"
@@ -20,25 +19,26 @@ func GetIDFromDB(token string) (int, error) {
 	if err == sql.ErrNoRows {
 		return 0, nil // Aucun enregistrement trouvé
 	} else if err != nil {
-		return 0, fmt.Errorf("erreur lors de la récupération de l'ID : %w", err)
+		return 0, fmt.Errorf("erreur lors de la récupération de l'id : %w", err)
 	}
 
 	return id, nil
 }
 
-// DropUser supprime un utilisateur en fonction de son token
+// DropUser supprime un utilisateur en fonction de son id
 func DropUser(token string) (string, error) {
 	db := config.GetDB()
 
 	// Supprimer directement par le token
-	query := `DELETE FROM entity WHERE token = $1`
-	result, err := db.Exec(query, token)
+	query := `DELETE FROM entity WHERE id = $1`
 
+	result, err := db.Exec(query, token)
 	if err != nil {
 		return "", fmt.Errorf("erreur lors de la suppression de l'utilisateur : %w", err)
 	}
 
 	rowsAffected, err := result.RowsAffected()
+
 	if err != nil {
 		return "", fmt.Errorf("erreur lors de la vérification des lignes supprimées : %w", err)
 	}
@@ -65,6 +65,21 @@ func IsExist(token string) (bool, error) {
 	return exists, nil
 }
 
+// IsExistById vérifie si un id existe dans la base de données
+func IsExistById(token string) (bool, error) {
+	db := config.GetDB()
+
+	var exists bool
+	query := `SELECT EXISTS (SELECT 1 FROM entity WHERE id = $1)`
+	err := db.QueryRow(query, token).Scan(&exists)
+
+	if err != nil {
+		return false, fmt.Errorf("erreur lors de la vérification de l'existence : %w", err)
+	}
+
+	return exists, nil
+}
+
 // Register insère une nouvelle entité dans la base de données
 func Register(token string, entity httpModels.RegisterRequest) (int64, error) {
 	db := config.GetDB()
@@ -75,14 +90,13 @@ func Register(token string, entity httpModels.RegisterRequest) (int64, error) {
 	err := db.QueryRow(query, entity.Name, token, entity.Prompt).Scan(&id)
 
 	if err != nil {
-		return 0, fmt.Errorf("Error while registering entity : %w", err)
+		return 0, fmt.Errorf("error while registering entity : %w", err)
 	}
 
 	return id, nil
 }
 
 func RegisterWebsocket(token string, entity websocketModels.RegisterRequest) (int64, error) {
-	log.Println("RegisterWebsocket")
 	db := config.GetDB()
 
 	query := `INSERT INTO entity (name, token, prompt, created) VALUES ($1, $2, $3, CURRENT_DATE) RETURNING id`
@@ -91,7 +105,7 @@ func RegisterWebsocket(token string, entity websocketModels.RegisterRequest) (in
 	err := db.QueryRow(query, entity.Name, token, entity.Prompt).Scan(&id)
 
 	if err != nil {
-		return 0, fmt.Errorf("Error while registering entity : %w", err)
+		return 0, fmt.Errorf("error while registering entity : %w", err)
 	}
 
 	return id, nil

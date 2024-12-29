@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"log"
 	http3 "my-api/internal/models/http"
-	"my-api/internal/services"
 	http2 "my-api/internal/services/http"
 	"net/http"
 )
@@ -17,7 +16,7 @@ func RemoveHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	token := r.Header.Get("Authorization")
-	_, err := services.Remove(token)
+	_, err := http2.Remove(token)
 
 	if err != nil {
 		res = http3.RemoveResponse{
