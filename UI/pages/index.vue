@@ -32,4 +32,5 @@
 <script setup>
     const identifiant = ref("")
     const password = ref("")
+    const config = useRuntimeConfig().public
 </script>
