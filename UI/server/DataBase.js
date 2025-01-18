@@ -48,7 +48,6 @@ const getAllUsers = async () => {
       ORDER BY created DESC;
     `;
     const result = await query(queryText);
-    console.log("result", result)
     return result;
 };
 

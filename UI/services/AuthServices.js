@@ -48,28 +48,17 @@ const firstRegister = async (username, password) => {
 const login = async (username, password) => {
     if (username !== "" && password !== "") {
         try {
-            const saltRounds = 10;
-            // Hash du mot de passe côté client
-            const hashedPassword = await bcrypt.hash(password, saltRounds);
-
-            // Requête de connexion
-            const { data, error } = await useFetch('/api/login', {
+            // Requête de connexion avec $fetch
+            const response = await $fetch('/api/login', {
                 method: 'POST',
-                body: { username, password: hashedPassword }
+                body: { username, password }
             });
 
-            console.log(data)
-
-            if (error.value) {
-                console.error('Erreur lors de la connexion :', error.value.message);
-                return false;
-            }
-
-            console.log('Connexion réussie :', data.value);
-            return true;
-
+            // Vérification de la réponse
+            console.log("response.success", response.success);
+            return response.success || false;
         } catch (err) {
-            console.error('Erreur de connexion :', err.message);
+            console.error('Erreur lors de la connexion :', err.message);
             return false;
         }
     } else {
@@ -77,6 +66,7 @@ const login = async (username, password) => {
         return false;
     }
 };
+
 
 export {
     isSettup,

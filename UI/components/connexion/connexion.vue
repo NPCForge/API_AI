@@ -28,12 +28,19 @@
     const password = ref("");
     const valide = ref("");
 
-    const connect = () => {
-        if (username.value != "" || password.value != "") {
-            if (login(username.value, password.value))
-                valide.value = "valide"
-            else
-                valide.value = "not valide"
+    const connect = async () => {
+        if (username.value !== "" && password.value !== "") {
+            const response = await login(username.value, password.value);
+            console.log("login response", response);
+
+            // Utiliser la réponse pour mettre à jour "valide"
+            if (response) {
+                valide.value = "valide";
+            } else {
+                valide.value = "not valide";
+            }
+        } else {
+            valide.value = "Nom d'utilisateur et mot de passe requis.";
         }
-    }
+    };
 </script>

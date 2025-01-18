@@ -1,4 +1,5 @@
-import { verifyCredentials } from '../DataBase';
+import { getUserByName } from '../DataBase';
+import bcrypt from 'bcryptjs';
 
 export default defineEventHandler(async (event) => {
     const body = await readBody(event);
@@ -9,15 +10,22 @@ export default defineEventHandler(async (event) => {
     }
 
     try {
-        // Vérifie les identifiants (le mot de passe est déjà hashé côté client)
-        const user = await verifyCredentials(username, password);
-        console.log(user)
+        const user = await getUserByName(username);
+        console.log("user login", user)
 
         if (!user) {
             throw createError({ statusCode: 401, message: 'Identifiants invalides.' });
         }
 
-        return { success: true, message: 'Connexion réussie !' };
+        const isPasswordValid = await bcrypt.compare(password, user.password);
+
+        if (isPasswordValid) {
+            console.log('Passwords match! User authenticated.');
+            return { success: true, message: 'Connexion réussie !' };
+        } else {
+            console.log('Passwords do not match! Authentication failed.');
+            return { success: false, message: 'La Connexion a échoué, mauvais mot de passe !' };
+        }
     } catch (error) {
         throw createError({ statusCode: 500, message: error.message });
     }
