@@ -1,4 +1,6 @@
-const { Pool } = require('pg');
+import pkg from 'pg';
+
+const { Pool } = pkg;
 const config = useRuntimeConfig().public
 
 // Configuration de la connexion PostgreSQL
@@ -9,6 +11,16 @@ const pool = new Pool({
     password: config.POSTGRES_PASSWORD || 'votre_mot_de_passe',
     port: Number(config.POSTGRES_PORT) || 5432,
 });
+
+const query = async (text, params = []) => {
+    try {
+        const result = await pool.query(text, params);
+        return result.rows;
+    } catch (error) {
+        console.error('Erreur de requête SQL :', error.message);
+        throw new Error(error.message);
+    }
+};
 
 const getUsersByAccess = async (access) => {
     const queryText = `
@@ -29,12 +41,14 @@ const verifyCredentials = async (name, password) => {
     return result[0] || null;
 };
 
+// ✅ : implemented (./api/get-all-user.js)
 const getAllUsers = async () => {
     const queryText = `
       SELECT * FROM user_ui
       ORDER BY created DESC;
     `;
     const result = await query(queryText);
+    console.log("result", result)
     return result;
 };
 
@@ -90,6 +104,7 @@ const getUserById = async (id) => {
     return result[0] || null;
 };
 
+// ✅ : implemented (./api/add-user.js)
 const addUser = async (name, password, access = 0) => {
     const queryText = `
       INSERT INTO user_ui (name, password, access)
@@ -102,7 +117,7 @@ const addUser = async (name, password, access = 0) => {
 };
 
 // Export des fonctions
-module.exports = {
+export {
     addUser,
     getUserById,
     getUserByName,
