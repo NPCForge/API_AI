@@ -13,7 +13,7 @@
         height: 100vh;
         position: fixed;
     }
-    </style>
+</style>
 
 <script setup>
     import { isSettup } from '~/services/AuthServices';

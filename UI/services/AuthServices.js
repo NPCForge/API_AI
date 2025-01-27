@@ -32,7 +32,7 @@ const firstRegister = async (username, password) => {
                 return false;
             }
 
-            console.log('Utilisateur créé avec succès :', data.value);
+            // console.log('Utilisateur créé avec succès :', data.value);
             return true;
 
         } catch (err) {
@@ -55,8 +55,16 @@ const login = async (username, password) => {
             });
 
             // Vérification de la réponse
-            console.log("response.success", response.success);
-            return response.success || false;
+            if (response.success && response.token) {
+                // Enregistrer le token dans le localStorage
+                localStorage.setItem('authToken', response.token);
+
+                // console.log('Connexion réussie, token enregistré dans le localStorage.');
+                return true;
+            } else {
+                console.error('Connexion échouée :', response.message || 'Erreur inconnue.');
+                return false;
+            }
         } catch (err) {
             console.error('Erreur lors de la connexion :', err.message);
             return false;
@@ -67,9 +75,20 @@ const login = async (username, password) => {
     }
 };
 
+const getAuthToken = () => {
+    return localStorage.getItem('authToken');
+};
+
+const logout = () => {
+    localStorage.removeItem('authToken');
+    // console.log('Déconnexion réussie, token supprimé du localStorage.');
+};
+
 
 export {
     isSettup,
     firstRegister,
-    login
+    login,
+    getAuthToken,
+    logout
 }

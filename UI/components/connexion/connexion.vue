@@ -28,6 +28,7 @@
     const password = ref("");
     const valide = ref("");
 
+
     const connect = async () => {
         if (username.value !== "" && password.value !== "") {
             const response = await login(username.value, password.value);
@@ -36,6 +37,7 @@
             // Utiliser la réponse pour mettre à jour "valide"
             if (response) {
                 valide.value = "valide";
+                navigateTo('/protected/');
             } else {
                 valide.value = "not valide";
             }
