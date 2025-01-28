@@ -48,18 +48,19 @@ const firstRegister = async (username, password) => {
 const login = async (username, password) => {
     if (username !== "" && password !== "") {
         try {
+            const { $cookies } = useNuxtApp(); // Utiliser useNuxtApp ici
+
             // Requête de connexion avec $fetch
             const response = await $fetch('/api/login', {
                 method: 'POST',
                 body: { username, password }
             });
 
-            // Vérification de la réponse
             if (response.success && response.token) {
-                // Enregistrer le token dans le localStorage
-                localStorage.setItem('authToken', response.token);
+                // Enregistrer le token dans les cookies
+                $cookies.set('authToken', response.token, { path: '/', maxAge: 3600 });
 
-                // console.log('Connexion réussie, token enregistré dans le localStorage.');
+                // console.log('Connexion réussie, token enregistré dans les cookies.');
                 return true;
             } else {
                 console.error('Connexion échouée :', response.message || 'Erreur inconnue.');
@@ -75,20 +76,16 @@ const login = async (username, password) => {
     }
 };
 
-const getAuthToken = () => {
-    return localStorage.getItem('authToken');
-};
-
 const logout = () => {
-    localStorage.removeItem('authToken');
-    // console.log('Déconnexion réussie, token supprimé du localStorage.');
+    // Supprimer le cookie en définissant une date d'expiration passée
+    const { $cookies } = useNuxtApp();
+    $cookies.remove('authToken');
+    // console.log('Déconnexion réussie, token supprimé des cookies.');
 };
-
 
 export {
     isSettup,
     firstRegister,
     login,
-    getAuthToken,
     logout
 }

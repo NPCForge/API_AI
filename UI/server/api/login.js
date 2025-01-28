@@ -18,7 +18,7 @@ export default defineEventHandler(async (event) => {
             config.JWT_SECRET_KEY,
             { expiresIn: '1h' }
         );
-        console.log("token", token)
+        // console.log("token", token)
         return token
     }
 
@@ -36,7 +36,7 @@ export default defineEventHandler(async (event) => {
         const isPasswordValid = await bcrypt.compare(password, user.password);
 
         if (isPasswordValid) {
-            console.log('Passwords match! User authenticated.');
+            // console.log('Passwords match! User authenticated.');
 
             const token = manage_token(user);
 
@@ -44,7 +44,7 @@ export default defineEventHandler(async (event) => {
 
             return { success: true, message: 'Connexion réussie !', token: token };
         } else {
-            console.log('Passwords do not match! Authentication failed.');
+            // console.log('Passwords do not match! Authentication failed.');
             return { success: false, message: 'La Connexion a échoué, mauvais mot de passe !' };
         }
     } catch (error) {
