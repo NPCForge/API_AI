@@ -35,6 +35,7 @@ func main() {
 	protected.HandleFunc("/Disconnect", httpHandlers.DisconnectHandler).Methods("POST")
 	protected.HandleFunc("/Remove", httpHandlers.RemoveHandler).Methods("POST")
 	protected.HandleFunc("/MakeDecision", httpHandlers.MakeDecisionHandler).Methods("POST")
+	protected.HandleFunc("/GetPopulation", httpHandlers.GetPopulationHandler).Methods("GET")
 
 	port := ":3000"
 	log.Printf("Serveur démarré sur http://localhost%s\n", port)
