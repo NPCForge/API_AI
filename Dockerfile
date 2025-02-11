@@ -28,6 +28,9 @@ COPY --from=builder /app/main .
 # Copier le dossier d'assets
 COPY --from=builder /app/config/asset config/asset
 
+# Copier le dossier de prompts
+COPY --from=builder /app/prompts prompts
+
 # Copier les fichiers de configuration nécessaires (si requis)
 COPY ./.env.local .env.local
 
