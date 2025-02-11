@@ -5,7 +5,7 @@ FROM golang:1.23 AS builder
 WORKDIR /app
 
 # Copier les fichiers nécessaires dans le conteneur
-COPY go.mod go.sum ./
+COPY go.mod go.sum ./ 
 RUN go mod download
 
 COPY . .
@@ -24,6 +24,9 @@ WORKDIR /app
 
 # Copier l'exécutable compilé depuis l'étape précédente
 COPY --from=builder /app/main .
+
+# Copier le dossier d'assets
+COPY --from=builder /app/config/asset config/asset
 
 # Copier les fichiers de configuration nécessaires (si requis)
 COPY ./.env.local .env.local
