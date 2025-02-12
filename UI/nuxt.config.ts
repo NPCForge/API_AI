@@ -21,5 +21,6 @@ export default defineNuxtConfig({
         public: Object.fromEntries(
             Object.entries(process.env)
         ),
-    }
+    },
+    modules: ['@nuxt/ui']
 })
