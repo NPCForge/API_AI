@@ -25,6 +25,21 @@ func GetIDFromDB(token string) (int, error) {
 	return id, nil
 }
 
+func GetPromptByID(id string) (string, error) {
+	db := config.GetDB()
+
+	var prompt string
+	query := `SELECT prompt FROM entity WHERE id = $1`
+	err := db.QueryRow(query, id).Scan(&prompt)
+	if err == sql.ErrNoRows {
+		return "", nil
+	} else if err != nil {
+		return "", fmt.Errorf("error while getting prompt : %w", err)
+	}
+
+	return prompt, nil
+}
+
 // DropUser supprime un utilisateur en fonction de son id
 func DropUser(token string) (string, error) {
 	db := config.GetDB()

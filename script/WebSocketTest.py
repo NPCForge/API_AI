@@ -11,7 +11,7 @@ def on_message(ws, message):
     print(f"Message reçu : {message}")
     try:
         message_dict = json.loads(message)
-        if "token" in message_dict and (action == "register" or action == "disconnect" or action == "connection" or action == "remove"):
+        if "token" in message_dict and (action in ["register", "disconnect", "connection", "remove"]):
             token = message_dict["token"]
             print(f"Token mis à jour : {token}")
     except json.JSONDecodeError:
@@ -25,10 +25,10 @@ def on_close(ws, close_status_code, close_msg):
 
 def on_open(ws):
     print("Connexion ouverte")
-    print("Entrez une commande (Register, Connection, TakeDecision, Disconnect, Remove) ou 'exit' pour quitter.")
+    print("Entrez une commande (Register, Connection, TakeDecision, Disconnect, Remove, TalkTo) ou 'exit' pour quitter.")
 
 def listen_to_stdin(ws):
-    global token, action  # Ajout de 'action' à la liste des variables globales
+    global token, action
     while True:
         user_input = input("Commande : ").strip()
 
@@ -37,14 +37,13 @@ def listen_to_stdin(ws):
             ws.close()
             break
 
-        # Préparation des messages en fonction de la commande
         if user_input.lower() == "register":
             message = json.dumps({
                 "action": "Register",
                 "API_KEY": "VDCAjPZ8jhDmXfsSufW2oZyU8SFZi48dRhA8zyKUjSRU3T1aBZ7E8FFIjdEM2X1d",
                 "checksum": "azerty",
                 "name": "tom",
-                "prompt": "juste le boss",
+                "prompt": "tu dois uniquement répondre par 'Bonjour' à tous mes messages",
             })
         elif user_input.lower() == "connection":
             message = json.dumps({
@@ -79,11 +78,22 @@ def listen_to_stdin(ws):
             else:
                 print("Erreur : Aucun token disponible. Veuillez vous connecter ou vous enregistrer d'abord.")
                 continue
+        elif user_input.lower() == "talkto":
+            if token:
+                message_text = input("Message à envoyer : ").strip()
+                message = json.dumps({
+                    "action": "TalkTo",
+                    "token": token,
+                    "message": message_text
+                })
+            else:
+                print("Erreur : Aucun token disponible. Veuillez vous connecter ou vous enregistrer d'abord.")
+                continue
         else:
-            print("Commande inconnue. Essayez 'Register', 'Connection', 'TakeDecision', 'Disconnect', 'Remove', ou 'exit'.")
+            print("Commande inconnue. Essayez 'Register', 'Connection', 'TakeDecision', 'Disconnect', 'Remove', 'TalkTo' ou 'exit'.")
             continue
 
-        action = user_input.lower()  # Mise à jour correcte de la variable globale 'action'
+        action = user_input.lower()
         ws.send(message)
 
 # Initialisation du WebSocket

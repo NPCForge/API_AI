@@ -18,6 +18,52 @@ func readPromptFromFile(filePath string) (string, error) {
 	return string(content), nil
 }
 
+func GptTalkToRequest(message string, prompt string) (string, error) {
+	GptClient := resty.New()
+
+	// Prepare messages with a system prompt
+	var Messages = []httpModels.ChatGptSimpleRequestBodyMessage{
+		{
+			Role:    "system", // Add the system prompt
+			Content: prompt,
+		},
+		{
+			Role:    "user",
+			Content: message,
+		},
+	}
+
+	// Create the request body
+	var body httpModels.ChatGptSimpleRequestBody = httpModels.ChatGptSimpleRequestBody{
+		Model:    "gpt-3.5-turbo",
+		Messages: Messages,
+	}
+
+	// Make the request to the OpenAI API
+	resp, err := GptClient.R().
+		SetHeader("Content-Type", "application/json").
+		SetHeader("Authorization", "Bearer "+config.GetEnvVariable("CHATGPT_TOKEN")).
+		SetBody(body).
+		Post("https://api.openai.com/v1/chat/completions")
+
+	if err != nil {
+		return "", fmt.Errorf("error during the request: %w", err)
+	}
+
+	// Process the response
+	var response httpModels.ChatGPTResponse
+	if err := json.Unmarshal(resp.Body(), &response); err != nil {
+		return "", fmt.Errorf("error decoding the response: %w", err)
+	}
+
+	// Check if there are valid choices in the response
+	if len(response.Choices) > 0 {
+		return response.Choices[0].Message.Content, nil
+	}
+
+	return "", fmt.Errorf("no response available")
+}
+
 func GptSimpleRequest(message string) (string, error) {
 	GptClient := resty.New()
 
