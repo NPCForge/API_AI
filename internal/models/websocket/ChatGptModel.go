@@ -16,7 +16,8 @@ type TalkToResponse struct {
 }
 
 type TalkToRequest struct {
-	Action  string `json:"action"`
-	Message string `json:"message"`
-	Token   string `json:"token"`
+	Action       string `json:"action"`
+	Message      string `json:"message"`
+	Interlocutor string `json:"interlocutor"`
+	Token        string `json:"token"`
 }

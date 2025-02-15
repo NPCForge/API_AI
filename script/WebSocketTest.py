@@ -43,7 +43,7 @@ def listen_to_stdin(ws):
                 "API_KEY": "VDCAjPZ8jhDmXfsSufW2oZyU8SFZi48dRhA8zyKUjSRU3T1aBZ7E8FFIjdEM2X1d",
                 "checksum": "azerty",
                 "name": "tom",
-                "prompt": "tu dois uniquement répondre par 'Bonjour' à tous mes messages",
+                "prompt": "I am a pirate. I always finish my sentences by 'gomu gomu'",
             })
         elif user_input.lower() == "connection":
             message = json.dumps({
@@ -83,6 +83,7 @@ def listen_to_stdin(ws):
                 message_text = input("Message à envoyer : ").strip()
                 message = json.dumps({
                     "action": "TalkTo",
+                    "interlocutor": "Tom",
                     "token": token,
                     "message": message_text
                 })

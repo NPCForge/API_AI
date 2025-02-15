@@ -18,18 +18,27 @@ func readPromptFromFile(filePath string) (string, error) {
 	return string(content), nil
 }
 
-func GptTalkToRequest(message string, prompt string) (string, error) {
+func GptTalkToRequest(message string, prompt string, interlocutor string) (string, error) {
 	GptClient := resty.New()
+
+	systemPrompt, err := readPromptFromFile("prompts/discussion.txt")
+	if err != nil {
+		return "", fmt.Errorf("error retrieving the system prompt: %w", err)
+	}
+
+	systemPrompt += prompt
+
+	userPrompt := "Interlocutor: " + interlocutor + "\nMessage: " + message
 
 	// Prepare messages with a system prompt
 	var Messages = []httpModels.ChatGptSimpleRequestBodyMessage{
 		{
 			Role:    "system", // Add the system prompt
-			Content: prompt,
+			Content: systemPrompt,
 		},
 		{
 			Role:    "user",
-			Content: message,
+			Content: userPrompt,
 		},
 	}
 

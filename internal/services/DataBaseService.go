@@ -40,6 +40,21 @@ func GetPromptByID(id string) (string, error) {
 	return prompt, nil
 }
 
+func GetChecksumByID(id string) (string, error) {
+	db := config.GetDB()
+
+	var checksum string
+	query := `SELECT token FROM entity WHERE id = $1`
+	err := db.QueryRow(query, id).Scan(&checksum)
+	if err == sql.ErrNoRows {
+		return "", nil
+	} else if err != nil {
+		return "", fmt.Errorf("error while getting prompt : %w", err)
+	}
+
+	return checksum, nil
+}
+
 // DropUser supprime un utilisateur en fonction de son id
 func DropUser(token string) (string, error) {
 	db := config.GetDB()
