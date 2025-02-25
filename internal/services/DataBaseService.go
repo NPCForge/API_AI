@@ -40,21 +40,6 @@ func GetPromptByID(id string) (string, error) {
 	return prompt, nil
 }
 
-func GetChecksumByID(id string) (string, error) {
-	db := config.GetDB()
-
-	var checksum string
-	query := `SELECT checksum FROM entity WHERE id = $1`
-	err := db.QueryRow(query, id).Scan(&checksum)
-	if err == sql.ErrNoRows {
-		return "", nil
-	} else if err != nil {
-		return "", fmt.Errorf("error while getting prompt : %w", err)
-	}
-
-	return checksum, nil
-}
-
 // DropUser supprime un utilisateur en fonction de son id
 func DropUser(id string) (string, error) {
 	db := config.GetDB()
@@ -136,6 +121,21 @@ func RegisterWebsocket(checksum string, entity websocketModels.RegisterRequest) 
 
 	if err != nil {
 		return 0, fmt.Errorf("error while registering entity : %w", err)
+	}
+
+	return id, nil
+}
+
+func NewMessage(senderId int, receiverId string, message string) (int64, error) {
+	db := config.GetDB()
+
+	query := `INSERT INTO discussions (sender_user_id, receiver_user_id, message) VALUES ($1, $2, $3) RETURNING id`
+
+	var id int64
+	err := db.QueryRow(query, senderId, receiverId, message).Scan(&id)
+
+	if err != nil {
+		return 0, fmt.Errorf("error while insert message : %w", err)
 	}
 
 	return id, nil
