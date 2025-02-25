@@ -25,7 +25,7 @@ def on_close(ws, close_status_code, close_msg):
 
 def on_open(ws):
     print("Connexion ouverte")
-    print("Entrez une commande (Register, Connection, TakeDecision, Disconnect, Remove, TalkTo) ou 'exit' pour quitter.")
+    print("Entrez une commande (Register, Connection, TakeDecision, Disconnect, Remove) ou 'exit' pour quitter.")
 
 def listen_to_stdin(ws):
     global token, action
@@ -74,18 +74,6 @@ def listen_to_stdin(ws):
                 message = json.dumps({
                     "action": "Remove",
                     "token": token
-                })
-            else:
-                print("Erreur : Aucun token disponible. Veuillez vous connecter ou vous enregistrer d'abord.")
-                continue
-        elif user_input.lower() == "talkto":
-            if token:
-                message_text = input("Message à envoyer : ").strip()
-                message = json.dumps({
-                    "action": "TalkTo",
-                    "interlocutor": "Tom",
-                    "token": token,
-                    "message": message_text
                 })
             else:
                 print("Erreur : Aucun token disponible. Veuillez vous connecter ou vous enregistrer d'abord.")

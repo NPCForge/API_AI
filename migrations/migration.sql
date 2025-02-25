@@ -5,3 +5,13 @@ CREATE TABLE IF NOT EXISTS entity (
     prompt VARCHAR(2000) NOT NULL,
     created DATE DEFAULT CURRENT_DATE
 );
+
+CREATE TABLE IF NOT EXISTS discussions (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    sender_user_id INT NOT NULL,
+    receiver_user_id INT NOT NULL,
+    is_new_message BOOLEAN NOT NULL DEFAULT FALSE,
+    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (sender_user_id) REFERENCES entity(id) ON DELETE CASCADE,
+    FOREIGN KEY (receiver_user_id) REFERENCES entity(id) ON DELETE CASCADE
+);

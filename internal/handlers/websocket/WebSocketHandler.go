@@ -45,11 +45,6 @@ var actions = []websocketModels.WebSocketDispatcher{
 		Handler:   RemoveHandlerWebSocket,
 		Protected: true,
 	},
-	{
-		Name:      "TalkTo",
-		Handler:   TalkToHandlerWebSocket,
-		Protected: true,
-	},
 }
 
 func handleWebSocketMessage(conn *websocket.Conn, messageType int, message []byte) {
