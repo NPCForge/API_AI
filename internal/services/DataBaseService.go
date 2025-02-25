@@ -8,13 +8,13 @@ import (
 	websocketModels "my-api/internal/models/websocket"
 )
 
-// GetIDFromDB récupère l'ID correspondant à un token donné
-func GetIDFromDB(token string) (int, error) {
+// GetIDFromDB récupère l'ID correspondant à un checksum donné
+func GetIDFromDB(checksum string) (int, error) {
 	db := config.GetDB() // Récupère la connexion à la base de données
 
 	var id int
-	query := `SELECT id FROM entity WHERE token = $1`
-	err := db.QueryRow(query, token).Scan(&id)
+	query := `SELECT id FROM entity WHERE checksum = $1`
+	err := db.QueryRow(query, checksum).Scan(&id)
 
 	if err == sql.ErrNoRows {
 		return 0, nil // Aucun enregistrement trouvé
@@ -44,7 +44,7 @@ func GetChecksumByID(id string) (string, error) {
 	db := config.GetDB()
 
 	var checksum string
-	query := `SELECT token FROM entity WHERE id = $1`
+	query := `SELECT checksum FROM entity WHERE id = $1`
 	err := db.QueryRow(query, id).Scan(&checksum)
 	if err == sql.ErrNoRows {
 		return "", nil
@@ -56,13 +56,13 @@ func GetChecksumByID(id string) (string, error) {
 }
 
 // DropUser supprime un utilisateur en fonction de son id
-func DropUser(token string) (string, error) {
+func DropUser(id string) (string, error) {
 	db := config.GetDB()
 
-	// Supprimer directement par le token
+	// Supprimer directement par le checksum
 	query := `DELETE FROM entity WHERE id = $1`
 
-	result, err := db.Exec(query, token)
+	result, err := db.Exec(query, id)
 	if err != nil {
 		return "", fmt.Errorf("erreur lors de la suppression de l'utilisateur : %w", err)
 	}
@@ -74,19 +74,19 @@ func DropUser(token string) (string, error) {
 	}
 
 	if rowsAffected == 0 {
-		return "", fmt.Errorf("aucun utilisateur avec ce token trouvé")
+		return "", fmt.Errorf("aucun utilisateur avec cet id trouvé")
 	}
 
 	return "success", nil
 }
 
-// IsExist vérifie si un token existe dans la base de données
-func IsExist(token string) (bool, error) {
+// IsExist vérifie si un checksum existe dans la base de données
+func IsExist(checksum string) (bool, error) {
 	db := config.GetDB()
 
 	var exists bool
-	query := `SELECT EXISTS (SELECT 1 FROM entity WHERE token = $1)`
-	err := db.QueryRow(query, token).Scan(&exists)
+	query := `SELECT EXISTS (SELECT 1 FROM entity WHERE checksum = $1)`
+	err := db.QueryRow(query, checksum).Scan(&exists)
 
 	if err != nil {
 		return false, fmt.Errorf("erreur lors de la vérification de l'existence : %w", err)
@@ -96,12 +96,12 @@ func IsExist(token string) (bool, error) {
 }
 
 // IsExistById vérifie si un id existe dans la base de données
-func IsExistById(token string) (bool, error) {
+func IsExistById(id string) (bool, error) {
 	db := config.GetDB()
 
 	var exists bool
 	query := `SELECT EXISTS (SELECT 1 FROM entity WHERE id = $1)`
-	err := db.QueryRow(query, token).Scan(&exists)
+	err := db.QueryRow(query, id).Scan(&exists)
 
 	if err != nil {
 		return false, fmt.Errorf("erreur lors de la vérification de l'existence : %w", err)
@@ -111,13 +111,13 @@ func IsExistById(token string) (bool, error) {
 }
 
 // Register insère une nouvelle entité dans la base de données
-func Register(token string, entity httpModels.RegisterRequest) (int64, error) {
+func Register(checksum string, entity httpModels.RegisterRequest) (int64, error) {
 	db := config.GetDB()
 
-	query := `INSERT INTO entity (name, token, prompt, created) VALUES ($1, $2, $3, CURRENT_DATE) RETURNING id`
+	query := `INSERT INTO entity (name, checksum, prompt, created) VALUES ($1, $2, $3, CURRENT_DATE) RETURNING id`
 
 	var id int64
-	err := db.QueryRow(query, entity.Name, token, entity.Prompt).Scan(&id)
+	err := db.QueryRow(query, entity.Name, checksum, entity.Prompt).Scan(&id)
 
 	if err != nil {
 		return 0, fmt.Errorf("error while registering entity : %w", err)
@@ -126,13 +126,13 @@ func Register(token string, entity httpModels.RegisterRequest) (int64, error) {
 	return id, nil
 }
 
-func RegisterWebsocket(token string, entity websocketModels.RegisterRequest) (int64, error) {
+func RegisterWebsocket(checksum string, entity websocketModels.RegisterRequest) (int64, error) {
 	db := config.GetDB()
 
-	query := `INSERT INTO entity (name, token, prompt, created) VALUES ($1, $2, $3, CURRENT_DATE) RETURNING id`
+	query := `INSERT INTO entity (name, checksum, prompt, created) VALUES ($1, $2, $3, CURRENT_DATE) RETURNING id`
 
 	var id int64
-	err := db.QueryRow(query, entity.Name, token, entity.Prompt).Scan(&id)
+	err := db.QueryRow(query, entity.Name, checksum, entity.Prompt).Scan(&id)
 
 	if err != nil {
 		return 0, fmt.Errorf("error while registering entity : %w", err)
