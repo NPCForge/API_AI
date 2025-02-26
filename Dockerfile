@@ -5,7 +5,7 @@ FROM golang:1.23 AS builder
 WORKDIR /app
 
 # Copier les fichiers nécessaires dans le conteneur
-COPY go.mod go.sum ./
+COPY go.mod go.sum ./ 
 RUN go mod download
 
 COPY . .
@@ -25,11 +25,17 @@ WORKDIR /app
 # Copier l'exécutable compilé depuis l'étape précédente
 COPY --from=builder /app/main .
 
+# Copier le dossier d'assets
+COPY --from=builder /app/config/asset config/asset
+
+# Copier le dossier de prompts
+COPY --from=builder /app/prompts prompts
+
 # Copier les fichiers de configuration nécessaires (si requis)
 COPY ./.env.local .env.local
 
 # Exposer le port sur lequel l'application écoute (ex. : 8080)
-EXPOSE 8080
+EXPOSE 3000
 
 # Commande pour démarrer l'application
 CMD ["./main"]

@@ -1,3 +1,7 @@
 *.env.local
 .DS_Store
 .idea
+db_data
+tmp/
+logfile
+bin/
