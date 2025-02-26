@@ -49,8 +49,54 @@ func TalkToWebSocket(token string, message string, interlocutor string) (string,
 	}
 }
 
+func TalkToPreprocess(msg websocketModels.MakeDecisionRequest, entity string) (string, error) {
+	from, err := pkg.GetUserIDFromJWT(msg.Token)
+	to, err := services.GetEntityByName(entity)
+
+	if err != nil {
+		return "error during the process", err
+	}
+
+	discussion, err := services.GetDiscussion(from, to)
+
+	if err != nil {
+		println("Error retrieving discussion")
+		return "error during the process", err
+	}
+
+	var sb strings.Builder
+
+	for _, msg := range discussion {
+		sb.WriteString(fmt.Sprintf("%s -> %s: %s\n",
+			msg.SenderName, msg.ReceiverName, msg.Message))
+	}
+
+	result := sb.String()
+
+	message, err := TalkToWebSocket(msg.Token, result, entity)
+
+	if err != nil {
+		return "error during the process", err
+	}
+
+	return message, nil
+}
+
 func MakeDecisionWebSocket(conn *websocket.Conn, msg websocketModels.MakeDecisionRequest, sendResponse func(*websocket.Conn, string, map[string]interface{}), sendError func(*websocket.Conn, string, map[string]interface{})) {
 	var initialRoute = "MakeDecision"
+	receiver, err := pkg.GetUserIDFromJWT(msg.Token)
+
+	newMessages, err := services.GetNewMessages(receiver)
+
+	var formattedMessages []string
+
+	for _, msg := range newMessages {
+		formattedMessages = append(formattedMessages, fmt.Sprintf("[%s -> %s: %s]", msg.SenderName, msg.ReceiverName, msg.Message))
+	}
+
+	result := "New Messages: {" + strings.Join(formattedMessages, ", ") + "}"
+
+	msg.Message += "\n" + result
 
 	back, err := services.GptSimpleRequest(msg.Message)
 	if err != nil {
@@ -68,11 +114,7 @@ func MakeDecisionWebSocket(conn *websocket.Conn, msg websocketModels.MakeDecisio
 		if len(match) > 1 {
 			entity := match[1]
 
-			// ATTENTION: Changer la string envoyée à talkto
-			// Il faut implémenter dans la fonction talkto, un système qui récupère les anciens messages en bdd
-			// et les store quand il en envoie
-
-			message, err := TalkToWebSocket(msg.Token, "Hello World", entity)
+			message, err := TalkToPreprocess(msg, entity)
 			if err != nil {
 				sendError(conn, initialRoute, map[string]interface{}{
 					"message": "Error while calling MakeDecision service",

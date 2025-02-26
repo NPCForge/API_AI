@@ -2,7 +2,14 @@
 
 I will give you the following information :
 Interlocutor: Who you are talking to
-Message: What did the interlocutor say
+Discussion: What was the previous discussion with your interlocutor.
+
+Here is the format of a discussion:
+Sender -> Receiver: Message
+Sender -> Receiver: Message
+...
+I Replaced your name by "You" at the Sender or Receiver position.
+If there is nothing in the discussion, it means that you never interacted with your interlocutor.
 
 You should only respond in the format as described below:
 RESPONSE FORMAT:
