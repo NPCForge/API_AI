@@ -6,6 +6,7 @@ import (
 	"my-api/config"
 	httpModels "my-api/internal/models/http"
 	websocketModels "my-api/internal/models/websocket"
+	"strings"
 )
 
 // GetIDFromDB récupère l'ID correspondant à un checksum donné
@@ -52,10 +53,18 @@ func GetNameByID(id string) (string, error) {
 	return name, nil
 }
 
+func placeholders(n int) string {
+	placeholders := make([]string, n)
+	for i := range placeholders {
+		placeholders[i] = "$" + fmt.Sprintf("%d", i+1)
+	}
+	return strings.Join(placeholders, ", ")
+}
+
 func GetNewMessages(receiver string) ([]websocketModels.Message, error) {
 	db := config.GetDB()
 
-	query := `SELECT d.sender_user_id, d.receiver_user_id, e1.name AS sender_name, e2.name AS receiver_name, d.message, d.is_new_message
+	query := `SELECT d.id, d.sender_user_id, d.receiver_user_id, e1.name AS sender_name, e2.name AS receiver_name, d.message, d.is_new_message
 	FROM discussions d
 	JOIN entity e1 ON d.sender_user_id = e1.id
 	JOIN entity e2 ON d.receiver_user_id = e2.id
@@ -70,28 +79,43 @@ func GetNewMessages(receiver string) ([]websocketModels.Message, error) {
 	defer rows.Close()
 
 	var messages []websocketModels.Message
+	var messageIDs []int
 
 	for rows.Next() {
-		var senderUserID, receiverUserID int
+		var senderUserID, receiverUserID, messageID int
 		var msg websocketModels.Message
 
-		err := rows.Scan(&senderUserID, &receiverUserID, &msg.SenderName, &msg.ReceiverName, &msg.Message, &msg.IsNewMessage)
+		err := rows.Scan(&messageID, &senderUserID, &receiverUserID, &msg.SenderName, &msg.ReceiverName, &msg.Message, &msg.IsNewMessage)
 		if err != nil {
 			println("Error after row scan:", err.Error())
 			return nil, err
 		}
 
-		// Remplace le nom par "You" si le sender ou receiver est l'utilisateur actuel
 		if fmt.Sprintf("%d", receiverUserID) == receiver {
 			msg.ReceiverName = "You"
 		}
 
 		messages = append(messages, msg)
+		messageIDs = append(messageIDs, messageID)
 	}
 
 	if err := rows.Err(); err != nil {
 		println("Error after rows")
 		return nil, err
+	}
+
+	if len(messageIDs) > 0 {
+		updateQuery := `UPDATE discussions SET is_new_message = FALSE WHERE id IN (` + placeholders(len(messageIDs)) + `);`
+		args := make([]interface{}, len(messageIDs))
+		for i, id := range messageIDs {
+			args[i] = id
+		}
+
+		_, err = db.Exec(updateQuery, args...)
+		if err != nil {
+			println("Error updating messages:", err.Error())
+			return nil, err
+		}
 	}
 
 	return messages, nil
