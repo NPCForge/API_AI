@@ -8,6 +8,7 @@ type MakeDecisionResponse struct {
 type MakeDecisionRequest struct {
 	Action  string `json:"action"`
 	Message string `json:"message"`
+	Token   string `json:"token"`
 }
 
 type TalkToResponse struct {
@@ -15,9 +16,9 @@ type TalkToResponse struct {
 	Status  int    `json:"status"`
 }
 
-type TalkToRequest struct {
-	Action       string `json:"action"`
-	Message      string `json:"message"`
-	Interlocutor string `json:"interlocutor"`
-	Token        string `json:"token"`
+type Message struct {
+	SenderName   string
+	ReceiverName string
+	Message      string
+	IsNewMessage bool
 }

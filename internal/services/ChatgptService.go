@@ -26,9 +26,9 @@ func GptTalkToRequest(message string, prompt string, interlocutor string) (strin
 		return "", fmt.Errorf("error retrieving the system prompt: %w", err)
 	}
 
-	systemPrompt += prompt
+	systemPrompt += "\n" + prompt
 
-	userPrompt := "Interlocutor: " + interlocutor + "\nMessage: " + message
+	userPrompt := "Interlocutor: " + interlocutor + "\nDiscussion: " + message
 
 	// Prepare messages with a system prompt
 	var Messages = []httpModels.ChatGptSimpleRequestBodyMessage{

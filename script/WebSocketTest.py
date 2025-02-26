@@ -25,7 +25,7 @@ def on_close(ws, close_status_code, close_msg):
 
 def on_open(ws):
     print("Connexion ouverte")
-    print("Entrez une commande (Register, Connection, TakeDecision, Disconnect, Remove, TalkTo) ou 'exit' pour quitter.")
+    print("Entrez une commande (Register, Connection, TakeDecision, Disconnect, Remove, NewMessage) ou 'exit' pour quitter.")
 
 def listen_to_stdin(ws):
     global token, action
@@ -55,7 +55,7 @@ def listen_to_stdin(ws):
                 message = json.dumps({
                     "action": "TakeDecision",
                     "token": token,
-                    "message": "Nearby Entities: {[Name = Arthur], [Name = Emma]}"
+                    "message": "Nearby Entities: {[Name = Tom]}"
                 })
             else:
                 print("Erreur : Aucun token disponible. Veuillez vous connecter ou vous enregistrer d'abord.")
@@ -78,20 +78,19 @@ def listen_to_stdin(ws):
             else:
                 print("Erreur : Aucun token disponible. Veuillez vous connecter ou vous enregistrer d'abord.")
                 continue
-        elif user_input.lower() == "talkto":
+        elif user_input.lower() == "newmessage":
             if token:
-                message_text = input("Message à envoyer : ").strip()
                 message = json.dumps({
-                    "action": "TalkTo",
-                    "interlocutor": "Tom",
-                    "token": token,
-                    "message": message_text
+                    "action": "NewMessage",
+                    "message": "Hello",
+                    "sender": "azerty",
+                    "token": token
                 })
             else:
                 print("Erreur : Aucun token disponible. Veuillez vous connecter ou vous enregistrer d'abord.")
                 continue
         else:
-            print("Commande inconnue. Essayez 'Register', 'Connection', 'TakeDecision', 'Disconnect', 'Remove', 'TalkTo' ou 'exit'.")
+            print("Commande inconnue. Essayez 'Register', 'Connection', 'TakeDecision', 'Disconnect', 'Remove', 'NewMessage' ou 'exit'.")
             continue
 
         action = user_input.lower()
