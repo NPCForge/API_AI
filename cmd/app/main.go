@@ -31,13 +31,14 @@ func main() {
 
 	r.HandleFunc("/Connect", httpHandlers.ConnectHandler).Methods("POST")
 	r.HandleFunc("/Register", httpHandlers.RegisterHandler).Methods("POST")
+	r.HandleFunc("/Health", httpHandlers.HealthHandler).Methods("POST")
 
 	protected.HandleFunc("/Disconnect", httpHandlers.DisconnectHandler).Methods("POST")
 	protected.HandleFunc("/Remove", httpHandlers.RemoveHandler).Methods("POST")
 	protected.HandleFunc("/MakeDecision", httpHandlers.MakeDecisionHandler).Methods("POST")
 	protected.HandleFunc("/GetPopulation", httpHandlers.GetPopulationHandler).Methods("GET")
 
-	port := ":3000"
+	port := ":8000"
 	log.Printf("Serveur démarré sur http://localhost%s\n", port)
 	if err := http.ListenAndServe(port, r); err != nil {
 		log.Fatalf("Erreur lors du lancement du serveur : %v", err)
