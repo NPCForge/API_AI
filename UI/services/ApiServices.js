@@ -1,15 +1,18 @@
-import { useFetch } from '#app';
+import { ofetch } from 'ofetch';
 
 const isUp = async () => {
-    const { data, error } = await useFetch('http://localhost:8000/health');
+    try {
+        const data = await ofetch('/api/isUp', {
+            method: 'POST',
+        });
 
-    if (error.value) {
-        console.log('L’API ne répond pas ❌', error.value);
+        console.log(data.status_code, "");
+        if (data.status_code == 200) return true;
+        else return false;
+    } catch (error) {
+        console.log('L’API ne répond pas ❌', error);
         return false;
     }
-
-    console.log('L’API est en ligne ✅');
-    return true;
 };
 
 export { isUp };

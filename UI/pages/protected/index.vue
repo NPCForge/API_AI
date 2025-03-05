@@ -1,6 +1,6 @@
 <template>
     <div class="body_index">
-        <p @click="TestConnexion">- Afficher les personnes connecté {{ isConnected }}</p>
+        <p @click="TestConnexion">- connecté {{ isConnected }}</p>
         <p>- Afficher les utilisateur enregistrer</p>
         <p>- Afficher le model utilisé</p>
         <monitoringConnected class="component"/>

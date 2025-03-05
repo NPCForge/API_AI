@@ -31,7 +31,7 @@ func main() {
 
 	r.HandleFunc("/Connect", httpHandlers.ConnectHandler).Methods("POST")
 	r.HandleFunc("/Register", httpHandlers.RegisterHandler).Methods("POST")
-	r.HandleFunc("/Health", httpHandlers.HealthHandler).Methods("POST")
+	r.HandleFunc("/Health", httpHandlers.HealthHandler).Methods("GET")
 
 	protected.HandleFunc("/Disconnect", httpHandlers.DisconnectHandler).Methods("POST")
 	protected.HandleFunc("/Remove", httpHandlers.RemoveHandler).Methods("POST")

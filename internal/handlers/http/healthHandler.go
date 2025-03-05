@@ -8,9 +8,9 @@ import (
 )
 
 func HealthHandler(w http.ResponseWriter, r *http.Request) {
-
+	log.Printf("hello healthHandler")
 	res := http3.HealthResponse{
-		Message: "Suppression réussie",
+		Message: "Service on",
 		Status:  200,
 	}
 
