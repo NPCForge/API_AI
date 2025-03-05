@@ -12,6 +12,7 @@
   "dependencies": {
     "@nuxt/ui": "^2.21.0",
     "@popperjs/core": "^2.11.8",
+    "aos": "^2.3.4",
     "bcrypt": "^5.1.1",
     "bcryptjs": "^2.4.3",
     "bootstrap": "^5.3.3",
