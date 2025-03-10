@@ -15,4 +15,8 @@ const isUp = async () => {
     }
 };
 
-export { isUp };
+const getConnected = async () => {
+    return [{ id: "mathieu" }]
+}
+
+export { isUp, getConnected };

@@ -18,6 +18,7 @@ func main() {
 	r := mux.NewRouter()
 	config.DrawLogo()
 	config.InitDB()
+	port := config.ManageArgument()
 
 	// Goroutine pour les commandes
 	go utils.Commande()
@@ -38,7 +39,6 @@ func main() {
 	protected.HandleFunc("/MakeDecision", httpHandlers.MakeDecisionHandler).Methods("POST")
 	protected.HandleFunc("/GetPopulation", httpHandlers.GetPopulationHandler).Methods("GET")
 
-	port := ":8000"
 	log.Printf("Serveur démarré sur http://localhost%s\n", port)
 	if err := http.ListenAndServe(port, r); err != nil {
 		log.Fatalf("Erreur lors du lancement du serveur : %v", err)

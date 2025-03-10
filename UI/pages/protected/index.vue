@@ -19,9 +19,11 @@
         height: auto;
         min-height: 100vh;
     }
+
     .component {
         margin: 1%;
     }
+
     .alert_box {
         position: fixed;
         z-index: 8;

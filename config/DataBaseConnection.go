@@ -106,3 +106,24 @@ func CloseDB() {
 		}
 	}
 }
+
+func searchArg(arg string) (string, error) {
+	args := os.Args
+	if len(args) > 1 {
+		fmt.Println("Arguments sans le nom du programme:", args[1:])
+	} else {
+		fmt.Println("Aucun argument fourni.")
+	}
+	return "", nil
+}
+
+func ManageArgument() string {
+	port := "8000"
+	res, err := searchArg("port")
+
+	if err == nil {
+		port = res
+	}
+
+	return port
+}

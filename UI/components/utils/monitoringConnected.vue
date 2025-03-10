@@ -13,8 +13,8 @@
             />
         </div>
         <div class="body">
-            <div class="fiche d-flex align-self-center justify-content-start">
-                <p>Id:</p>
+            <div v-for="n in arr" class="fiche d-flex align-self-center justify-content-start">
+                <p>Id: {{ n.id }}</p>
             </div>
         </div>
     </div>
@@ -57,8 +57,14 @@
 </style>
 
 <script setup>
-    const request = () => {
+    import { getConnected } from '~/services/ApiServices';
+
+    const arr = ref([])
+
+    const request = async () => {
         console.log("Fetching population data...");
+        arr.value = await getConnected()
+        console.log(arr.value)
         // Implémenter la requête vers getPopulation ici
     };
 </script>
