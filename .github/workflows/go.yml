@@ -39,7 +39,7 @@ jobs:
       run: go test -coverprofile=coverage.out ./...
 
     - name: Upload coverage report
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@main
       with:
         name: coverage-report
         path: coverage.out
