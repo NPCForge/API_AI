@@ -70,7 +70,7 @@ func GptTalkToRequest(message string, prompt string, interlocutor string) (strin
 		return response.Choices[0].Message.Content, nil
 	}
 
-	return "", fmt.Errorf("no response available")
+	return "", fmt.Errorf("[GptTalkToRequest]: no response available")
 }
 
 func GptSimpleRequest(message string) (string, error) {
@@ -122,5 +122,5 @@ func GptSimpleRequest(message string) (string, error) {
 		return response.Choices[0].Message.Content, nil
 	}
 
-	return "", fmt.Errorf("no response available")
+	return "", fmt.Errorf("[GptSimpleRequest]: no response available")
 }

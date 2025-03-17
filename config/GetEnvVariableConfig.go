@@ -12,6 +12,7 @@ import (
 func GetEnvVariable(c string) string {
 	// Charge le fichier .env.local
 	if err := godotenv.Load(".env.local"); err != nil {
+		println(err.Error())
 		log.Fatal("Erreur de chargement du fichier .env.local")
 	}
 
