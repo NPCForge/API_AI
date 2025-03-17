@@ -6,7 +6,7 @@ CREATE TABLE IF NOT EXISTS entity (
     created DATE DEFAULT CURRENT_DATE
 );
 
-CREATE TABLE IF NOT EXISTS discussions (
+CREATE TABLE IF NOT EXISTS messages (
     id SERIAL PRIMARY KEY,
     sender_user_id INT NOT NULL,
     message TEXT NOT NULL,
@@ -14,11 +14,11 @@ CREATE TABLE IF NOT EXISTS discussions (
     FOREIGN KEY (sender_user_id) REFERENCES entity(id) ON DELETE CASCADE
 );
 
-CREATE TABLE IF NOT EXISTS discussion_receivers (
-    discussion_id INT NOT NULL,
+CREATE TABLE IF NOT EXISTS message_receivers (
+    message_id INT NOT NULL,
     receiver_user_id INT NOT NULL,
     is_new_message BOOLEAN NOT NULL DEFAULT TRUE,
-    PRIMARY KEY (discussion_id, receiver_user_id),
-    FOREIGN KEY (discussion_id) REFERENCES discussions(id) ON DELETE CASCADE,
+    PRIMARY KEY (message_id, receiver_user_id),
+    FOREIGN KEY (message_id) REFERENCES messages(id) ON DELETE CASCADE,
     FOREIGN KEY (receiver_user_id) REFERENCES entity(id) ON DELETE CASCADE
 );

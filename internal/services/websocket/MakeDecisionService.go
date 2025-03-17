@@ -68,7 +68,7 @@ func TalkToPreprocess(msg websocketModels.MakeDecisionRequest, entity string) (s
 
 	for _, msg := range discussion {
 		sb.WriteString(fmt.Sprintf("%s -> %s: %s\n",
-			msg.SenderName, msg.ReceiverName, msg.Message))
+			msg.SenderName, msg.ReceiverNames, msg.Message))
 	}
 
 	result := sb.String()
@@ -91,7 +91,7 @@ func MakeDecisionWebSocket(conn *websocket.Conn, msg websocketModels.MakeDecisio
 	var formattedMessages []string
 
 	for _, msg := range newMessages {
-		formattedMessages = append(formattedMessages, fmt.Sprintf("[%s -> %s: %s]", msg.SenderName, msg.ReceiverName, msg.Message))
+		formattedMessages = append(formattedMessages, fmt.Sprintf("[%s -> %s: %s]", msg.SenderName, msg.ReceiverNames, msg.Message))
 	}
 
 	result := "New Messages: {" + strings.Join(formattedMessages, ", ") + "}"

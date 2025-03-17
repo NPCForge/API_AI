@@ -17,8 +17,7 @@ type TalkToResponse struct {
 }
 
 type Message struct {
-	SenderName   string
-	ReceiverName string
-	Message      string
-	IsNewMessage bool
+	SenderName    string
+	ReceiverNames []string
+	Message       string
 }
