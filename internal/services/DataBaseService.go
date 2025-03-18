@@ -7,7 +7,6 @@ import (
 	"my-api/config"
 	httpModels "my-api/internal/models/http"
 	websocketModels "my-api/internal/models/websocket"
-	"strings"
 )
 
 // GetIDFromDB récupère l'ID correspondant à un checksum donné
@@ -52,14 +51,6 @@ func GetNameByID(id string) (string, error) {
 		return "", fmt.Errorf("error while getting name : %w", err)
 	}
 	return name, nil
-}
-
-func placeholders(n int) string {
-	placeholders := make([]string, n)
-	for i := range placeholders {
-		placeholders[i] = "$" + fmt.Sprintf("%d", i+1)
-	}
-	return strings.Join(placeholders, ", ")
 }
 
 func GetNewMessages(receiver string) ([]websocketModels.Message, error) {

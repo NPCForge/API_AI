@@ -4,6 +4,7 @@ import (
 	"github.com/gorilla/websocket"
 	"my-api/internal/models/websocket"
 	"my-api/internal/services"
+	"strconv"
 )
 
 func NewMessageWebSocket(conn *websocket.Conn, msg websocketModels.NewMessageRequest, sendResponse func(*websocket.Conn, string, map[string]interface{}), sendError func(*websocket.Conn, string, map[string]interface{})) {
@@ -18,8 +19,8 @@ func NewMessageWebSocket(conn *websocket.Conn, msg websocketModels.NewMessageReq
 		return
 	}
 
-	for _, receiverChecksum := range msg.Receivers {
-		receiverId, err := services.GetIDFromDB(receiverChecksum)
+	for _, receiver := range msg.Receivers {
+		receiverId, err := services.GetEntityByName(receiver)
 		if err != nil {
 			sendError(conn, initialRoute, map[string]interface{}{
 				"message": "Error in getting IDs",
@@ -27,12 +28,22 @@ func NewMessageWebSocket(conn *websocket.Conn, msg websocketModels.NewMessageReq
 			return
 		}
 
-		_, err = services.NewMessage(senderId, receiverId, msg.Message)
+		receiverIntId, err := strconv.Atoi(receiverId)
 
 		if err != nil {
 			sendError(conn, initialRoute, map[string]interface{}{
 				"message": "Error in creating message",
 			})
+			return
+		}
+
+		_, err = services.NewMessage(senderId, receiverIntId, msg.Message)
+
+		if err != nil {
+			sendError(conn, initialRoute, map[string]interface{}{
+				"message": "Error in creating message",
+			})
+			return
 		}
 	}
 
