@@ -2,7 +2,7 @@ package websocketServices
 
 import (
 	"fmt"
-	"my-api/internal/models/websocket"
+	websocketModels "my-api/internal/models/websocket"
 	"my-api/internal/services"
 	"my-api/pkg"
 	"regexp"
@@ -86,7 +86,7 @@ func MakeDecisionWebSocket(conn *websocket.Conn, msg websocketModels.MakeDecisio
 	var initialRoute = "MakeDecision"
 	receiver, err := pkg.GetUserIDFromJWT(msg.Token)
 
-	newMessages, err := services.GetNewMessages(receiver)
+	newMessages, _ := services.GetNewMessages(receiver)
 
 	var formattedMessages []string
 
