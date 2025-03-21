@@ -1,19 +1,37 @@
 package websocketServices
 
 import (
+	"github.com/fatih/color"
 	"github.com/gorilla/websocket"
-	"my-api/internal/models/websocket"
+
+	websocketModels "my-api/internal/models/websocket"
 	"my-api/internal/services"
+	"my-api/internal/types"
 	"my-api/pkg"
 )
 
-func NewMessageWebSocket(conn *websocket.Conn, msg websocketModels.NewMessageRequest, sendResponse func(*websocket.Conn, string, map[string]interface{}), sendError func(*websocket.Conn, string, map[string]interface{})) {
-	var initialRoute = "NewMessage"
+func NewMessageWebSocket(
+	conn *websocket.Conn,
+	msg websocketModels.NewMessageRequest,
+	sendResponse types.SendResponseFunc,
+	sendError types.SendErrorFunc,
+) {
+	initialRoute := "NewMessage"
+
+	color.Cyan("✉️  Handling new message from: %s", msg.Sender)
 
 	receiverId, err := pkg.GetUserIDFromJWT(msg.Token)
-	senderId, err := services.GetIDFromDB(msg.Sender)
-
 	if err != nil {
+		color.Red("❌ Failed to extract receiver ID from JWT: %v", err)
+		sendError(conn, initialRoute, map[string]interface{}{
+			"message": "Invalid token",
+		})
+		return
+	}
+
+	senderId, err := services.GetIDFromDB(msg.Sender)
+	if err != nil {
+		color.Red("❌ Failed to get sender ID: %v", err)
 		sendError(conn, initialRoute, map[string]interface{}{
 			"message": "Error in getting IDs",
 		})
@@ -21,12 +39,17 @@ func NewMessageWebSocket(conn *websocket.Conn, msg websocketModels.NewMessageReq
 	}
 
 	_, err = services.NewMessage(senderId, receiverId, msg.Message)
-
 	if err != nil {
+		color.Red("❌ Error while creating new message: %v", err)
 		sendError(conn, initialRoute, map[string]interface{}{
 			"message": "Error in creating message",
 		})
+		return
 	}
 
-	return
+	color.Green("✅ Message successfully saved from %d to %d", senderId, receiverId)
+
+	sendResponse(conn, initialRoute, map[string]interface{}{
+		"message": "Message sent successfully",
+	})
 }

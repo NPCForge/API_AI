@@ -3,22 +3,23 @@ package services
 import (
 	"database/sql"
 	"fmt"
+	"strings"
+
 	"my-api/config"
 	httpModels "my-api/internal/models/http"
 	websocketModels "my-api/internal/models/websocket"
-	"strings"
 )
 
 // GetIDFromDB récupère l'ID correspondant à un checksum donné
 func GetIDFromDB(checksum string) (int, error) {
-	db := config.GetDB() // Récupère la connexion à la base de données
+	db := config.GetDB()
 
 	var id int
 	query := `SELECT id FROM entity WHERE checksum = $1`
 	err := db.QueryRow(query, checksum).Scan(&id)
 
 	if err == sql.ErrNoRows {
-		return 0, nil // Aucun enregistrement trouvé
+		return 0, nil
 	} else if err != nil {
 		return 0, fmt.Errorf("erreur lors de la récupération de l'id : %w", err)
 	}
@@ -32,6 +33,7 @@ func GetPromptByID(id string) (string, error) {
 	var prompt string
 	query := `SELECT prompt FROM entity WHERE id = $1`
 	err := db.QueryRow(query, id).Scan(&prompt)
+
 	if err == sql.ErrNoRows {
 		return "", nil
 	} else if err != nil {
@@ -47,9 +49,11 @@ func GetNameByID(id string) (string, error) {
 	var name string
 	query := `SELECT name FROM entity WHERE id = $1`
 	err := db.QueryRow(query, id).Scan(&name)
+
 	if err != nil {
 		return "", fmt.Errorf("error while getting name : %w", err)
 	}
+
 	return name, nil
 }
 
@@ -64,12 +68,15 @@ func placeholders(n int) string {
 func GetNewMessages(receiver string) ([]websocketModels.Message, error) {
 	db := config.GetDB()
 
-	query := `SELECT d.id, d.sender_user_id, d.receiver_user_id, e1.name AS sender_name, e2.name AS receiver_name, d.message, d.is_new_message
+	query := `
+	SELECT d.id, d.sender_user_id, d.receiver_user_id, e1.name AS sender_name, e2.name AS receiver_name, d.message, d.is_new_message
 	FROM discussions d
 	JOIN entity e1 ON d.sender_user_id = e1.id
 	JOIN entity e2 ON d.receiver_user_id = e2.id
-	WHERE (d.receiver_user_id = $1 AND d.is_new_message = TRUE)
-	ORDER BY d.timestamp LIMIT 5;`
+	WHERE d.receiver_user_id = $1 AND d.is_new_message = TRUE
+	ORDER BY d.timestamp
+	LIMIT 5;
+	`
 
 	rows, err := db.Query(query, receiver)
 	if err != nil {
@@ -82,8 +89,8 @@ func GetNewMessages(receiver string) ([]websocketModels.Message, error) {
 	var messageIDs []int
 
 	for rows.Next() {
-		var senderUserID, receiverUserID, messageID int
 		var msg websocketModels.Message
+		var senderUserID, receiverUserID, messageID int
 
 		err := rows.Scan(&messageID, &senderUserID, &receiverUserID, &msg.SenderName, &msg.ReceiverName, &msg.Message, &msg.IsNewMessage)
 		if err != nil {
@@ -124,13 +131,15 @@ func GetNewMessages(receiver string) ([]websocketModels.Message, error) {
 func GetDiscussion(from string, to string) ([]websocketModels.Message, error) {
 	db := config.GetDB()
 
-	query := `SELECT d.sender_user_id, d.receiver_user_id, e1.name AS sender_name, e2.name AS receiver_name, d.message, d.is_new_message
+	query := `
+	SELECT d.sender_user_id, d.receiver_user_id, e1.name AS sender_name, e2.name AS receiver_name, d.message, d.is_new_message
 	FROM discussions d
 	JOIN entity e1 ON d.sender_user_id = e1.id
 	JOIN entity e2 ON d.receiver_user_id = e2.id
 	WHERE (d.sender_user_id = $1 AND d.receiver_user_id = $2)
 	   OR (d.sender_user_id = $2 AND d.receiver_user_id = $1)
-	ORDER BY d.timestamp;`
+	ORDER BY d.timestamp;
+	`
 
 	rows, err := db.Query(query, from, to)
 	if err != nil {
@@ -142,8 +151,8 @@ func GetDiscussion(from string, to string) ([]websocketModels.Message, error) {
 	var messages []websocketModels.Message
 
 	for rows.Next() {
-		var senderUserID, receiverUserID int
 		var msg websocketModels.Message
+		var senderUserID, receiverUserID int
 
 		err := rows.Scan(&senderUserID, &receiverUserID, &msg.SenderName, &msg.ReceiverName, &msg.Message, &msg.IsNewMessage)
 		if err != nil {
@@ -151,7 +160,6 @@ func GetDiscussion(from string, to string) ([]websocketModels.Message, error) {
 			return nil, err
 		}
 
-		// Remplace le nom par "You" si le sender ou receiver est l'utilisateur actuel
 		if fmt.Sprintf("%d", senderUserID) == from {
 			msg.SenderName = "You"
 		}
@@ -180,23 +188,21 @@ func GetEntityByName(name string) (string, error) {
 	if err == sql.ErrNoRows {
 		return "Cannot find entity", err
 	}
+
 	return entity, nil
 }
 
-// DropUser supprime un utilisateur en fonction de son id
 func DropUser(id string) (string, error) {
 	db := config.GetDB()
 
-	// Supprimer directement par le checksum
 	query := `DELETE FROM entity WHERE id = $1`
-
 	result, err := db.Exec(query, id)
+
 	if err != nil {
 		return "", fmt.Errorf("erreur lors de la suppression de l'utilisateur : %w", err)
 	}
 
 	rowsAffected, err := result.RowsAffected()
-
 	if err != nil {
 		return "", fmt.Errorf("erreur lors de la vérification des lignes supprimées : %w", err)
 	}
@@ -208,7 +214,6 @@ func DropUser(id string) (string, error) {
 	return "success", nil
 }
 
-// IsExist vérifie si un checksum existe dans la base de données
 func IsExist(checksum string) (bool, error) {
 	db := config.GetDB()
 
@@ -223,7 +228,6 @@ func IsExist(checksum string) (bool, error) {
 	return exists, nil
 }
 
-// IsExistById vérifie si un id existe dans la base de données
 func IsExistById(id string) (bool, error) {
 	db := config.GetDB()
 
@@ -238,7 +242,6 @@ func IsExistById(id string) (bool, error) {
 	return exists, nil
 }
 
-// Register insère une nouvelle entité dans la base de données
 func Register(checksum string, entity httpModels.RegisterRequest) (int64, error) {
 	db := config.GetDB()
 
@@ -246,7 +249,6 @@ func Register(checksum string, entity httpModels.RegisterRequest) (int64, error)
 
 	var id int64
 	err := db.QueryRow(query, entity.Name, checksum, entity.Prompt).Scan(&id)
-
 	if err != nil {
 		return 0, fmt.Errorf("error while registering entity : %w", err)
 	}
@@ -261,7 +263,6 @@ func RegisterWebsocket(checksum string, entity websocketModels.RegisterRequest) 
 
 	var id int64
 	err := db.QueryRow(query, entity.Name, checksum, entity.Prompt).Scan(&id)
-
 	if err != nil {
 		return 0, fmt.Errorf("error while registering entity : %w", err)
 	}
@@ -276,7 +277,6 @@ func NewMessage(senderId int, receiverId string, message string) (int64, error) 
 
 	var id int64
 	err := db.QueryRow(query, senderId, receiverId, message).Scan(&id)
-
 	if err != nil {
 		return 0, fmt.Errorf("error while insert message : %w", err)
 	}

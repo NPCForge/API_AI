@@ -3,10 +3,12 @@ package services
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
+
 	"github.com/go-resty/resty/v2"
-	"io/ioutil" // To read the file
+
 	"my-api/config"
-	"my-api/internal/models/http"
+	httpModels "my-api/internal/models/http"
 )
 
 // Function to read the content of a file
@@ -33,7 +35,7 @@ func GptTalkToRequest(message string, prompt string, interlocutor string) (strin
 	// Prepare messages with a system prompt
 	var Messages = []httpModels.ChatGptSimpleRequestBodyMessage{
 		{
-			Role:    "system", // Add the system prompt
+			Role:    "system",
 			Content: systemPrompt,
 		},
 		{
@@ -43,7 +45,7 @@ func GptTalkToRequest(message string, prompt string, interlocutor string) (strin
 	}
 
 	// Create the request body
-	var body httpModels.ChatGptSimpleRequestBody = httpModels.ChatGptSimpleRequestBody{
+	body := httpModels.ChatGptSimpleRequestBody{
 		Model:    "gpt-3.5-turbo",
 		Messages: Messages,
 	}
@@ -85,7 +87,7 @@ func GptSimpleRequest(message string) (string, error) {
 	// Prepare messages with a system prompt
 	var Messages = []httpModels.ChatGptSimpleRequestBodyMessage{
 		{
-			Role:    "system", // Add the system prompt
+			Role:    "system",
 			Content: systemPrompt,
 		},
 		{
@@ -95,7 +97,7 @@ func GptSimpleRequest(message string) (string, error) {
 	}
 
 	// Create the request body
-	var body httpModels.ChatGptSimpleRequestBody = httpModels.ChatGptSimpleRequestBody{
+	body := httpModels.ChatGptSimpleRequestBody{
 		Model:    "gpt-3.5-turbo",
 		Messages: Messages,
 	}

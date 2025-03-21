@@ -2,25 +2,31 @@ package utils
 
 import (
 	"bufio"
-	"fmt"
-	"my-api/pkg"
 	"os"
 	"strings"
+
+	"my-api/pkg"
+
+	"github.com/fatih/color"
 )
 
 func status() {
-	store := pkg.GetPopulation() // retourne un map[string]string
+	store := pkg.GetPopulation() // map[string]string
 
-	println("------------ Status ------------------------------------------------------------")
+	color.Cyan("------------ 📊 Status ------------------------------------------------------------")
 	for key, value := range store {
-		fmt.Printf("Clé : %s, Valeur : %s\n", key, value)
+		color.Green("🔑 Clé : %s → 📦 Valeur : %s", key, value)
 	}
-	fmt.Printf("------------ %d actifs ------------------------------------------------------------\n", len(store))
+	color.Cyan("------------ 🟢 %d actifs ------------------------------------------------------------\n", len(store))
 }
 
 func Commande() {
 	reader := bufio.NewReader(os.Stdin)
+
+	color.Magenta("🧠 Console interactive prête. Tape une commande (status, stop, ...)\n")
+
 	for {
+		color.White("⤷ Entrez une commande : ")
 		input, _ := reader.ReadString('\n')
 		input = strings.TrimSpace(input)
 
@@ -30,13 +36,14 @@ func Commande() {
 
 		switch input {
 		case "stop":
-			fmt.Println("Arrêt du serveur...")
+			color.Red("⛔ Arrêt du serveur...")
 			os.Exit(0)
+
 		case "status":
-			// fmt.Println("Le serveur est actif.")
 			status()
+
 		default:
-			fmt.Println("Commande inconnue :", input)
+			color.Yellow("❓ Commande inconnue : %s", input)
 		}
 	}
 }
