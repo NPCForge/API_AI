@@ -151,7 +151,8 @@ func GetDiscussion(from string, to string) ([]websocketModels.Message, error) {
     JOIN message_receivers mr ON m.id = mr.message_id
     WHERE m.sender_user_id = $1
     AND mr.receiver_user_id = $2
-    AND mr.is_new_message = TRUE
+  	OR m.sender_user_id = $2
+  	AND mr.receiver_user_id = $1
 )
 SELECT 
     fm.sender_user_id,

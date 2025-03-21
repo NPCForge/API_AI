@@ -28,7 +28,7 @@ func GptTalkToRequest(message string, prompt string, interlocutor string) (strin
 
 	systemPrompt += "\n" + prompt
 
-	userPrompt := "Interlocutor: " + interlocutor + "\nDiscussion: " + message
+	userPrompt := "Interlocutor: " + interlocutor + "\nDiscussion: { " + message + " }"
 
 	// Prepare messages with a system prompt
 	var Messages = []httpModels.ChatGptSimpleRequestBodyMessage{
@@ -41,6 +41,14 @@ func GptTalkToRequest(message string, prompt string, interlocutor string) (strin
 			Content: userPrompt,
 		},
 	}
+
+	yellow := "\033[33m"
+	reset := "\033[0m"
+
+	println("GPTTalkToRequest: \n",
+		string(yellow), "userPrompt = {\n", userPrompt, "\n}\n",
+		string(reset),
+	)
 
 	// Create the request body
 	var body httpModels.ChatGptSimpleRequestBody = httpModels.ChatGptSimpleRequestBody{
@@ -93,6 +101,14 @@ func GptSimpleRequest(message string) (string, error) {
 			Content: message,
 		},
 	}
+
+	yellow := "\033[33m"
+	reset := "\033[0m"
+
+	println("GPTTalkToRequest: \n",
+		string(yellow), "userPrompt = {\n", message, "\n}\n",
+		string(reset),
+	)
 
 	// Create the request body
 	var body httpModels.ChatGptSimpleRequestBody = httpModels.ChatGptSimpleRequestBody{

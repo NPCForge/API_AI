@@ -75,7 +75,7 @@ func TalkToPreprocess(msg websocketModels.MakeDecisionRequest, entity_names []st
 		var sb strings.Builder
 
 		for _, msg := range discussion {
-			sb.WriteString(fmt.Sprintf("%s -> %s: %s\n",
+			sb.WriteString(fmt.Sprintf("[%s -> %s: %s], ",
 				msg.SenderName, msg.ReceiverNames, msg.Message))
 		}
 
