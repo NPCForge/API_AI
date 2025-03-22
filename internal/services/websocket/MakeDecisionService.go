@@ -14,6 +14,15 @@ import (
 	"my-api/pkg"
 )
 
+func NeedToFinish(msg string) bool {
+	for _, str := range strings.Fields(msg) {
+		if str == "end_of_discussion" {
+			return true
+		}
+	}
+	return false
+}
+
 func TalkToWebSocket(token string, message string, interlocutor string) (string, error) {
 	UserId, err := pkg.GetUserIDFromJWT(token)
 	if err != nil {
@@ -40,6 +49,10 @@ func TalkToWebSocket(token string, message string, interlocutor string) (string,
 	}
 
 	color.Cyan("📥 Received from GPT: %s", back)
+
+	if NeedToFinish(back) {
+		color.HiMagenta("𝌦 After this, we need to finish : %s", back)
+	}
 
 	re := regexp.MustCompile(`Response:\s*(.*)`)
 	match := re.FindStringSubmatch(back)

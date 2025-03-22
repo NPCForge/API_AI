@@ -27,6 +27,24 @@ func GetIDFromDB(checksum string) (int, error) {
 	return id, nil
 }
 
+// DropAllUser for debug
+func DropAllUser() (int64, error) {
+	db := config.GetDB()
+
+	query := `DELETE FROM entity`
+	result, err := db.Exec(query)
+	if err != nil {
+		return 0, fmt.Errorf("erreur lors de la suppression : %w", err)
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return 0, fmt.Errorf("erreur lors de la récupération du nombre de lignes supprimées : %w", err)
+	}
+
+	return rowsAffected, nil
+}
+
 func GetPromptByID(id string) (string, error) {
 	db := config.GetDB()
 

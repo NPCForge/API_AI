@@ -86,3 +86,9 @@ func IsValidToken(token string) bool {
 	}
 	return false // Le token n'est pas trouvé
 }
+
+func ClearTokenStore() {
+	mu.Lock()
+	defer mu.Unlock()
+	tokenStore = make(map[string]string)
+}
