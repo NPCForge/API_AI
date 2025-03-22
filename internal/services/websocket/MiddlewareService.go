@@ -43,6 +43,8 @@ func LoginMiddlewareWebSocket(
 		return false
 	}
 
+	color.Yellow("🔐 Token : " + msg.Token + "\n")
+
 	_, err = pkg.VerifyJWT(msg.Token)
 	if err != nil {
 		color.Red("❌ Invalid JWT: %v", err)
