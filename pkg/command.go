@@ -1,17 +1,15 @@
-package utils
+package pkg
 
 import (
 	"bufio"
 	"os"
 	"strings"
 
-	"my-api/pkg"
-
 	"github.com/fatih/color"
 )
 
 func status() {
-	store := pkg.GetPopulation() // map[string]string
+	store := GetPopulation()
 
 	color.Cyan("------------ 📊 Status ------------------------------------------------------------")
 	for key, value := range store {

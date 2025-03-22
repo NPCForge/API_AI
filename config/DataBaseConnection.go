@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"my-api/internal/utils"
 	"os"
 	"strings"
 	"sync"
@@ -107,23 +108,19 @@ func CloseDB() {
 	}
 }
 
-func searchArg(arg string) (string, error) {
+func searchArg(arg string) string {
 	args := os.Args
-	if len(args) > 1 {
-		fmt.Println("Arguments sans le nom du programme:", args[1:])
-	} else {
-		fmt.Println("Aucun argument fourni.")
+	if index := utils.IndexOf(args, arg); index != -1 && index+1 < len(args) {
+		return args[index+1]
 	}
-	return "", nil
+	return ""
 }
 
 func ManageArgument() string {
-	port := "8000"
-	res, err := searchArg("port")
-
-	if err == nil {
+	port := "3000"
+	res := searchArg("--port")
+	if res != "" {
 		port = res
 	}
-
 	return port
 }

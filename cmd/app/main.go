@@ -3,12 +3,12 @@ package main
 import (
 	"log"
 	"my-api/config"
+	"my-api/pkg"
 	"net/http"
 
 	httpHandlers "my-api/internal/handlers/http"
 	websocketHandlers "my-api/internal/handlers/websocket"
 	httpServices "my-api/internal/services/http"
-	"my-api/internal/utils"
 
 	"github.com/gorilla/mux"
 )
@@ -21,7 +21,7 @@ func main() {
 	port := config.ManageArgument()
 
 	// Goroutine pour les commandes
-	go utils.Commande()
+	go pkg.Commande()
 
 	// Websocket handler
 	r.HandleFunc("/ws", websocketHandlers.WebsocketHandler).Methods("GET")
@@ -39,8 +39,8 @@ func main() {
 	protected.HandleFunc("/MakeDecision", httpHandlers.MakeDecisionHandler).Methods("POST")
 	protected.HandleFunc("/GetPopulation", httpHandlers.GetPopulationHandler).Methods("GET")
 
-	log.Printf("Serveur démarré sur http://localhost%s\n", port)
-	if err := http.ListenAndServe(port, r); err != nil {
+	log.Printf("Serveur démarré sur http://localhost:%s\n", port)
+	if err := http.ListenAndServe(":"+port, r); err != nil {
 		log.Fatalf("Erreur lors du lancement du serveur : %v", err)
 	}
 }

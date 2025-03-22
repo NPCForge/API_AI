@@ -52,3 +52,12 @@ func SendError(conn *websocket.Conn, initialRoute string, fields map[string]inte
 
 	conn.WriteJSON(resp)
 }
+
+func IndexOf(slice []string, val string) int {
+	for i, item := range slice {
+		if item == val {
+			return i
+		}
+	}
+	return -1
+}
