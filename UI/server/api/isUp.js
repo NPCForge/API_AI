@@ -2,7 +2,7 @@ import { ofetch } from 'ofetch';
 
 export default defineEventHandler(async (event) => {
     try {
-        const data = await ofetch("http://localhost:8000/Health", {
+        const data = await ofetch("http://localhost:3000/Health", {
             method: "GET"
         });
 
