@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"os"
 	"runtime"
 
 	"github.com/fatih/color"
@@ -51,4 +52,9 @@ func SendError(conn *websocket.Conn, initialRoute string, fields map[string]inte
 	color.Yellow("📤 Payload: %+v", resp)
 
 	conn.WriteJSON(resp)
+}
+
+func IsRunningInDocker() bool {
+	_, err := os.Stat("/.dockerenv")
+	return err == nil
 }
