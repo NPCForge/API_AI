@@ -2,50 +2,63 @@ package websocketServices
 
 import (
 	"errors"
-	websocketModels "my-api/internal/models/websocket"
-	"my-api/internal/services"
-	"my-api/pkg"
 	"strconv"
 
+	"github.com/fatih/color"
 	"github.com/gorilla/websocket"
+
+	websocketModels "my-api/internal/models/websocket"
+	"my-api/internal/services"
+	"my-api/internal/types"
+	"my-api/pkg"
 )
 
 func SaveInDatabase(entity websocketModels.RegisterRequest) (int64, error) {
-	response, err := services.IsExist(entity.Checksum)
+	color.Cyan("📝 SaveInDatabase triggered with checksum: %s", entity.Checksum)
 
+	exists, err := services.IsExist(entity.Checksum)
 	if err != nil {
+		color.Red("❌ Error checking existence: %v", err)
 		return -1, errors.New("error searching in table")
 	}
 
-	if response {
-		return -1, errors.New("error entry already exist in database")
+	if exists {
+		color.Yellow("⚠️ Entry already exists in DB for checksum: %s", entity.Checksum)
+		return -1, errors.New("entry already exists in database")
 	}
 
 	id, err := services.RegisterWebsocket(entity.Checksum, entity)
-
 	if err != nil {
+		color.Red("❌ Error while registering: %v", err)
 		return -1, errors.New("error while registering")
 	}
 
+	color.Green("✅ New user registered with ID: %d", id)
 	return id, nil
 }
 
-func RegisterServiceWebSocket(conn *websocket.Conn, msg websocketModels.RegisterRequest, sendResponse func(*websocket.Conn, string, map[string]interface{}), sendError func(*websocket.Conn, string, map[string]interface{})) {
-	var initialRoute = "Register"
+func RegisterServiceWebSocket(
+	conn *websocket.Conn,
+	msg websocketModels.RegisterRequest,
+	sendResponse types.SendResponseFunc,
+	sendError types.SendErrorFunc,
+) {
+	initialRoute := "Register"
+
 	id, err := SaveInDatabase(msg)
-
-	var stringId = strconv.FormatInt(id, 10)
-
 	if err != nil {
+		color.Red("❌ Failed to save in database: %v", err)
 		sendError(conn, initialRoute, map[string]interface{}{
-			"message": "Error saving in database",
+			"message": err.Error(),
 		})
 		return
 	}
 
-	pass, err := pkg.GenerateJWT(stringId)
+	stringId := strconv.FormatInt(id, 10)
 
+	pass, err := pkg.GenerateJWT(stringId)
 	if err != nil {
+		color.Red("❌ Failed to generate JWT: %v", err)
 		sendError(conn, initialRoute, map[string]interface{}{
 			"message": "Unable to generate Token",
 		})
@@ -54,6 +67,7 @@ func RegisterServiceWebSocket(conn *websocket.Conn, msg websocketModels.Register
 
 	pkg.SetToken(stringId, pass)
 
+	color.Green("✅ Token generated and stored for user: %s", stringId)
 	sendResponse(conn, initialRoute, map[string]interface{}{
 		"token": pass,
 	})

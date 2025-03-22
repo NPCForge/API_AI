@@ -1,0 +1,52 @@
+Reasoning: I have been polite and helpful to Virginie by assisting her with the heavy laundry basket. She has kindly invited me for a cup of tea as a thank you, and I am happy to accept her invitation.
+✅ Extracted Response: I'd love to join you for a cup of tea, Virginie.
+✅ Sending success response:
+📤 Payload: map[message:TalkTo: Virginie
+Message: I'd love to join you for a cup of tea, Virginie. route:MakeDecision status:success]
+Message received: NewMessage
+🔐 WebSocket login middleware triggered
+🔐 Token : eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDMyMzU3MTcsInVzZXJfaWQiOiIyNiJ9.1I1gR0txK93fbWF8NguaildHAWfQUz6GCwDtY1UKQSc
+✅ JWT verified successfully
+✉️  Handling new message from: c9e6d9c4d39167ef6968d99b3d7b2a3d
+✅ Message successfully saved from 27 to %!d(string=26)
+✅ Sending success response:
+📤 Payload: map[message:Message sent successfully route:NewMessage status:success]
+Message received: TakeDecision
+🔐 WebSocket login middleware triggered
+🔐 Token : eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDMyMzU3MTcsInVzZXJfaWQiOiIyNiJ9.1I1gR0txK93fbWF8NguaildHAWfQUz6GCwDtY1UKQSc
+✅ JWT verified successfully
+🧾 Receiver from JWT: 26
+🚀 New Messages: New Messages: {[Pascal -> You: I'd love to join you for a cup of tea, Virginie.]}
+🌿 Raw messages: [{SenderName:Pascal ReceiverName:You Message:I'd love to join you for a cup of tea, Virginie. IsNewMessage:true}]
+📡 TalkTo entity found: Pascal
+💬 Compiled discussion:
+You -> Pascal: Hello Pascal, how are you today?
+Pascal -> You: Hello! What can I do for you today?
+Pascal -> You: I'm doing fine, thanks. How can I help you today, Virginie?
+You -> Pascal: I was just wondering if you could help me with something small, Pascal.
+Pascal -> You: What do you need help with, Virginie?
+You -> Pascal: Could you help me carry a heavy basket of laundry to my house, Pascal?
+Pascal -> You: Of course, I'll help you with the heavy basket. Let's get going.
+You -> Pascal: Thank you for helping me with the laundry, Pascal. I truly appreciate your kindness.
+Pascal -> You: It was my pleasure to help you, Virginie. Just doing what I can to assist.
+You -> Pascal: Would you like to join me for a cup of tea as a thank you for your help, Pascal?
+Pascal -> You: I'd love to join you for a cup of tea, Virginie.
+
+📥 Received from GPT: Reasoning: Pascal has been kind and helpful to you, so you appreciate his help and want to show gratitude by inviting him for tea.
+Response: That sounds lovely, Pascal. Let's go have a nice cup of tea together.
+✅ Extracted Response: That sounds lovely, Pascal. Let's go have a nice cup of tea together.
+✅ Sending success response:
+📤 Payload: map[message:TalkTo: Pascal
+Message: That sounds lovely, Pascal. Let's go have a nice cup of tea together. route:MakeDecision status:success]
+Message received: NewMessage
+🔐 WebSocket login middleware triggered
+🔐 Token : ㄀㟦bGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDMyMzU3MTcsInVzZXJfaWQiOiIyNyJ9.30r1M05iRT-5Y6yLMknFlaRFEDeklu_VWfWhWXG766w
+❌ Invalid JWT: illegal base64 data at input byte 0
+🚨 Sending error response:
+📤 Payload: map[message:Invalid Token route:Connection status:error]
+Message received: TakeDecision
+🔐 WebSocket login middleware triggered
+🔐 Token : ㄀㟦bGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDMyMzU3MTcsInVzZXJfaWQiOiIyNyJ9.30r1M05iRT-5Y6yLMknFlaRFEDeklu_VWfWhWXG766w
+❌ Invalid JWT: illegal base64 data at input byte 0
+🚨 Sending error response:
+📤 Payload: map[message:Invalid Token route:Connection status:error]

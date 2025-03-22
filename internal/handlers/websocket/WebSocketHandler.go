@@ -45,6 +45,11 @@ var actions = []websocketModels.WebSocketDispatcher{
 		Handler:   RemoveHandlerWebSocket,
 		Protected: true,
 	},
+	{
+		Name:      "NewMessage",
+		Handler:   NewMessageHandlerWebsocket,
+		Protected: true,
+	},
 }
 
 func handleWebSocketMessage(conn *websocket.Conn, messageType int, message []byte) {

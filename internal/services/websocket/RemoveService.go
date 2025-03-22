@@ -1,27 +1,37 @@
 package websocketServices
 
 import (
+	"github.com/fatih/color"
+	"github.com/gorilla/websocket"
+
 	websocketModels "my-api/internal/models/websocket"
 	"my-api/internal/services"
+	"my-api/internal/types"
 	"my-api/pkg"
-
-	"github.com/gorilla/websocket"
 )
 
-func RemoveServiceWebSocket(conn *websocket.Conn, msg websocketModels.RemoveRequest, sendResponse func(*websocket.Conn, string, map[string]interface{}), sendError func(*websocket.Conn, string, map[string]interface{})) {
-	var initialRoute = "Remove"
+func RemoveServiceWebSocket(
+	conn *websocket.Conn,
+	msg websocketModels.RemoveRequest,
+	sendResponse types.SendResponseFunc,
+	sendError types.SendErrorFunc,
+) {
+	initialRoute := "Remove"
+
+	color.Cyan("🗑️  RemoveServiceWebSocket triggered")
 
 	UserId, err := pkg.GetUserIDFromJWT(msg.Token)
-
 	if err != nil {
+		color.Red("❌ Failed to extract user ID from token: %v", err)
 		sendResponse(conn, initialRoute, map[string]interface{}{
 			"message": "error during the process",
 		})
+		return
 	}
 
 	exist, err_ := services.IsExistById(UserId)
-
 	if err_ != nil {
+		color.Red("❌ Failed to check if user exists: %v", err_)
 		sendResponse(conn, initialRoute, map[string]interface{}{
 			"message": "failed",
 		})
@@ -29,6 +39,7 @@ func RemoveServiceWebSocket(conn *websocket.Conn, msg websocketModels.RemoveRequ
 	}
 
 	if !exist {
+		color.Yellow("⚠️ User ID %d does not exist", UserId)
 		sendResponse(conn, initialRoute, map[string]interface{}{
 			"message": "success",
 		})
@@ -36,14 +47,15 @@ func RemoveServiceWebSocket(conn *websocket.Conn, msg websocketModels.RemoveRequ
 	}
 
 	response, err_ := services.DropUser(UserId)
-
 	if err_ != nil || response == "" {
+		color.Red("❌ Failed to drop user ID %d: %v", UserId, err_)
 		sendResponse(conn, initialRoute, map[string]interface{}{
-			"message": "failed: droping BD",
+			"message": "failed: dropping DB",
 		})
 		return
 	}
 
+	color.Green("✅ User ID %d successfully removed", UserId)
 	sendResponse(conn, initialRoute, map[string]interface{}{
 		"message": "success",
 	})
