@@ -23,32 +23,32 @@ func NeedToFinish(msg string) bool {
 	return false
 }
 
-func TalkToWebSocket(token string, message string, interlocutor string) (string, error) {
+func TalkToWebSocket(token string, message string, interlocutor string) (string, error, bool) {
 	UserId, err := pkg.GetUserIDFromJWT(token)
 	if err != nil {
 		color.Red("❌ JWT parsing failed: %v", err)
-		return "error during the process", err
+		return "error during the process", err, false
 	}
 
 	_, err_ := services.IsExistById(UserId)
 	if err_ != nil {
 		color.Red("❌ User ID doesn't exist: %v", err_)
-		return "error during the process", err_
+		return "error during the process", err_, false
 	}
 
 	prompt, err_ := services.GetPromptByID(UserId)
 	if err_ != nil {
 		color.Red("❌ Failed to get prompt: %v", err_)
-		return "error during the process", err_
+		return "error during the process", err_, false
 	}
 
 	back, err := services.GptTalkToRequest(message, prompt, interlocutor)
 	if err != nil {
 		color.Red("❌ GPT TalkToRequest failed: %v", err)
-		return "error during the process", err
+		return "error during the process", err, false
 	}
 
-	color.Cyan("📥 Received from GPT: %s", back)
+	color.Cyan("📥 Received from GPT (%d): %s", len(back), back)
 
 	if NeedToFinish(back) {
 		color.HiMagenta("𝌦 After this, we need to finish : %s", back)
@@ -60,10 +60,10 @@ func TalkToWebSocket(token string, message string, interlocutor string) (string,
 	if len(match) > 1 {
 		response := match[1]
 		color.Green("✅ Extracted Response: %s", response)
-		return response, nil
+		return response, nil, NeedToFinish(back)
 	} else {
 		color.Yellow("⚠️ Response pattern not found in GPT output")
-		return "error during the process", fmt.Errorf("error during the process")
+		return "error during the process", fmt.Errorf("error during the process"), false
 	}
 }
 
@@ -94,7 +94,7 @@ func TalkToPreprocess(msg websocketModels.MakeDecisionRequest, entity string) (s
 
 	color.Cyan("💬 Compiled discussion:\n%s", result)
 
-	message, err := TalkToWebSocket(msg.Token, result, entity)
+	message, err, _ := TalkToWebSocket(msg.Token, result, entity) // return true si la discussion est fini
 	if err != nil {
 		color.Red("❌ TalkToWebSocket failed: %v", err)
 		return "error during the process", err

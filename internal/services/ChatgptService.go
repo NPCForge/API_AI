@@ -50,12 +50,25 @@ func GptTalkToRequest(message string, prompt string, interlocutor string) (strin
 		Messages: Messages,
 	}
 
+	// body := httpModels.LmStudioSimpleRequestBody{
+	// 	Model:       "llama-3.2-3b-instruct",
+	// 	Messages:    Messages,
+	// 	Temperature: 0.5,
+	// 	Max_tokens:  -1,
+	// 	Stream:      false,
+	// }
+
 	// Make the request to the OpenAI API
 	resp, err := GptClient.R().
 		SetHeader("Content-Type", "application/json").
 		SetHeader("Authorization", "Bearer "+config.GetEnvVariable("CHATGPT_TOKEN")).
 		SetBody(body).
 		Post("https://api.openai.com/v1/chat/completions")
+
+	// resp, err := GptClient.R().
+	// 	SetHeader("Content-Type", "application/json").
+	// 	SetBody(body).
+	// 	Post("http://localhost:1234/v1/chat/completions")
 
 	if err != nil {
 		return "", fmt.Errorf("error during the request: %w", err)
