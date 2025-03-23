@@ -67,23 +67,23 @@ func TalkToWebSocket(token string, message string, interlocutor string) (string,
 	}
 }
 
-func TalkToPreprocess(msg websocketModels.MakeDecisionRequest, entity string) (string, error) {
+func TalkToPreprocess(msg websocketModels.MakeDecisionRequest, entity string) (string, error, bool) {
 	from, err := pkg.GetUserIDFromJWT(msg.Token)
 	if err != nil {
 		color.Red("❌ JWT parsing failed in TalkToPreprocess: %v", err)
-		return "error during the process", err
+		return "error during the process", err, false
 	}
 
 	to, err := services.GetEntityByName(entity)
 	if err != nil {
 		color.Red("❌ Entity '%s' not found: %v", entity, err)
-		return "error during the process", err
+		return "error during the process", err, false
 	}
 
 	discussion, err := services.GetDiscussion(from, to)
 	if err != nil {
 		color.Red("❌ Failed to retrieve discussion: %v", err)
-		return "error during the process", err
+		return "error during the process", err, false
 	}
 
 	var sb strings.Builder
@@ -94,13 +94,13 @@ func TalkToPreprocess(msg websocketModels.MakeDecisionRequest, entity string) (s
 
 	color.Cyan("💬 Compiled discussion:\n%s", result)
 
-	message, err, _ := TalkToWebSocket(msg.Token, result, entity) // return true si la discussion est fini
+	message, err, finish := TalkToWebSocket(msg.Token, result, entity) // return true si la discussion est fini
 	if err != nil {
 		color.Red("❌ TalkToWebSocket failed: %v", err)
-		return "error during the process", err
+		return "error during the process", err, false
 	}
 
-	return message, nil
+	return message, nil, finish
 }
 
 func MakeDecisionWebSocket(
@@ -151,7 +151,7 @@ func MakeDecisionWebSocket(
 			entity := match[1]
 			color.Green("📡 TalkTo entity found: %s", entity)
 
-			message, err := TalkToPreprocess(msg, entity)
+			message, err, _ := TalkToPreprocess(msg, entity)
 			if err != nil {
 				color.Red("❌ Error during TalkToPreprocess: %v", err)
 				sendError(conn, initialRoute, map[string]interface{}{
