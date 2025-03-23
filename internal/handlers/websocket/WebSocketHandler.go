@@ -50,6 +50,11 @@ var actions = []websocketModels.WebSocketDispatcher{
 		Handler:   NewMessageHandlerWebsocket,
 		Protected: true,
 	},
+	{
+		Name:      "ResetGame",
+		Handler:   ResetGameWebsocket,
+		Protected: false,
+	},
 }
 
 func handleWebSocketMessage(conn *websocket.Conn, messageType int, message []byte) {
