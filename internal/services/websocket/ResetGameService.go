@@ -1,4 +1,4 @@
-﻿package websocketServices
+package websocketServices
 
 import (
 	"github.com/fatih/color"

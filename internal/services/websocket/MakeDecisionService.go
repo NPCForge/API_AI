@@ -2,6 +2,7 @@ package websocketServices
 
 import (
 	"fmt"
+	"my-api/internal/handlers"
 	"regexp"
 	"strings"
 
@@ -151,6 +152,13 @@ func MakeDecisionWebSocket(
 			})
 			return
 		}
+	}
+
+	if handlers.WS.IsBlocking {
+		sendError(conn, initialRoute, map[string]interface{}{
+			"message": "API currently blocked",
+		})
+		return
 	}
 
 	sendResponse(conn, initialRoute, map[string]interface{}{
