@@ -147,6 +147,12 @@ func MakeDecisionWebSocket(
 				})
 				return
 			}
+			if handlers.WS.IsBlocking {
+				sendError(conn, initialRoute, map[string]interface{}{
+					"message": "API currently blocked",
+				})
+				return
+			}
 			sendResponse(conn, initialRoute, map[string]interface{}{
 				"message": fmt.Sprintf("TalkTo: %s\nMessage: %s", entity, message),
 			})

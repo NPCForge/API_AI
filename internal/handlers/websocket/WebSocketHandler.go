@@ -69,17 +69,6 @@ func handleBlockingEvent(triggerConn *websocket.Conn) {
 	handlers.WS.BlockMutex.Lock()
 	handlers.WS.IsBlocking = true
 	handlers.WS.BlockMutex.Unlock()
-
-	//// Broadcast + close all conns except the one doing the reset
-	//handlers.WS.Mutex.Lock()
-	//for conn := range handlers.WS.Conns {
-	//	if conn != triggerConn {
-	//		utils.SendError(conn, "root", map[string]interface{}{
-	//			"message": "API temporarily unavailable. Please try again later.",
-	//		})
-	//	}
-	//}
-	//handlers.WS.Mutex.Unlock()
 }
 
 func handleWebSocketMessage(conn *websocket.Conn, messageType int, message []byte) {
