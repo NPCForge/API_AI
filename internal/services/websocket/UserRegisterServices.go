@@ -2,6 +2,7 @@ package websocketServices
 
 import (
 	"errors"
+	"my-api/internal/utils"
 	"strconv"
 
 	"github.com/fatih/color"
@@ -56,7 +57,7 @@ func RegisterServiceWebSocket(
 
 	stringId := strconv.FormatInt(id, 10)
 
-	pass, err := pkg.GenerateJWT(stringId)
+	pass, err := utils.GenerateJWT(stringId)
 	if err != nil {
 		color.Red("❌ Failed to generate JWT: %v", err)
 		sendError(conn, initialRoute, map[string]interface{}{

@@ -2,7 +2,7 @@ package config
 
 import (
 	"fmt"
-	"log"
+	. "my-api/pkg"
 	"os"
 
 	"github.com/joho/godotenv"
@@ -12,13 +12,13 @@ import (
 func GetEnvVariable(c string) string {
 	// Charge le fichier .env.local
 	if err := godotenv.Load(".env.local"); err != nil {
-		log.Fatal("Erreur de chargement du fichier .env.local")
+		DisplayContext("Erreur de chargement du fichier .env.local", Error, true)
 	}
 
 	// Récupère la variable d'environnement
 	variable := os.Getenv(c)
 	if variable == "" {
-		log.Fatal(fmt.Sprintf("%s non définie dans .env.local", c))
+		DisplayContext(fmt.Sprintf("%s non définie dans .env.local", c), Error, true)
 	}
 
 	return variable

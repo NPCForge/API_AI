@@ -11,7 +11,7 @@ import (
 	websocketModels "my-api/internal/models/websocket"
 	"my-api/internal/services"
 	"my-api/internal/types"
-	"my-api/pkg"
+	"my-api/internal/utils"
 )
 
 func NeedToFinish(msg string) bool {
@@ -24,7 +24,7 @@ func NeedToFinish(msg string) bool {
 }
 
 func TalkToWebSocket(token string, message string, interlocutor string) (string, error, bool) {
-	UserId, err := pkg.GetUserIDFromJWT(token)
+	UserId, err := utils.GetUserIDFromJWT(token)
 	if err != nil {
 		color.Red("❌ JWT parsing failed: %v", err)
 		return "error during the process", err, false
@@ -68,7 +68,7 @@ func TalkToWebSocket(token string, message string, interlocutor string) (string,
 }
 
 func TalkToPreprocess(msg websocketModels.MakeDecisionRequest, entity string) (string, error, bool) {
-	from, err := pkg.GetUserIDFromJWT(msg.Token)
+	from, err := utils.GetUserIDFromJWT(msg.Token)
 	if err != nil {
 		color.Red("❌ JWT parsing failed in TalkToPreprocess: %v", err)
 		return "error during the process", err, false
@@ -111,7 +111,7 @@ func MakeDecisionWebSocket(
 ) {
 	initialRoute := "MakeDecision"
 
-	receiver, err := pkg.GetUserIDFromJWT(msg.Token)
+	receiver, err := utils.GetUserIDFromJWT(msg.Token)
 	if err != nil {
 		color.Red("❌ JWT parsing failed: %v", err)
 		sendError(conn, initialRoute, map[string]interface{}{

@@ -1,8 +1,10 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"my-api/config"
+	"my-api/pkg"
 	"net/http"
 
 	httpHandlers "my-api/internal/handlers/http"
@@ -39,8 +41,8 @@ func main() {
 	protected.HandleFunc("/MakeDecision", httpHandlers.MakeDecisionHandler).Methods("POST")
 
 	port := ":3000"
-	log.Printf("Serveur démarré sur http://localhost%s\n", port)
+	pkg.DisplayContext(fmt.Sprintf("Serveur démarré sur http://localhost%s", port), pkg.Update)
 	if err := http.ListenAndServe(port, r); err != nil {
-		log.Fatalf("Erreur lors du lancement du serveur : %v", err)
+		pkg.DisplayContext("Erreur lors du lancement du serveur", pkg.Error, err, true)
 	}
 }

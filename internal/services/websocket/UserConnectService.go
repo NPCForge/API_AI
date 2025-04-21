@@ -9,6 +9,7 @@ import (
 	websocketModels "my-api/internal/models/websocket"
 	"my-api/internal/services"
 	"my-api/internal/types"
+	"my-api/internal/utils"
 	"my-api/pkg"
 )
 
@@ -56,7 +57,7 @@ func UserConnectWebSocket(
 	}
 	stringId := strconv.Itoa(id)
 
-	pass, err := pkg.GenerateJWT(stringId)
+	pass, err := utils.GenerateJWT(stringId)
 	if err != nil {
 		color.Red("❌ Failed to generate JWT: %v", err)
 		sendError(conn, initialRoute, map[string]interface{}{

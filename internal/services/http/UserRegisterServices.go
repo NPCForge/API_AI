@@ -4,6 +4,7 @@ import (
 	"errors"
 	httpModels "my-api/internal/models/http"
 	"my-api/internal/services"
+	"my-api/internal/utils"
 	"my-api/pkg"
 	"strconv"
 )
@@ -36,7 +37,7 @@ func RegisterService(entity httpModels.RegisterRequest) (string, error) {
 		return "", errors.New("error saving in database")
 	}
 
-	pass, err := pkg.GenerateJWT(strconv.FormatInt(id, 10))
+	pass, err := utils.GenerateJWT(strconv.FormatInt(id, 10))
 
 	if err != nil {
 		return "", errors.New("error generating JWT")

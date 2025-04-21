@@ -6,6 +6,7 @@ import (
 
 	websocketModels "my-api/internal/models/websocket"
 	"my-api/internal/types"
+	"my-api/internal/utils"
 	"my-api/pkg"
 )
 
@@ -19,7 +20,7 @@ func DisconnectWebSocket(
 
 	color.Cyan("🔌 Attempting to disconnect...")
 
-	result, err := pkg.VerifyJWT(msg.Token)
+	result, err := utils.VerifyJWT(msg.Token)
 	if err != nil {
 		color.Red("❌ JWT verification failed: %v", err)
 		sendError(conn, initialRoute, map[string]interface{}{

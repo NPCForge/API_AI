@@ -1,9 +1,10 @@
-package pkg
+package utils
 
 import (
 	"fmt"
 	"my-api/config"
 	"my-api/internal/models"
+	"my-api/pkg"
 	"strconv"
 	"time"
 
@@ -43,7 +44,7 @@ func VerifyJWT(tokenString string) (*models.CustomClaims, error) {
 	}
 
 	// Check if token is stored in connected tokens
-	_, isStored := GetUserID(tokenString)
+	_, isStored := pkg.GetUserID(tokenString)
 
 	if !isStored {
 		return nil, fmt.Errorf("invalid token")

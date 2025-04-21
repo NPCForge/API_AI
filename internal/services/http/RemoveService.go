@@ -3,12 +3,12 @@ package httpServices
 import (
 	"errors"
 	"my-api/internal/services"
-	"my-api/pkg"
+	"my-api/internal/utils"
 )
 
 func Remove(token string) (string, error) {
 
-	UserId, err := pkg.GetUserIDFromJWT(token)
+	UserId, err := utils.GetUserIDFromJWT(token)
 
 	if err != nil {
 		return "failed", errors.New("error getting userid")

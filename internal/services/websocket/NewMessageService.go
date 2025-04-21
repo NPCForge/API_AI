@@ -7,7 +7,7 @@ import (
 	websocketModels "my-api/internal/models/websocket"
 	"my-api/internal/services"
 	"my-api/internal/types"
-	"my-api/pkg"
+	"my-api/internal/utils"
 )
 
 func NewMessageWebSocket(
@@ -20,7 +20,7 @@ func NewMessageWebSocket(
 
 	color.Cyan("✉️  Handling new message from: %s", msg.Sender)
 
-	receiverId, err := pkg.GetUserIDFromJWT(msg.Token)
+	receiverId, err := utils.GetUserIDFromJWT(msg.Token)
 	if err != nil {
 		color.Red("❌ Failed to extract receiver ID from JWT: %v", err)
 		sendError(conn, initialRoute, map[string]interface{}{

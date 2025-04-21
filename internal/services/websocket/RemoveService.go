@@ -7,7 +7,7 @@ import (
 	websocketModels "my-api/internal/models/websocket"
 	"my-api/internal/services"
 	"my-api/internal/types"
-	"my-api/pkg"
+	"my-api/internal/utils"
 )
 
 func RemoveServiceWebSocket(
@@ -20,7 +20,7 @@ func RemoveServiceWebSocket(
 
 	color.Cyan("🗑️  RemoveServiceWebSocket triggered")
 
-	UserId, err := pkg.GetUserIDFromJWT(msg.Token)
+	UserId, err := utils.GetUserIDFromJWT(msg.Token)
 	if err != nil {
 		color.Red("❌ Failed to extract user ID from token: %v", err)
 		sendResponse(conn, initialRoute, map[string]interface{}{

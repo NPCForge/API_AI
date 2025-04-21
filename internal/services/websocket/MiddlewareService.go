@@ -8,7 +8,6 @@ import (
 
 	"my-api/internal/types"
 	"my-api/internal/utils"
-	"my-api/pkg"
 )
 
 func LoginMiddlewareWebSocket(
@@ -45,7 +44,7 @@ func LoginMiddlewareWebSocket(
 
 	color.Yellow("🔐 Token : " + msg.Token + "\n")
 
-	_, err = pkg.VerifyJWT(msg.Token)
+	_, err = utils.VerifyJWT(msg.Token)
 	if err != nil {
 		color.Red("❌ Invalid JWT: %v", err)
 		utils.SendError(conn, initialRoute, map[string]interface{}{
