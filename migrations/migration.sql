@@ -1,8 +1,8 @@
 CREATE TABLE IF NOT EXISTS users (
     id SERIAL PRIMARY KEY,
-    name VARCHAR(255) NOT NULL,
-    checksum VARCHAR(1080) NOT NULL,
+    name VARCHAR(255) NOT NULL UNIQUE,
     permission INT DEFAULT 0,
+    password_hash VARCHAR(1080) NOT NULL,
     created DATE DEFAULT CURRENT_DATE
 );
 

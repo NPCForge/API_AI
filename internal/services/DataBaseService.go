@@ -3,10 +3,12 @@ package services
 import (
 	"database/sql"
 	"fmt"
-	"github.com/lib/pq"
 	"my-api/config"
 	httpModels "my-api/internal/models/http"
 	websocketModels "my-api/internal/models/websocket"
+	"my-api/pkg"
+
+	"github.com/lib/pq"
 )
 
 // GetIDFromDB récupère l'ID correspondant à un checksum donné
@@ -30,7 +32,7 @@ func GetIDFromDB(checksum string) (int, error) {
 func DropAllUser() (int64, error) {
 	db := config.GetDB()
 
-	query := `DELETE FROM entity`
+	query := `DELETE FROM users`
 	result, err := db.Exec(query)
 	if err != nil {
 		return 0, fmt.Errorf("erreur lors de la suppression : %w", err)
@@ -339,6 +341,30 @@ func RegisterWebsocket(checksum string, entity websocketModels.RegisterRequest) 
 	err := db.QueryRow(query, entity.Name, checksum, entity.Prompt).Scan(&id)
 	if err != nil {
 		return 0, fmt.Errorf("error while registering entity : %w", err)
+	}
+
+	return id, nil
+}
+
+func RegisterRefacto(password string, identifier string) (int, error) {
+	db := config.GetDB()
+
+	// Hasher le mot de passe
+	pass, err := pkg.HashPassword(password)
+	if err != nil {
+		return -1, fmt.Errorf("error hashing password: %w", err)
+	}
+
+	query := `
+		INSERT INTO users (name, password_hash, created)
+		VALUES ($1, $2, CURRENT_DATE)
+		RETURNING id
+	`
+
+	var id int
+	err = db.QueryRow(query, identifier, pass).Scan(&id)
+	if err != nil {
+		return -1, fmt.Errorf("error while registering entity: %w", err)
 	}
 
 	return id, nil

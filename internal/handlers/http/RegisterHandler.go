@@ -5,6 +5,7 @@ import (
 	"my-api/config"
 	httpModels "my-api/internal/models/http"
 	service "my-api/internal/services/merged"
+	"my-api/pkg"
 	"net/http"
 )
 
@@ -33,8 +34,8 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if req.Password != "" && req.Identifiant != "" {
-		private, err := service.RegisterService(req.Identifiant, req.Password)
+	if req.Password != "" && req.Identifier != "" {
+		private, err := service.RegisterService(req.Password, req.Identifier)
 
 		if err != nil {
 			http.Error(w, err.Error(), 500)
@@ -43,27 +44,16 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 
 		res.Private = private
 		res.Status = 201
+		res.Message = "User created"
+	} else {
+		res.Private = "null"
+		res.Status = 204
+		res.Message = "Password or Identifiant is not given"
 	}
 
-	// private, err := httpServices.RegisterService(req)
-
-	// Check if the token was successfully created
-	// if err != nil {
-	// 	http.Error(w, "Internal Server Error", 500)
-	// 	return
-	// }
-
-	// // Create the response
-	// res := httpModels.RegisterResponse{
-	// 	Message: "Connection successful",
-	// 	Status:  200,
-	// 	Private: private,
-	// }
-
-	// // Set the Content-Type header to application/json and send the JSON response
-	// w.Header().Set("Content-Type", "application/json")
-	// w.WriteHeader(http.StatusOK)
-	// if err := json.NewEncoder(w).Encode(res); err != nil {
-	// 	log.Printf("Error while sending JSON response: %v", err)
-	// }
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	if err := json.NewEncoder(w).Encode(res); err != nil {
+		pkg.DisplayContext("Error while sending JSON response", pkg.Error, err)
+	}
 }
