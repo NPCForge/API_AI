@@ -1,6 +1,7 @@
 *.env.local
 .DS_Store
 .idea
+.venv
 db_data
 tmp/
 logfile

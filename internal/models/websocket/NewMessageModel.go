@@ -6,8 +6,9 @@ type NewMessageResponse struct {
 }
 
 type NewMessageRequest struct {
-	Action  string `json:"action"`
-	Sender  string `json:"sender"`
-	Message string `json:"message"`
-	Token   string `json:"token"`
+	Action    string   `json:"action"`
+	Sender    string   `json:"sender"`
+	Receivers []string `json:"receivers"`
+	Message   string   `json:"message"`
+	Token     string   `json:"token"`
 }

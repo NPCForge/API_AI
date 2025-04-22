@@ -67,34 +67,48 @@ func TalkToWebSocket(token string, message string, interlocutor string) (string,
 	}
 }
 
-func TalkToPreprocess(msg websocketModels.MakeDecisionRequest, entity string) (string, error, bool) {
+func TalkToPreprocess(msg websocketModels.MakeDecisionRequest, entity_names []string) (string, error, bool) {
 	from, err := utils.GetUserIDFromJWT(msg.Token)
+
 	if err != nil {
 		color.Red("❌ JWT parsing failed in TalkToPreprocess: %v", err)
-		return "error during the process", err, false
+		return "Error getting user ID", err, false
 	}
 
-	to, err := services.GetEntityByName(entity)
-	if err != nil {
-		color.Red("❌ Entity '%s' not found: %v", entity, err)
-		return "error during the process", err, false
+	var allDiscussions string
+
+	for _, name := range entity_names {
+		to, err := services.GetEntityByName(name)
+
+		if err != nil {
+			color.Red("❌ Entity '%s' not found: %v", to, err)
+			return "error during the process", err, false
+		}
+
+		discussion, err := services.GetDiscussion(from, to)
+
+		if err != nil {
+			color.Red("❌ Failed to retrieve discussion: %v", err)
+			return "error during the process", err, false
+		}
+
+		var sb strings.Builder
+
+		for _, msg := range discussion {
+			sb.WriteString(fmt.Sprintf("[%s -> %s: %s], ",
+				msg.SenderName, msg.ReceiverNames, msg.Message))
+		}
+
+		allDiscussions += sb.String()
+		allDiscussions += "\n"
 	}
 
-	discussion, err := services.GetDiscussion(from, to)
-	if err != nil {
-		color.Red("❌ Failed to retrieve discussion: %v", err)
-		return "error during the process", err, false
-	}
+	color.Cyan("💬 Compiled discussion:\n%s", allDiscussions)
 
-	var sb strings.Builder
-	for _, msg := range discussion {
-		sb.WriteString(fmt.Sprintf("%s -> %s: %s\n", msg.SenderName, msg.ReceiverName, msg.Message))
-	}
-	result := sb.String()
+	namesString := "[" + strings.Join(entity_names, ", ") + "]"
 
-	color.Cyan("💬 Compiled discussion:\n%s", result)
+	message, err, finish := TalkToWebSocket(msg.Token, allDiscussions, namesString)
 
-	message, err, finish := TalkToWebSocket(msg.Token, result, entity) // return true si la discussion est fini
 	if err != nil {
 		color.Red("❌ TalkToWebSocket failed: %v", err)
 		return "error during the process", err, false
@@ -109,9 +123,9 @@ func MakeDecisionWebSocket(
 	sendResponse types.SendResponseFunc,
 	sendError types.SendErrorFunc,
 ) {
-	initialRoute := "MakeDecision"
-
+	var initialRoute = "MakeDecision"
 	receiver, err := utils.GetUserIDFromJWT(msg.Token)
+
 	if err != nil {
 		color.Red("❌ JWT parsing failed: %v", err)
 		sendError(conn, initialRoute, map[string]interface{}{
@@ -119,13 +133,14 @@ func MakeDecisionWebSocket(
 		})
 		return
 	}
+
 	color.Green("🧾 Receiver from JWT: %v", receiver)
 
 	newMessages, _ := services.GetNewMessages(receiver)
 
 	var formattedMessages []string
 	for _, msg := range newMessages {
-		formattedMessages = append(formattedMessages, fmt.Sprintf("[%s -> %s: %s]", msg.SenderName, msg.ReceiverName, msg.Message))
+		formattedMessages = append(formattedMessages, fmt.Sprintf("[%s -> %s: \"%s\"]", msg.SenderName, msg.ReceiverNames, msg.Message))
 	}
 
 	result := "New Messages: {" + strings.Join(formattedMessages, ", ") + "}"
@@ -144,29 +159,49 @@ func MakeDecisionWebSocket(
 	}
 
 	if strings.Contains(back, "TalkTo:") {
-		re := regexp.MustCompile(`(?m)^TalkTo:\s*(.+)`)
-		match := re.FindStringSubmatch(back)
 
-		if len(match) > 1 {
-			entity := match[1]
-			color.Green("📡 TalkTo entity found: %s", entity)
+		re := regexp.MustCompile(`\[(.*?)\]`)
+		matches := re.FindStringSubmatch(back)
 
-			message, err, _ := TalkToPreprocess(msg, entity)
+		if len(matches) > 1 {
+			names := strings.Split(matches[1], ", ")
+			namesString := "[" + strings.Join(names, ", ") + "]"
+
+			message, err, _ := TalkToPreprocess(msg, names)
+
 			if err != nil {
 				color.Red("❌ Error during TalkToPreprocess: %v", err)
 				sendError(conn, initialRoute, map[string]interface{}{
 					"message": "Error while calling MakeDecision service",
 				})
 				return
+			} else {
+				sendResponse(conn, initialRoute, map[string]interface{}{
+					"message": "TalkTo: " + namesString + "\nMessage: " + message,
+				})
+				return
 			}
-			sendResponse(conn, initialRoute, map[string]interface{}{
-				"message": fmt.Sprintf("TalkTo: %s\nMessage: %s", entity, message),
-			})
-			return
 		}
-	}
 
-	sendResponse(conn, initialRoute, map[string]interface{}{
-		"message": back,
-	})
+		//match := re.FindStringSubmatch(back)
+		//
+		//if len(match) > 1 {
+		//	entity := match[1]
+		//
+		//	message, err := TalkToPreprocess(msg, entity)
+		//	if err != nil {
+		//		sendError(conn, initialRoute, map[string]interface{}{
+		//			"message": "Error while calling MakeDecision service",
+		//		})
+		//		return
+		//	} else {
+		//		sendResponse(conn, initialRoute, map[string]interface{}{
+		//			"message": "TalkTo: " + entity + "\nMessage: " + message,
+		//		})
+		//		return
+		//	}
+		//}
+	} else {
+		println("[MakeDecisionWebSocket]: Unable to find TalkTo")
+	}
 }

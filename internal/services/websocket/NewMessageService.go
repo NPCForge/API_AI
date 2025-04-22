@@ -7,7 +7,7 @@ import (
 	websocketModels "my-api/internal/models/websocket"
 	"my-api/internal/services"
 	"my-api/internal/types"
-	"my-api/internal/utils"
+	"strconv"
 )
 
 func NewMessageWebSocket(
@@ -20,15 +20,6 @@ func NewMessageWebSocket(
 
 	color.Cyan("✉️  Handling new message from: %s", msg.Sender)
 
-	receiverId, err := utils.GetUserIDFromJWT(msg.Token)
-	if err != nil {
-		color.Red("❌ Failed to extract receiver ID from JWT: %v", err)
-		sendError(conn, initialRoute, map[string]interface{}{
-			"message": "Invalid token",
-		})
-		return
-	}
-
 	senderId, err := services.GetIDFromDB(msg.Sender)
 	if err != nil {
 		color.Red("❌ Failed to get sender ID: %v", err)
@@ -38,18 +29,36 @@ func NewMessageWebSocket(
 		return
 	}
 
-	_, err = services.NewMessage(senderId, receiverId, msg.Message)
-	if err != nil {
-		color.Red("❌ Error while creating new message: %v", err)
-		sendError(conn, initialRoute, map[string]interface{}{
-			"message": "Error in creating message",
-		})
-		return
+	for _, receiver := range msg.Receivers {
+		receiverId, err := services.GetEntityByName(receiver)
+		if err != nil {
+			color.Red("❌ Error while getting IDs: %v", err)
+			sendError(conn, initialRoute, map[string]interface{}{
+				"message": "Error in getting IDs",
+			})
+			return
+		}
+
+		receiverIntId, err := strconv.Atoi(receiverId)
+
+		if err != nil {
+			color.Red("❌ Error while creating new message: %v", err)
+			sendError(conn, initialRoute, map[string]interface{}{
+				"message": "Error in creating message",
+			})
+			return
+		}
+
+		_, err = services.NewMessage(senderId, receiverIntId, msg.Message)
+
+		if err != nil {
+			sendError(conn, initialRoute, map[string]interface{}{
+				"message": "Error in creating message",
+			})
+			return
+		}
+		color.Green("✅ Message successfully saved from %d to %d", senderId, receiverId)
 	}
 
-	color.Green("✅ Message successfully saved from %d to %d", senderId, receiverId)
-
-	sendResponse(conn, initialRoute, map[string]interface{}{
-		"message": "Message sent successfully",
-	})
+	return
 }
