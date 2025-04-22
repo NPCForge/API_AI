@@ -10,7 +10,11 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-func RegisterHandlerWebsocket(conn *websocket.Conn, message []byte, sendResponse func(*websocket.Conn, string, map[string]interface{}), sendError func(*websocket.Conn, string, map[string]interface{})) {
+func RegisterHandlerWebsocket(
+	conn *websocket.Conn, message []byte,
+	sendResponse func(*websocket.Conn, string, map[string]interface{}),
+	sendError func(*websocket.Conn, string, map[string]interface{}),
+) {
 	log.Println("RegisterHandlerWebsocket")
 	var msg websocketModels.RegisterRequest
 	var initialRoute = "Register"

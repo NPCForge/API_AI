@@ -2,13 +2,17 @@ package websocketHandlers
 
 import (
 	"encoding/json"
-	"my-api/internal/models/websocket"
-	"my-api/internal/services/websocket"
+	websocketModels "my-api/internal/models/websocket"
+	websocketServices "my-api/internal/services/websocket"
 
 	"github.com/gorilla/websocket"
 )
 
-func DisconnectHandlerWebsocket(conn *websocket.Conn, message []byte, sendResponse func(*websocket.Conn, string, map[string]interface{}), sendError func(*websocket.Conn, string, map[string]interface{})) {
+func DisconnectHandlerWebsocket(
+	conn *websocket.Conn, message []byte,
+	sendResponse func(*websocket.Conn, string, map[string]interface{}),
+	sendError func(*websocket.Conn, string, map[string]interface{}),
+) {
 	var msg websocketModels.DisconnectRequest
 	var initialRoute = "Disconnect"
 

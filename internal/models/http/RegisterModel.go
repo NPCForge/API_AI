@@ -1,5 +1,11 @@
 package httpModels
 
+type RegisterRequestRefacto struct {
+	Token       string `json:"API_KEY"`
+	Identifiant string `json:"identifiant"`
+	Password    string `json:"password"`
+}
+
 // RegisterRequest represents the structure of the expected data in the request
 type RegisterRequest struct {
 	Token    string `json:"API_KEY"`

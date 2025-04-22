@@ -8,7 +8,11 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-func MakeDecisionHandlerWebSocket(conn *websocket.Conn, message []byte, sendResponse func(*websocket.Conn, string, map[string]interface{}), sendError func(*websocket.Conn, string, map[string]interface{})) {
+func MakeDecisionHandlerWebSocket(
+	conn *websocket.Conn, message []byte,
+	sendResponse func(*websocket.Conn, string, map[string]interface{}),
+	sendError func(*websocket.Conn, string, map[string]interface{}),
+) {
 	var msg websocketModels.MakeDecisionRequest
 	var initialRoute = "MakeDecision"
 
