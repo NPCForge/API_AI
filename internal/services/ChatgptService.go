@@ -30,7 +30,7 @@ func GptTalkToRequest(message string, prompt string, interlocutor string) (strin
 
 	systemPrompt += "\n" + prompt
 
-	userPrompt := "Interlocutor: " + interlocutor + "\nDiscussion: " + message
+	userPrompt := "Interlocutor: " + interlocutor + "\nDiscussion: { " + message + " }"
 
 	// Prepare messages with a system prompt
 	var Messages = []httpModels.ChatGptSimpleRequestBodyMessage{
@@ -43,6 +43,14 @@ func GptTalkToRequest(message string, prompt string, interlocutor string) (strin
 			Content: userPrompt,
 		},
 	}
+
+	yellow := "\033[33m"
+	reset := "\033[0m"
+
+	println("GPTTalkToRequest: \n",
+		string(yellow), "userPrompt = {\n", userPrompt, "\n}\n",
+		string(reset),
+	)
 
 	// Create the request body
 	body := httpModels.ChatGptSimpleRequestBody{
@@ -85,7 +93,7 @@ func GptTalkToRequest(message string, prompt string, interlocutor string) (strin
 		return response.Choices[0].Message.Content, nil
 	}
 
-	return "", fmt.Errorf("no response available")
+	return "", fmt.Errorf("[GptTalkToRequest]: no response available")
 }
 
 func GptSimpleRequest(message string) (string, error) {
@@ -108,6 +116,14 @@ func GptSimpleRequest(message string) (string, error) {
 			Content: message,
 		},
 	}
+
+	yellow := "\033[33m"
+	reset := "\033[0m"
+
+	println("GPTTalkToRequest: \n",
+		string(yellow), "userPrompt = {\n", message, "\n}\n",
+		string(reset),
+	)
 
 	// Create the request body
 	body := httpModels.ChatGptSimpleRequestBody{
@@ -137,5 +153,5 @@ func GptSimpleRequest(message string) (string, error) {
 		return response.Choices[0].Message.Content, nil
 	}
 
-	return "", fmt.Errorf("no response available")
+	return "", fmt.Errorf("[GptSimpleRequest]: no response available")
 }

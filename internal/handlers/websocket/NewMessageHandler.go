@@ -20,7 +20,7 @@ func NewMessageHandlerWebsocket(conn *websocket.Conn, message []byte, sendRespon
 		return
 	}
 
-	if msg.Message == "" || msg.Sender == "" {
+	if msg.Message == "" || msg.Sender == "" || len(msg.Receivers) == 0 {
 		sendError(conn, initialRoute, map[string]interface{}{
 			"message": "Missing required fields in the JSON message",
 		})
