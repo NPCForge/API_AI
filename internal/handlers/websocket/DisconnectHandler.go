@@ -2,10 +2,9 @@ package websocketHandlers
 
 import (
 	"encoding/json"
-	websocketModels "my-api/internal/models/websocket"
-	websocketServices "my-api/internal/services/websocket"
-
 	"github.com/gorilla/websocket"
+	websocketModels "my-api/internal/models/websocket"
+	service "my-api/internal/services/merged"
 )
 
 func DisconnectHandlerWebsocket(
@@ -24,5 +23,23 @@ func DisconnectHandlerWebsocket(
 		return
 	}
 
-	websocketServices.DisconnectWebSocket(conn, msg, sendResponse, sendError)
+	if msg.Action == "" || msg.Token == "" {
+		sendError(conn, initialRoute, map[string]interface{}{
+			"message": "Missing required fields in the JSON message",
+		})
+		return
+	}
+
+	err = service.DisconnectService(msg.Token)
+
+	if err != nil {
+		sendError(conn, initialRoute, map[string]interface{}{
+			"message": "Error while disconnecting",
+		})
+		return
+	}
+
+	sendResponse(conn, initialRoute, map[string]interface{}{
+		"message": "Successfully disconnected",
+	})
 }

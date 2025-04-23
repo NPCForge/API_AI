@@ -8,19 +8,16 @@ import (
 	"net/http"
 )
 
-// ConnectHandler gère la requête pour la route Connect
 func ConnectHandler(w http.ResponseWriter, r *http.Request) {
-	// Vérifie que la méthode est POST
 	if r.Method != http.MethodPost {
-		http.Error(w, "Méthode non autorisée", http.StatusMethodNotAllowed)
+		http.Error(w, "Unauthorized method", http.StatusMethodNotAllowed)
 		return
 	}
 
-	// Décode le corps de la requête
 	var req httpModels.ConnectRequestRefacto
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
-		http.Error(w, "Erreur de décodage du JSON", http.StatusBadRequest)
+		http.Error(w, "Bad Request", http.StatusBadRequest)
 		return
 	}
 
@@ -35,16 +32,15 @@ func ConnectHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	} else {
 		res = httpModels.ConnectResponse{
-			Message:  "Connexion réussie",
+			Message:  "Successfully connected",
 			Status:   200,
 			TmpToken: pass,
 		}
 	}
 
-	// Définit l'en-tête Content-Type à application/json et envoie la réponse JSON
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(res.Status)
 	if err := json.NewEncoder(w).Encode(res); err != nil {
-		log.Printf("Erreur lors de l'envoi de la réponse JSON : %v", err)
+		log.Printf("Error while sending json : %v", err)
 	}
 }

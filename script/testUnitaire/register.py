@@ -18,7 +18,11 @@ PASSWORD = "Password"
 WS_IDENTIFIER = "User_01_test_ws"
 HTTP_IDENTIFIER = "User_01_test_http"
 
-async def register_websocket():
+# Réinitialise le fichier token.json
+with open(token_file, "w") as f:
+    json.dump({}, f)
+
+async def websocket():
     try:
         async with websockets.connect(uri) as websocket:
             message = {
@@ -37,18 +41,25 @@ async def register_websocket():
 
             token = response_data.get("token")
             if token:
+                # Lire les tokens existants
+                try:
+                    with open(token_file, "r") as f:
+                        tokens = json.load(f)
+                except (FileNotFoundError, json.JSONDecodeError):
+                    tokens = {}
+
+                tokens["ws"] = token
+
                 with open(token_file, "w") as f:
-                    json.dump({"token": token}, f)
+                    json.dump(tokens, f)
                 print("✅ WS - Token sauvegardé.")
                 return True
-            else:
-                print("❌ WS - Pas de token.")
-                return False
+
     except Exception as e:
         print(f"❌ WS - Erreur : {e}")
         return False
 
-def register_http():
+def http():
     try:
         url = "http://localhost:3000/Register"
         payload = json.dumps({
@@ -63,14 +74,37 @@ def register_http():
         print(f"\n✅ HTTP - Code : {response.status_code}")
         print(f"✅ HTTP - Réponse : {response.text}")
 
-        return response.status_code == 200
+        response_data = json.loads(response.text)
+
+        token = response_data.get("token")
+
+        if token:
+            # Lire les tokens existants
+            try:
+                with open(token_file, "r") as f:
+                    tokens = json.load(f)
+            except (FileNotFoundError, json.JSONDecodeError):
+                tokens = {}
+
+            tokens["http"] = token
+
+            with open(token_file, "w") as f:
+                json.dump(tokens, f)
+            print("✅ HTTP - Token sauvegardé.")
+            return True
     except Exception as e:
         print(f"❌ HTTP - Erreur : {e}")
         return False
 
 async def main():
-    ws_success = await register_websocket()
-    http_success = register_http()
+    ws_success = await websocket()
+    http_success = http()
+
+    if not ws_success:
+        print("\n❌ WS.")
+    if not http_success:
+        print("\n❌ HTTP.")
+
     return ws_success and http_success
 
 if __name__ == "__main__":

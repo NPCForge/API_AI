@@ -378,7 +378,6 @@ func RegisterRefacto(password string, identifier string) (int, error) {
 	if err != nil {
 		return -1, fmt.Errorf("error hashing password: %w", err)
 	}
-	println(password + ": " + pass)
 
 	query := `
 		INSERT INTO users (name, password_hash, created)

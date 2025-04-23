@@ -6,9 +6,6 @@ import (
 	"my-api/internal/utils"
 	"my-api/pkg"
 	"strconv"
-	//"my-api/internal/utils"
-	//"my-api/pkg"
-	//"strconv"
 )
 
 func ConnectService(password string, identifier string) (string, error) {

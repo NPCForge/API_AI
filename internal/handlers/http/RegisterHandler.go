@@ -18,19 +18,17 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Decode the request body
 	err := json.NewDecoder(r.Body).Decode(&req)
 
 	if err != nil {
-		http.Error(w, "JSON decoding error", http.StatusBadRequest)
+		http.Error(w, "Bad Request", http.StatusBadRequest)
 		return
 	}
 
 	apiKey := config.GetEnvVariable("API_KEY_REGISTER")
 
-	// Check if the token is valid
 	if req.Token != apiKey {
-		http.Error(w, "Invalid token", http.StatusUnauthorized)
+		http.Error(w, "Unauthorized method", http.StatusUnauthorized)
 		return
 	}
 
@@ -38,7 +36,7 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 		private, err := service.RegisterService(req.Password, req.Identifier)
 
 		if err != nil {
-			http.Error(w, err.Error(), 500)
+			http.Error(w, "Server Error", 500)
 			return
 		}
 
