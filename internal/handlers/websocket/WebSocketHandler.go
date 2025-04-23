@@ -28,7 +28,7 @@ var actions = []websocketModels.WebSocketDispatcher{
 		IsBlocking: false,
 	},
 	{
-		Name:       "Connection",
+		Name:       "Connect",
 		Handler:    ConnectHandlerWebSocket,
 		Protected:  false,
 		IsBlocking: false,

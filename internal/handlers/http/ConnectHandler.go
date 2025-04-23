@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"log"
 	httpModels "my-api/internal/models/http"
-	httpServices "my-api/internal/services/http"
+	service "my-api/internal/services/merged"
 	"net/http"
 )
 
@@ -17,14 +17,14 @@ func ConnectHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Décode le corps de la requête
-	var req httpModels.ConnectRequest
+	var req httpModels.ConnectRequestRefacto
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
 		http.Error(w, "Erreur de décodage du JSON", http.StatusBadRequest)
 		return
 	}
 
-	pass, err := httpServices.UserConnect(req)
+	pass, err := service.ConnectService(req.Password, req.Identifier)
 	var res httpModels.ConnectResponse
 
 	if err != nil {
@@ -43,7 +43,7 @@ func ConnectHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Définit l'en-tête Content-Type à application/json et envoie la réponse JSON
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
+	w.WriteHeader(res.Status)
 	if err := json.NewEncoder(w).Encode(res); err != nil {
 		log.Printf("Erreur lors de l'envoi de la réponse JSON : %v", err)
 	}

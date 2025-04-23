@@ -1,4 +1,4 @@
-import asyncio
+﻿import asyncio
 import json
 import websockets
 import nest_asyncio
@@ -11,7 +11,6 @@ uri = "ws://localhost:3000/ws"
 token_file = "token.json"
 
 # Données communes
-API_KEY = "VDCAjPZ8jhDmXfsSufW2oZyU8SFZi48dRhA8zyKUjSRU3T1aBZ7E8FFIjdEM2X1d"
 PASSWORD = "Password"
 
 # Identifiants séparés pour différencier les requêtes
@@ -22,8 +21,7 @@ async def register_websocket():
     try:
         async with websockets.connect(uri) as websocket:
             message = {
-                "action": "Register",
-                "API_KEY": API_KEY,
+                "action": "Connect",
                 "identifier": WS_IDENTIFIER,
                 "password": PASSWORD
             }
@@ -50,9 +48,8 @@ async def register_websocket():
 
 def register_http():
     try:
-        url = "http://localhost:3000/Register"
+        url = "http://localhost:3000/Connect"
         payload = json.dumps({
-            "API_KEY": API_KEY,
             "Identifier": HTTP_IDENTIFIER,
             "Password": PASSWORD
         })

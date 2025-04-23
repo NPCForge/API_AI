@@ -48,11 +48,11 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 	} else {
 		res.Private = "null"
 		res.Status = 204
-		res.Message = "Password or Identifiant is not given"
+		res.Message = "Password or Identifier is not given"
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
+	w.WriteHeader(res.Status)
 	if err := json.NewEncoder(w).Encode(res); err != nil {
 		pkg.DisplayContext("Error while sending JSON response", pkg.Error, err)
 	}

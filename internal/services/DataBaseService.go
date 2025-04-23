@@ -374,9 +374,11 @@ func RegisterRefacto(password string, identifier string) (int, error) {
 
 	// Hasher le mot de passe
 	pass, err := pkg.HashPassword(password)
+
 	if err != nil {
 		return -1, fmt.Errorf("error hashing password: %w", err)
 	}
+	println(password + ": " + pass)
 
 	query := `
 		INSERT INTO users (name, password_hash, created)
@@ -387,8 +389,28 @@ func RegisterRefacto(password string, identifier string) (int, error) {
 	var id int
 	err = db.QueryRow(query, identifier, pass).Scan(&id)
 	if err != nil {
-		return -1, fmt.Errorf("error while registering entity: %w", err)
+		return -1, fmt.Errorf("error while registering user: %w", err)
 	}
 
 	return id, nil
+}
+
+func ConnectRefacto(password string, identifier string) (int, error) {
+	db := config.GetDB()
+
+	var userId int
+	var pass string
+
+	query := `SELECT id, password_hash FROM users WHERE LOWER(name) = LOWER($1)`
+	err := db.QueryRow(query, identifier).Scan(&userId, &pass)
+
+	if err != nil {
+		return -1, fmt.Errorf("error while connecting user: %w", err)
+	}
+
+	if !pkg.CheckPasswordHash(password, pass) {
+		err = fmt.Errorf("error while connecting user")
+	}
+
+	return userId, nil
 }
