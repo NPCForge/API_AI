@@ -8,17 +8,15 @@ import (
 	"github.com/joho/godotenv"
 )
 
-// GetEnvVariable charge une variable d'environnement depuis .env.local
+// GetEnvVariable load environment variable from .env.local
 func GetEnvVariable(c string) string {
-	// Charge le fichier .env.local
 	if err := godotenv.Load(".env.local"); err != nil {
-		DisplayContext("Erreur de chargement du fichier .env.local", Error, true)
+		DisplayContext("Error while loading .env.local", Error, true)
 	}
 
-	// Récupère la variable d'environnement
 	variable := os.Getenv(c)
 	if variable == "" {
-		DisplayContext(fmt.Sprintf("%s non définie dans .env.local", c), Error, true)
+		DisplayContext(fmt.Sprintf("%s undefined in .env.local", c), Error, true)
 	}
 
 	return variable
