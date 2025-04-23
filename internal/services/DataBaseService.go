@@ -7,6 +7,7 @@ import (
 	httpModels "my-api/internal/models/http"
 	websocketModels "my-api/internal/models/websocket"
 	"my-api/pkg"
+	"strings"
 
 	"github.com/lib/pq"
 )
@@ -74,6 +75,28 @@ func GetNameByID(id string) (string, error) {
 	}
 
 	return name, nil
+}
+
+func ResetGame() error {
+	db := config.GetDB()
+
+	query := "DELETE FROM discussions"
+
+	_, err := db.Exec(query)
+
+	if err != nil {
+		return fmt.Errorf("error while getting name : %w", err)
+	}
+
+	return nil
+}
+
+func placeholders(n int) string {
+	placeholders := make([]string, n)
+	for i := range placeholders {
+		placeholders[i] = "$" + fmt.Sprintf("%d", i+1)
+	}
+	return strings.Join(placeholders, ", ")
 }
 
 func GetNewMessages(receiver string) ([]websocketModels.Message, error) {
