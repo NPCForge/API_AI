@@ -18,12 +18,11 @@ PASSWORD = "Password"
 WS_IDENTIFIER = "User_01_test_ws"
 HTTP_IDENTIFIER = "User_01_test_http"
 
-async def register_websocket():
+async def remove_websocket():
     try:
         async with websockets.connect(uri) as websocket:
             message = {
                 "action": "Register",
-                "API_KEY": API_KEY,
                 "identifier": WS_IDENTIFIER,
                 "password": PASSWORD
             }
@@ -48,7 +47,7 @@ async def register_websocket():
         print(f"❌ WS - Erreur : {e}")
         return False
 
-def register_http():
+def remove_http():
     try:
         url = "http://localhost:3000/Register"
         payload = json.dumps({
@@ -69,8 +68,8 @@ def register_http():
         return False
 
 async def main():
-    ws_success = await register_websocket()
-    http_success = register_http()
+    ws_success = await remove_websocket()
+    http_success = remove_http()
     return ws_success and http_success
 
 if __name__ == "__main__":

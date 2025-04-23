@@ -3,36 +3,47 @@ package httpHandlers
 import (
 	"encoding/json"
 	"log"
-	http3 "my-api/internal/models/http"
-	http2 "my-api/internal/services/http"
+	httpModels "my-api/internal/models/http"
+	service "my-api/internal/services/merged"
+	"my-api/pkg"
 	"net/http"
 )
 
 func RemoveHandler(w http.ResponseWriter, r *http.Request) {
-	log.Println("RemoveHandler")
-	res := http3.RemoveResponse{
-		Message: "Suppression réussie",
-		Status:  200,
+	var req httpModels.RemoveRequestRefacto
+	var res httpModels.RemoveResponseRefacto
+
+	// delete
+
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
 	}
 
-	token := r.Header.Get("Authorization")
-	_, err := http2.Remove(token)
+	err := json.NewDecoder(r.Body).Decode(&req)
 
 	if err != nil {
-		res = http3.RemoveResponse{
-			Message: "Erreur lors de la suppression",
-			Status:  401,
-		}
+		http.Error(w, "JSON decoding error", http.StatusBadRequest)
+		return
 	}
 
-	_, err = http2.Disconnect(token)
+	if req.DeleteUserIdentifier == "" || req.Token == "" {
+		http.Error(w, "Bad Request", http.StatusBadRequest)
+		return
+	}
+
+	disconnect, err := service.RemoveService(req.Token, req.DeleteUserIdentifier)
 
 	if err != nil {
-		res = http3.RemoveResponse{
-			Message: "Erreur lors de la deconnexion",
-			Status:  401,
-		}
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
 	}
+
+	if disconnect {
+		pkg.DisplayContext("Remove Handler need to Disconnect HTTP", pkg.Debug)
+	}
+
+	// disconnect
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)

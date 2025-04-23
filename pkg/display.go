@@ -16,7 +16,8 @@ type DisplayType struct {
 var (
 	Debug   = DisplayType{Name: "debug", Color: ColorCodes.Orange, Icon: "🧰"}
 	Update  = DisplayType{Name: "update", Color: ColorCodes.Green, Icon: "🔄"}
-	Default = DisplayType{Name: "default", Color: ColorCodes.White, Icon: "⚙️"}
+	File    = DisplayType{Name: "file", Color: ColorCodes.LightGreen, Icon: "--- "}
+	Default = DisplayType{Name: "default", Color: ColorCodes.Blue, Icon: "⚙️"}
 	Error   = DisplayType{Name: "error", Color: ColorCodes.Red, Icon: "❌"}
 )
 

@@ -268,26 +268,27 @@ func GetEntityByName(name string) (string, error) {
 	return entity, nil
 }
 
-func DropUser(id string) (string, error) {
+// refacto ✅
+func DropUser(id int) error {
 	db := config.GetDB()
 
-	query := `DELETE FROM entity WHERE id = $1`
+	query := `DELETE FROM users WHERE id = $1`
 	result, err := db.Exec(query, id)
 
 	if err != nil {
-		return "", fmt.Errorf("erreur lors de la suppression de l'utilisateur : %w", err)
+		return fmt.Errorf("erreur lors de la suppression de l'utilisateur : %w", err)
 	}
 
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
-		return "", fmt.Errorf("erreur lors de la vérification des lignes supprimées : %w", err)
+		return fmt.Errorf("erreur lors de la vérification des lignes supprimées : %w", err)
 	}
 
 	if rowsAffected == 0 {
-		return "", fmt.Errorf("aucun utilisateur avec cet id trouvé")
+		return fmt.Errorf("aucun utilisateur avec cet id trouvé")
 	}
 
-	return "success", nil
+	return nil
 }
 
 func IsExist(checksum string) (bool, error) {
@@ -346,6 +347,8 @@ func RegisterWebsocket(checksum string, entity websocketModels.RegisterRequest) 
 	return id, nil
 }
 
+// === Refacto === ✅
+
 func RegisterRefacto(password string, identifier string) (int, error) {
 	db := config.GetDB()
 
@@ -368,4 +371,32 @@ func RegisterRefacto(password string, identifier string) (int, error) {
 	}
 
 	return id, nil
+}
+
+func GetPermissionByIdRefacto(id int) (int, error) {
+	db := config.GetDB()
+
+	var perm int
+	query := `SELECT permission FROM users WHERE id = $1`
+	err := db.QueryRow(query, id).Scan(&perm)
+
+	if err != nil {
+		return -1, fmt.Errorf("erreur lors de la vérification de l'existence : %w", err)
+	}
+
+	return perm, nil
+}
+
+func GetUserIdByNameRefacto(name string) (int, error) {
+	db := config.GetDB()
+
+	var perm int
+	query := `SELECT id FROM users WHERE name = $1`
+	err := db.QueryRow(query, name).Scan(&perm)
+
+	if err != nil {
+		return -1, fmt.Errorf("erreur lors de la vérification de l'existence : %w", err)
+	}
+
+	return perm, nil
 }
