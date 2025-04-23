@@ -1,4 +1,4 @@
-import asyncio
+﻿import asyncio
 import json
 import websockets
 import nest_asyncio
@@ -26,8 +26,7 @@ async def websocket():
     try:
         async with websockets.connect(uri) as websocket:
             message = {
-                "action": "Register",
-                "API_KEY": API_KEY,
+                "action": "Connect",
                 "identifier": WS_IDENTIFIER,
                 "password": PASSWORD
             }
@@ -61,9 +60,8 @@ async def websocket():
 
 def http():
     try:
-        url = "http://localhost:3000/Register"
+        url = "http://localhost:3000/Connect"
         payload = json.dumps({
-            "API_KEY": API_KEY,
             "Identifier": HTTP_IDENTIFIER,
             "Password": PASSWORD
         })

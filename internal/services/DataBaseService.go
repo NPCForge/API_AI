@@ -7,6 +7,7 @@ import (
 	httpModels "my-api/internal/models/http"
 	websocketModels "my-api/internal/models/websocket"
 	"my-api/pkg"
+	"strings"
 
 	"github.com/lib/pq"
 )
@@ -74,6 +75,28 @@ func GetNameByID(id string) (string, error) {
 	}
 
 	return name, nil
+}
+
+func ResetGame() error {
+	db := config.GetDB()
+
+	query := "DELETE FROM discussions"
+
+	_, err := db.Exec(query)
+
+	if err != nil {
+		return fmt.Errorf("error while getting name : %w", err)
+	}
+
+	return nil
+}
+
+func placeholders(n int) string {
+	placeholders := make([]string, n)
+	for i := range placeholders {
+		placeholders[i] = "$" + fmt.Sprintf("%d", i+1)
+	}
+	return strings.Join(placeholders, ", ")
 }
 
 func GetNewMessages(receiver string) ([]websocketModels.Message, error) {
@@ -354,6 +377,7 @@ func RegisterRefacto(password string, identifier string) (int, error) {
 
 	// Hasher le mot de passe
 	pass, err := pkg.HashPassword(password)
+
 	if err != nil {
 		return -1, fmt.Errorf("error hashing password: %w", err)
 	}
@@ -367,7 +391,7 @@ func RegisterRefacto(password string, identifier string) (int, error) {
 	var id int
 	err = db.QueryRow(query, identifier, pass).Scan(&id)
 	if err != nil {
-		return -1, fmt.Errorf("error while registering entity: %w", err)
+		return -1, fmt.Errorf("error while registering user: %w", err)
 	}
 
 	return id, nil
@@ -399,4 +423,24 @@ func GetUserIdByNameRefacto(name string) (int, error) {
 	}
 
 	return perm, nil
+}
+
+func ConnectRefacto(password string, identifier string) (int, error) {
+	db := config.GetDB()
+
+	var userId int
+	var pass string
+
+	query := `SELECT id, password_hash FROM users WHERE LOWER(name) = LOWER($1)`
+	err := db.QueryRow(query, identifier).Scan(&userId, &pass)
+
+	if err != nil {
+		return -1, fmt.Errorf("error while connecting user: %w", err)
+	}
+
+	if !pkg.CheckPasswordHash(password, pass) {
+		err = fmt.Errorf("error while connecting user")
+	}
+
+	return userId, nil
 }

@@ -1,5 +1,10 @@
 package httpModels
 
+type ConnectRequestRefacto struct {
+	Password   string `json:"password"`
+	Identifier string `json:"identifier"`
+}
+
 // ConnectRequest représente la structure des données attendues dans la requête
 type ConnectRequest struct {
 	Token string `json:"checksum"`

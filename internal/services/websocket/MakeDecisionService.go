@@ -2,6 +2,7 @@ package websocketServices
 
 import (
 	"fmt"
+	"my-api/internal/handlers"
 	"regexp"
 	"strings"
 
@@ -175,6 +176,12 @@ func MakeDecisionWebSocket(
 					"message": "Error while calling MakeDecision service",
 				})
 				return
+			}
+			if handlers.WS.IsBlocking {
+				sendError(conn, initialRoute, map[string]interface{}{
+					"message": "API currently blocked",
+				})
+				return
 			} else {
 				sendResponse(conn, initialRoute, map[string]interface{}{
 					"message": "TalkTo: " + namesString + "\nMessage: " + message,
@@ -182,26 +189,34 @@ func MakeDecisionWebSocket(
 				return
 			}
 		}
+	}
 
-		//match := re.FindStringSubmatch(back)
-		//
-		//if len(match) > 1 {
-		//	entity := match[1]
-		//
-		//	message, err := TalkToPreprocess(msg, entity)
-		//	if err != nil {
-		//		sendError(conn, initialRoute, map[string]interface{}{
-		//			"message": "Error while calling MakeDecision service",
-		//		})
-		//		return
-		//	} else {
-		//		sendResponse(conn, initialRoute, map[string]interface{}{
-		//			"message": "TalkTo: " + entity + "\nMessage: " + message,
-		//		})
-		//		return
-		//	}
-		//}
+	if handlers.WS.IsBlocking {
+		sendError(conn, initialRoute, map[string]interface{}{
+			"message": "API currently blocked",
+		})
+		return
 	} else {
 		println("[MakeDecisionWebSocket]: Unable to find TalkTo")
 	}
+
+	//match := re.FindStringSubmatch(back)
+	//
+	//if len(match) > 1 {
+	//	entity := match[1]
+	//
+	//	message, err := TalkToPreprocess(msg, entity)
+	//	if err != nil {
+	//		sendError(conn, initialRoute, map[string]interface{}{
+	//			"message": "Error while calling MakeDecision service",
+	//		})
+	//		return
+	//	} else {
+	//		sendResponse(conn, initialRoute, map[string]interface{}{
+	//			"message": "TalkTo: " + entity + "\nMessage: " + message,
+	//		})
+	//		return
+	//	}
+	//}
+
 }

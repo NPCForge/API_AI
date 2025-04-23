@@ -3,7 +3,7 @@ package websocketServices
 import (
 	"github.com/fatih/color"
 	"github.com/gorilla/websocket"
-
+	websocketHandlers "my-api/internal/handlers"
 	websocketModels "my-api/internal/models/websocket"
 	"my-api/internal/services"
 	"my-api/internal/types"
@@ -39,6 +39,13 @@ func NewMessageWebSocket(
 			return
 		}
 
+		if websocketHandlers.WS.IsBlocking {
+			sendError(conn, initialRoute, map[string]interface{}{
+				"message": "API currently blocked",
+			})
+			return
+		}
+
 		receiverIntId, err := strconv.Atoi(receiverId)
 
 		if err != nil {
@@ -59,6 +66,4 @@ func NewMessageWebSocket(
 		}
 		color.Green("✅ Message successfully saved from %d to %d", senderId, receiverId)
 	}
-
-	return
 }
