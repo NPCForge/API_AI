@@ -13,6 +13,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4.2.2
 
+      - name: Set Up Docker Compose
+        run: |
+          sudo curl -L "https://github.com/docker/compose/releases/download/v2.27.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+          sudo chmod +x /usr/local/bin/docker-compose
+          docker-compose version
+
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
@@ -24,16 +30,10 @@ jobs:
       - name: Build and start services
         run: docker-compose up -d
 
-      - name: Wait for API (max 440s)
+      - name: Wait for health endpoint
         run: |
-          for i in {1..120}; do
-            if curl -s http://localhost:3000/health | grep "OK"; then
-              echo "✅ API is up"
-              break
-            fi
-            echo "Waiting for API..."
-            sleep 2
-          done
+          chmod +x ./script/wait-for-it.sh
+          ./script/wait-for-it.sh
 
       - name: Run Go tests
         run: go test -v ./tests
