@@ -26,7 +26,16 @@ func TestMainFlow(t *testing.T) {
 	})
 
 	if !isConnexionSuccess {
-		t.Fatalf("Connect failed: %v", err)
+		t.Fatalf("Unable to connect to the server: %v", err)
+		return
 	}
 
+	fmt.Println("Connexion success...")
+	fmt.Println("Testing create entity...")
+
+	t.Run("Step3_CreateEntity", func(t *testing.T) {
+		if err := TestWebSocketAndHTTPCreateEntity(); err != nil {
+			t.Fatalf("CreateEntity failed: %v", err)
+		}
+	})
 }

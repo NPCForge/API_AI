@@ -28,7 +28,9 @@ func CreateEntityHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	id, err := service.CreateEntityService(req.Name, req.Prompt, req.Checksum, req.Token)
+	token := r.Header.Get("Authorization")
+
+	id, err := service.CreateEntityService(req.Name, req.Prompt, req.Checksum, token)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(sharedModel.ResponseCreateEntity{
@@ -46,5 +48,6 @@ func CreateEntityHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
 	json.NewEncoder(w).Encode(resp)
 }

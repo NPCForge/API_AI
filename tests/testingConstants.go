@@ -21,9 +21,9 @@ func getEnvVariable(c string) string {
 }
 
 const (
-	HttpConnectURL = "http://localhost:3000/Connect"
-	WsConnectURL   = "ws://localhost:3000/ws"
-	TokenFile      = "token.json"
+	HttpBaseUrl  = "http://localhost:3000/"
+	WsConnectURL = "ws://localhost:3000/ws"
+	TokenFile    = "token.json"
 
 	Password = "Password"
 	WsID     = "User_01_test_ws"
