@@ -1,6 +1,7 @@
 package sharedModel
 
 type RequestCreateEntity struct {
+	Action   string `json:"string"`
 	Name     string `json:"name"`
 	Prompt   string `json:"prompt"`
 	Checksum string `json:"checksum"`
