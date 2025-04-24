@@ -30,18 +30,17 @@ jobs:
       - name: Build and start services
         run: docker-compose up -d
 
-      - name: Wait for API health check
+      - name: Wait for API to be ready (inside container)
         run: |
-          echo '⏳ Waiting for http://api:3000/health to respond with "OK"...'
           for i in {1..30}; do
-            response=$(curl -s http://api:3000/health)
+            response=$(docker-compose exec -T api curl -s http://localhost:3000/health || true)
             if [ "$response" = "OK" ]; then
-              echo "✅ Service ready after $i seconds."
+              echo "✅ API is ready"
               exit 0
             fi
             sleep 1
           done
-          echo "❌ Timeout after 30 seconds. Response: \"$response\""
+          echo "❌ API did not respond OK in time"
           exit 1
 
       - name: Run Go tests
