@@ -29,4 +29,12 @@ func TestMainFlow(t *testing.T) {
 		t.Fatalf("Connect failed: %v", err)
 	}
 
+	fmt.Println("Connexion success...")
+	fmt.Println("Testing create entity...")
+
+	t.Run("Step3_CreateEntity", func(t *testing.T) {
+		if err := TestWebSocketAndHTTPCreateEntity(); err != nil {
+			t.Fatalf("CreateEntity failed: %v", err)
+		}
+	})
 }

@@ -61,9 +61,7 @@ func VerifyJWT(tokenString string) (*models.CustomClaims, error) {
 func GetUserIDFromJWT(tokenString string) (string, error) {
 	var jwtSecret = []byte(config.GetEnvVariable("JWT_SECRET_KEY"))
 
-	// Parse et vérifie le token
 	token, err := jwt.ParseWithClaims(tokenString, &models.CustomClaims{}, func(token *jwt.Token) (interface{}, error) {
-		// Vérifie que la méthode de signature est bien HMAC
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 		}

@@ -11,6 +11,9 @@ import (
 func TestWebSocketAndHTTPConnect() error {
 	err := ResetTokenFile()
 
+	isWSConnectSuccess := true
+	isHttpConnectSuccess := true
+
 	if err != nil {
 		return err
 	}
@@ -22,6 +25,9 @@ func TestWebSocketAndHTTPConnect() error {
 		if err != nil {
 			return err
 		}
+	} else {
+		fmt.Printf("error in ws connect: %s", err)
+		isWSConnectSuccess = false
 	}
 
 	httpToken, err := connectViaHTTP()
@@ -31,6 +37,13 @@ func TestWebSocketAndHTTPConnect() error {
 		if err != nil {
 			return err
 		}
+	} else {
+		fmt.Printf("error in http connect: %s", err)
+		isHttpConnectSuccess = false
+	}
+
+	if !isWSConnectSuccess && !isHttpConnectSuccess {
+		return fmt.Errorf("connect failed")
 	}
 	return nil
 }
@@ -77,7 +90,7 @@ func connectViaHTTP() (string, error) {
 	}
 
 	body, _ := json.Marshal(payload)
-	resp, err := http.Post(HttpConnectURL, "application/json", bytes.NewBuffer(body))
+	resp, err := http.Post(HttpBaseUrl+"Connect", "application/json", bytes.NewBuffer(body))
 	if err != nil {
 		return "", fmt.Errorf("HTTP request failed: %w", err)
 	}

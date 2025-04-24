@@ -1,6 +1,7 @@
 package websocketHandlers
 
 import (
+	"encoding/json"
 	"fmt"
 	sharedModel "my-api/internal/models/shared"
 
@@ -17,9 +18,18 @@ func CreateEntityHandlerWebSocket(
 	var req sharedModel.RequestCreateEntity
 	var initialRoute = "CreateEntity"
 
-	if req.Checksum == "" || req.Name == "" || req.Prompt == "" {
+	err := json.Unmarshal(message, &req)
+
+	if err != nil {
 		sendError(conn, initialRoute, map[string]interface{}{
 			"message": "Error while decoding JSON message",
+		})
+		return
+	}
+
+	if req.Checksum == "" || req.Name == "" || req.Prompt == "" {
+		sendError(conn, initialRoute, map[string]interface{}{
+			"message": "Missing fields in the payload",
 		})
 		return
 	}
@@ -33,7 +43,7 @@ func CreateEntityHandlerWebSocket(
 		return
 	}
 
-	sendError(conn, initialRoute, map[string]interface{}{
+	sendResponse(conn, initialRoute, map[string]interface{}{
 		"message": "Success",
 		"id":      fmt.Sprintf("%d", id),
 	})

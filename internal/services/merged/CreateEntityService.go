@@ -6,7 +6,6 @@ import (
 )
 
 func CreateEntityService(name string, prompt string, checksum string, self string) (int, error) {
-	// recuperer l'id self via jwt
 	id, err := utils.GetUserIDFromJWT(self)
 
 	if err != nil {

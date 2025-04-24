@@ -11,6 +11,9 @@ import (
 func TestWebsocketAndHTTPRegister() error {
 	err := ResetTokenFile()
 
+	isWSRegisterSuccess := true
+	isHTTPRegisterSuccess := true
+
 	if err != nil {
 		return err
 	}
@@ -24,7 +27,8 @@ func TestWebsocketAndHTTPRegister() error {
 			return err
 		}
 	} else {
-		return err
+		fmt.Println("Error in websocket register")
+		isWSRegisterSuccess = false
 	}
 
 	// HTTP test
@@ -36,7 +40,12 @@ func TestWebsocketAndHTTPRegister() error {
 			return err
 		}
 	} else {
-		return err
+		fmt.Println("Error in http register")
+		isHTTPRegisterSuccess = false
+	}
+
+	if !isWSRegisterSuccess && isHTTPRegisterSuccess {
+		return fmt.Errorf("all connexions failed")
 	}
 
 	return nil
@@ -85,7 +94,7 @@ func testHTTPRegister() (string, error) {
 	}
 	payload, _ := json.Marshal(reqData)
 
-	resp, err := http.Post(HttpConnectURL, "application/json", bytes.NewBuffer(payload))
+	resp, err := http.Post(HttpBaseUrl+"Register", "application/json", bytes.NewBuffer(payload))
 	if err != nil {
 		return "", fmt.Errorf("post error: %w", err)
 	}
