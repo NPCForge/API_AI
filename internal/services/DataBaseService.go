@@ -416,6 +416,43 @@ func CreateEntity(name string, prompt string, checksum string, id_owner string) 
 	return id, nil
 }
 
+func GetEntities(id_owner string) (ids []string, checksums []string, err error) {
+	db := config.GetDB()
+
+	query := `SELECT id, checksum FROM entities WHERE user_id = $1`
+
+	rows, err := db.Query(query, id_owner)
+
+	if err != nil {
+		return nil, nil, fmt.Errorf("error while getting entities: %w", err)
+	}
+
+	defer func(rows *sql.Rows) {
+		err := rows.Close()
+		if err != nil {
+			return
+		}
+	}(rows)
+
+	for rows.Next() {
+		var id string
+		var checksum string
+
+		if err := rows.Scan(&id, &checksum); err != nil {
+			return nil, nil, fmt.Errorf("error while scanning row: %w", err)
+		}
+
+		ids = append(ids, id)
+		checksums = append(checksums, checksum)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, nil, fmt.Errorf("rows iteration error: %w", err)
+	}
+
+	return ids, checksums, nil
+}
+
 func DropEntityByChecksum(checksum string) error {
 	db := config.GetDB()
 

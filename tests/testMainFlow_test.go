@@ -39,6 +39,14 @@ func TestMainFlow(t *testing.T) {
 		}
 	})
 
+	fmt.Println("Testing GetEntitiesViaWebSocket...")
+
+	t.Run("Step5_GetEntitiesViaWebSocket", func(t *testing.T) {
+		if err := TestWebSocketAndHTTPGetEntities(); err != nil {
+			t.Fatalf("Get entities failed: %v", err)
+		}
+	})
+
 	fmt.Println("Testing Disconnect...")
 	t.Run("Step4_Disconnect", func(t *testing.T) {
 		if err := TestWebSocketAndHTTPDisconnect(); err != nil {
