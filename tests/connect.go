@@ -26,7 +26,7 @@ func TestWebSocketAndHTTPConnect() error {
 			return err
 		}
 	} else {
-		fmt.Printf("error in ws connect: %s", err)
+		fmt.Printf("error in ws connect: %s\n", err)
 		isWSConnectSuccess = false
 	}
 
@@ -38,7 +38,7 @@ func TestWebSocketAndHTTPConnect() error {
 			return err
 		}
 	} else {
-		fmt.Printf("error in http connect: %s", err)
+		fmt.Printf("error in http connect: %s\n", err)
 		isHttpConnectSuccess = false
 	}
 

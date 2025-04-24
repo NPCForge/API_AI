@@ -10,14 +10,8 @@ jobs:
   test:
     runs-on: ubuntu-latest
 
-    services:
-      docker:
-        image: docker:20.10.16
-        options: --privileged
-
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v4.2.2
 
       - name: Set up Go
         uses: actions/setup-go@v5
@@ -27,15 +21,19 @@ jobs:
       - name: Copy .env.example to .env
         run: cp .env.exemple .env.local
 
-      - name: Set up Docker Compose
-        run: sudo apt-get update && sudo apt-get install -y docker-compose
-
       - name: Build and start services
-        run: docker-compose up -d --build
+        run: docker-compose up -d
 
-      - name: Wait for API to launch (400s)
+      - name: Wait for API (max 440s)
         run: |
-          sleep 400
+          for i in {1..120}; do
+            if curl -s http://localhost:3000/health | grep "OK"; then
+              echo "✅ API is up"
+              break
+            fi
+            echo "Waiting for API..."
+            sleep 2
+          done
 
       - name: Run Go tests
         run: go test -v ./tests

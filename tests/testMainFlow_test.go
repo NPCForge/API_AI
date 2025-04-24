@@ -26,7 +26,8 @@ func TestMainFlow(t *testing.T) {
 	})
 
 	if !isConnexionSuccess {
-		t.Fatalf("Connect failed: %v", err)
+		t.Fatalf("Unable to connect to the server: %v", err)
+		return
 	}
 
 	fmt.Println("Connexion success...")
