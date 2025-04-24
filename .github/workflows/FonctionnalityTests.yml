@@ -33,12 +33,9 @@ jobs:
       - name: Build and start services
         run: docker-compose up -d --build
 
-      - name: Wait for API to launch
+      - name: Wait for API to launch (120s)
         run: |
-          for i in {1..30}; do
-            echo "Waiting for API..."
-            sleep 2
-          done
+          sleep 120
 
       - name: Run Go tests
         run: go test -v ./tests
