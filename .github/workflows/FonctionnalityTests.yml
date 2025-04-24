@@ -30,10 +30,19 @@ jobs:
       - name: Build and start services
         run: docker-compose up -d
 
-      - name: Wait for health endpoint
+      - name: Wait for API health check
         run: |
-          chmod +x ./script/wait_for_it.sh
-          ./script/wait_for_it.sh
+          echo '⏳ Waiting for http://api:3000/health to respond with "OK"...'
+          for i in {1..30}; do
+            response=$(curl -s http://api:3000/health)
+            if [ "$response" = "OK" ]; then
+              echo "✅ Service ready after $i seconds."
+              exit 0
+            fi
+            sleep 1
+          done
+          echo "❌ Timeout after 30 seconds. Response: \"$response\""
+          exit 1
 
       - name: Run Go tests
         run: go test -v ./tests
