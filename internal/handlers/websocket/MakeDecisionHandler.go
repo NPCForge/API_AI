@@ -2,8 +2,8 @@ package websocketHandlers
 
 import (
 	"encoding/json"
-	"my-api/internal/models/websocket"
-	"my-api/internal/services/websocket"
+	websocketModels "my-api/internal/models/websocket"
+	websocketServices "my-api/internal/services/websocket"
 
 	"github.com/gorilla/websocket"
 )

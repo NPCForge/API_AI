@@ -2,25 +2,52 @@ package utils
 
 import (
 	"bufio"
-	"fmt"
-	"my-api/pkg"
 	"os"
 	"strings"
+
+	"my-api/internal/services"
+	"my-api/pkg"
+
+	"github.com/fatih/color"
 )
 
 func status() {
-	store := pkg.GetPopulation() // retourne un map[string]string
+	store := pkg.GetPopulation() // map[string]string
 
-	println("------------ Status ------------------------------------------------------------")
+	color.Cyan("------------ 📊 Status ------------------------------------------------------------")
 	for key, value := range store {
-		fmt.Printf("Clé : %s, Valeur : %s\n", key, value)
+		color.Green("🔑 Clé : %s → 📦 Valeur : %s", key, value)
 	}
-	fmt.Printf("------------ %d actifs ------------------------------------------------------------\n", len(store))
+	color.Cyan("------------ 🟢 %d actifs ------------------------------------------------------------\n", len(store))
+}
+
+func help() {
+	color.Cyan("------------ ⌨️ Commandes ------------------------------------------------------------")
+	color.Green("status\t: Retourne le nombre de personnes connectées.")
+	color.Green("reset\t: Supprime tous les utilisateurs de la BDD et réinitialise le statut.")
+	color.Green("stop\t: Coupe l'API.")
+	color.Green("help\t: Affiche les informations sur les différentes commandes.")
+	color.Cyan("-------------------------------------------------------------------------------------\n")
+}
+
+func reset() {
+	rowsAffected, err := services.DropAllUser()
+	if err != nil {
+		color.Red("❌ Erreur lors de la requête SQL : %s", err)
+		return
+	}
+	color.Cyan("💥 %d ligne(s) supprimée(s)", rowsAffected)
+	pkg.ClearTokenStore()
+	color.Cyan("💥 Tokenstore vidé.")
 }
 
 func Commande() {
 	reader := bufio.NewReader(os.Stdin)
+
+	color.Magenta("🧠 Console interactive prête. Tape une commande (help, stop, ...)\n")
+
 	for {
+		color.White("⤷ Entrez une commande : ")
 		input, _ := reader.ReadString('\n')
 		input = strings.TrimSpace(input)
 
@@ -30,13 +57,20 @@ func Commande() {
 
 		switch input {
 		case "stop":
-			fmt.Println("Arrêt du serveur...")
+			color.Red("⛔ Arrêt du serveur...")
 			os.Exit(0)
+
 		case "status":
-			// fmt.Println("Le serveur est actif.")
 			status()
+
+		case "reset":
+			reset()
+
+		case "help":
+			help()
+
 		default:
-			fmt.Println("Commande inconnue :", input)
+			color.Yellow("❓ Commande inconnue : %s", input)
 		}
 	}
 }

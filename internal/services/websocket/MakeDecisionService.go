@@ -2,105 +2,141 @@ package websocketServices
 
 import (
 	"fmt"
-	"my-api/internal/models/websocket"
-	"my-api/internal/services"
-	"my-api/pkg"
 	"regexp"
 	"strings"
 
+	"github.com/fatih/color"
 	"github.com/gorilla/websocket"
+
+	websocketModels "my-api/internal/models/websocket"
+	"my-api/internal/services"
+	"my-api/internal/types"
+	"my-api/pkg"
 )
 
-func TalkToWebSocket(token string, message string, interlocutor string) (string, error) {
-	UserId, err := pkg.GetUserIDFromJWT(token)
+func NeedToFinish(msg string) bool {
+	for _, str := range strings.Fields(msg) {
+		if str == "end_of_discussion" {
+			return true
+		}
+	}
+	return false
+}
 
+func TalkToWebSocket(token string, message string, interlocutor string) (string, error, bool) {
+	UserId, err := pkg.GetUserIDFromJWT(token)
 	if err != nil {
-		return "error during the process", err
+		color.Red("❌ JWT parsing failed: %v", err)
+		return "error during the process", err, false
 	}
 
 	_, err_ := services.IsExistById(UserId)
-
 	if err_ != nil {
-		return "error during the process", err
+		color.Red("❌ User ID doesn't exist: %v", err_)
+		return "error during the process", err_, false
 	}
 
 	prompt, err_ := services.GetPromptByID(UserId)
-
 	if err_ != nil {
-		return "error during the process", err
+		color.Red("❌ Failed to get prompt: %v", err_)
+		return "error during the process", err_, false
 	}
 
 	back, err := services.GptTalkToRequest(message, prompt, interlocutor)
 	if err != nil {
-		return "error during the process", err
+		color.Red("❌ GPT TalkToRequest failed: %v", err)
+		return "error during the process", err, false
 	}
 
-	fmt.Println("Received from GPT: " + back)
+	color.Cyan("📥 Received from GPT (%d): %s", len(back), back)
+
+	if NeedToFinish(back) {
+		color.HiMagenta("𝌦 After this, we need to finish : %s", back)
+	}
 
 	re := regexp.MustCompile(`Response:\s*(.*)`)
 	match := re.FindStringSubmatch(back)
 
 	if len(match) > 1 {
 		response := match[1]
-		return response, nil
+		color.Green("✅ Extracted Response: %s", response)
+		return response, nil, NeedToFinish(back)
 	} else {
-		fmt.Println("Response non trouvé")
-		return "error during the process", fmt.Errorf("error during the process")
+		color.Yellow("⚠️ Response pattern not found in GPT output")
+		return "error during the process", fmt.Errorf("error during the process"), false
 	}
 }
 
-func TalkToPreprocess(msg websocketModels.MakeDecisionRequest, entity string) (string, error) {
+func TalkToPreprocess(msg websocketModels.MakeDecisionRequest, entity string) (string, error, bool) {
 	from, err := pkg.GetUserIDFromJWT(msg.Token)
-	to, err := services.GetEntityByName(entity)
-
 	if err != nil {
-		return "error during the process", err
+		color.Red("❌ JWT parsing failed in TalkToPreprocess: %v", err)
+		return "error during the process", err, false
+	}
+
+	to, err := services.GetEntityByName(entity)
+	if err != nil {
+		color.Red("❌ Entity '%s' not found: %v", entity, err)
+		return "error during the process", err, false
 	}
 
 	discussion, err := services.GetDiscussion(from, to)
-
 	if err != nil {
-		println("Error retrieving discussion")
-		return "error during the process", err
+		color.Red("❌ Failed to retrieve discussion: %v", err)
+		return "error during the process", err, false
 	}
 
 	var sb strings.Builder
-
 	for _, msg := range discussion {
-		sb.WriteString(fmt.Sprintf("%s -> %s: %s\n",
-			msg.SenderName, msg.ReceiverName, msg.Message))
+		sb.WriteString(fmt.Sprintf("%s -> %s: %s\n", msg.SenderName, msg.ReceiverName, msg.Message))
 	}
-
 	result := sb.String()
 
-	message, err := TalkToWebSocket(msg.Token, result, entity)
+	color.Cyan("💬 Compiled discussion:\n%s", result)
 
+	message, err, finish := TalkToWebSocket(msg.Token, result, entity) // return true si la discussion est fini
 	if err != nil {
-		return "error during the process", err
+		color.Red("❌ TalkToWebSocket failed: %v", err)
+		return "error during the process", err, false
 	}
 
-	return message, nil
+	return message, nil, finish
 }
 
-func MakeDecisionWebSocket(conn *websocket.Conn, msg websocketModels.MakeDecisionRequest, sendResponse func(*websocket.Conn, string, map[string]interface{}), sendError func(*websocket.Conn, string, map[string]interface{})) {
-	var initialRoute = "MakeDecision"
-	receiver, err := pkg.GetUserIDFromJWT(msg.Token)
+func MakeDecisionWebSocket(
+	conn *websocket.Conn,
+	msg websocketModels.MakeDecisionRequest,
+	sendResponse types.SendResponseFunc,
+	sendError types.SendErrorFunc,
+) {
+	initialRoute := "MakeDecision"
 
-	newMessages, err := services.GetNewMessages(receiver)
+	receiver, err := pkg.GetUserIDFromJWT(msg.Token)
+	if err != nil {
+		color.Red("❌ JWT parsing failed: %v", err)
+		sendError(conn, initialRoute, map[string]interface{}{
+			"message": "Invalid token",
+		})
+		return
+	}
+	color.Green("🧾 Receiver from JWT: %v", receiver)
+
+	newMessages, _ := services.GetNewMessages(receiver)
 
 	var formattedMessages []string
-
 	for _, msg := range newMessages {
 		formattedMessages = append(formattedMessages, fmt.Sprintf("[%s -> %s: %s]", msg.SenderName, msg.ReceiverName, msg.Message))
 	}
 
 	result := "New Messages: {" + strings.Join(formattedMessages, ", ") + "}"
+	color.Cyan("🚀 New Messages: %s", result)
+	color.Yellow("🌿 Raw messages: %+v", newMessages)
 
 	msg.Message += "\n" + result
 
 	back, err := services.GptSimpleRequest(msg.Message)
 	if err != nil {
-		println("Error in MakeDecisionWebSocket: " + err.Error())
+		color.Red("❌ GptSimpleRequest failed: %v", err)
 		sendError(conn, initialRoute, map[string]interface{}{
 			"message": "Error while calling MakeDecision service",
 		})
@@ -113,19 +149,20 @@ func MakeDecisionWebSocket(conn *websocket.Conn, msg websocketModels.MakeDecisio
 
 		if len(match) > 1 {
 			entity := match[1]
+			color.Green("📡 TalkTo entity found: %s", entity)
 
-			message, err := TalkToPreprocess(msg, entity)
+			message, err, _ := TalkToPreprocess(msg, entity)
 			if err != nil {
+				color.Red("❌ Error during TalkToPreprocess: %v", err)
 				sendError(conn, initialRoute, map[string]interface{}{
 					"message": "Error while calling MakeDecision service",
 				})
 				return
-			} else {
-				sendResponse(conn, initialRoute, map[string]interface{}{
-					"message": "TalkTo: " + entity + "\nMessage: " + message,
-				})
-				return
 			}
+			sendResponse(conn, initialRoute, map[string]interface{}{
+				"message": fmt.Sprintf("TalkTo: %s\nMessage: %s", entity, message),
+			})
+			return
 		}
 	}
 

@@ -20,7 +20,9 @@ func main() {
 	config.InitDB()
 
 	// Goroutine pour les commandes
-	go utils.Commande()
+	if !utils.IsRunningInDocker() {
+		go utils.Commande()
+	}
 
 	// Websocket handler
 	r.HandleFunc("/ws", websocketHandlers.WebsocketHandler).Methods("GET")

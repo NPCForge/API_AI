@@ -19,6 +19,14 @@ type ChatGptSimpleRequestBody struct {
 	Model    string                            `json:"model"`
 }
 
+type LmStudioSimpleRequestBody struct {
+	Messages    []ChatGptSimpleRequestBodyMessage `json:"messages"`
+	Model       string                            `json:"model"`
+	Temperature float64                           `json:temperature`
+	Max_tokens  int                               `json:max_tokens`
+	Stream      bool                              `json:stream`
+}
+
 type ChatGPTResponse struct {
 	Choices []struct {
 		Message struct {

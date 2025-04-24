@@ -3,10 +3,12 @@ package services
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
+
 	"github.com/go-resty/resty/v2"
-	"io/ioutil" // To read the file
+
 	"my-api/config"
-	"my-api/internal/models/http"
+	httpModels "my-api/internal/models/http"
 )
 
 // Function to read the content of a file
@@ -33,7 +35,7 @@ func GptTalkToRequest(message string, prompt string, interlocutor string) (strin
 	// Prepare messages with a system prompt
 	var Messages = []httpModels.ChatGptSimpleRequestBodyMessage{
 		{
-			Role:    "system", // Add the system prompt
+			Role:    "system",
 			Content: systemPrompt,
 		},
 		{
@@ -43,10 +45,18 @@ func GptTalkToRequest(message string, prompt string, interlocutor string) (strin
 	}
 
 	// Create the request body
-	var body httpModels.ChatGptSimpleRequestBody = httpModels.ChatGptSimpleRequestBody{
+	body := httpModels.ChatGptSimpleRequestBody{
 		Model:    "gpt-3.5-turbo",
 		Messages: Messages,
 	}
+
+	// body := httpModels.LmStudioSimpleRequestBody{
+	// 	Model:       "llama-3.2-3b-instruct",
+	// 	Messages:    Messages,
+	// 	Temperature: 0.5,
+	// 	Max_tokens:  -1,
+	// 	Stream:      false,
+	// }
 
 	// Make the request to the OpenAI API
 	resp, err := GptClient.R().
@@ -54,6 +64,11 @@ func GptTalkToRequest(message string, prompt string, interlocutor string) (strin
 		SetHeader("Authorization", "Bearer "+config.GetEnvVariable("CHATGPT_TOKEN")).
 		SetBody(body).
 		Post("https://api.openai.com/v1/chat/completions")
+
+	// resp, err := GptClient.R().
+	// 	SetHeader("Content-Type", "application/json").
+	// 	SetBody(body).
+	// 	Post("http://localhost:1234/v1/chat/completions")
 
 	if err != nil {
 		return "", fmt.Errorf("error during the request: %w", err)
@@ -85,7 +100,7 @@ func GptSimpleRequest(message string) (string, error) {
 	// Prepare messages with a system prompt
 	var Messages = []httpModels.ChatGptSimpleRequestBodyMessage{
 		{
-			Role:    "system", // Add the system prompt
+			Role:    "system",
 			Content: systemPrompt,
 		},
 		{
@@ -95,7 +110,7 @@ func GptSimpleRequest(message string) (string, error) {
 	}
 
 	// Create the request body
-	var body httpModels.ChatGptSimpleRequestBody = httpModels.ChatGptSimpleRequestBody{
+	body := httpModels.ChatGptSimpleRequestBody{
 		Model:    "gpt-3.5-turbo",
 		Messages: Messages,
 	}
