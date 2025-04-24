@@ -27,7 +27,6 @@ func help() {
 	color.Green("reset\t: Supprime tous les utilisateurs de la BDD et réinitialise le statut.")
 	color.Green("stop\t: Coupe l'API.")
 	color.Green("help\t: Affiche les informations sur les différentes commandes.")
-	color.Green("script list\t: Affiche les test unitaire disponible.")
 	color.Cyan("-------------------------------------------------------------------------------------\n")
 }
 

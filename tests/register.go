@@ -4,8 +4,9 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/gorilla/websocket"
 	"net/http"
+
+	"github.com/gorilla/websocket"
 )
 
 func TestWebsocketAndHTTPRegister() error {
