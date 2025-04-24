@@ -52,8 +52,8 @@ func main() {
 
 	r.HandleFunc("/health", Health).Methods("GET")
 
-	port := ":3000"
-	pkg.DisplayContext(fmt.Sprintf("Serveur démarré sur http://localhost%s", port), pkg.Update)
+	port := "0.0.0.0:3000"
+	pkg.DisplayContext(fmt.Sprintf("Serveur démarré sur http://%s", port), pkg.Update)
 	if err := http.ListenAndServe(port, r); err != nil {
 		pkg.DisplayContext("Erreur lors du lancement du serveur", pkg.Error, err, true)
 	}
