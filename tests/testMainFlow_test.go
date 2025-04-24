@@ -38,4 +38,11 @@ func TestMainFlow(t *testing.T) {
 			t.Fatalf("CreateEntity failed: %v", err)
 		}
 	})
+
+	fmt.Println("Testing Disconnect...")
+	t.Run("Step4_Disconnect", func(t *testing.T) {
+		if err := TestWebSocketAndHTTPDisconnect(); err != nil {
+			t.Fatalf("Disconnect failed: %v", err)
+		}
+	})
 }

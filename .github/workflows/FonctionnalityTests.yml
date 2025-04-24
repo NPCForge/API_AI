@@ -30,7 +30,7 @@ jobs:
       - name: Build and start services
         run: docker-compose up -d
 
-      - name: Wait for API to be ready (inside container)
+      - name: Wait for API to be ready
         run: |
           for i in {1..30}; do
             response=$(curl -s http://localhost:3000/health || true)
