@@ -39,6 +39,7 @@ func main() {
 	protected.HandleFunc("/Disconnect", httpHandlers.DisconnectHandler).Methods("POST")
 	protected.HandleFunc("/Remove", httpHandlers.RemoveHandler).Methods("POST")
 	protected.HandleFunc("/MakeDecision", httpHandlers.MakeDecisionHandler).Methods("POST")
+	protected.HandleFunc("/CreateEntity", httpHandlers.CreateEntityHandler).Methods("POST")
 
 	port := ":3000"
 	pkg.DisplayContext(fmt.Sprintf("Serveur démarré sur http://localhost%s", port), pkg.Update)

@@ -63,6 +63,12 @@ var actions = []websocketModels.WebSocketDispatcher{
 		Protected:  false,
 		IsBlocking: true,
 	},
+	{
+		Name:       "CreateEntity",
+		Handler:    CreateEntityHandlerWebSocket,
+		Protected:  true,
+		IsBlocking: false,
+	},
 }
 
 func handleBlockingEvent(triggerConn *websocket.Conn) {

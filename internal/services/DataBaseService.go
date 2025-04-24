@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"my-api/config"
+	"my-api/internal/models"
 	httpModels "my-api/internal/models/http"
 	websocketModels "my-api/internal/models/websocket"
 	"my-api/pkg"
@@ -397,6 +398,24 @@ func RegisterRefacto(password string, identifier string) (int, error) {
 	return id, nil
 }
 
+func CreateEntity(name string, prompt string, checksum string, id_owner string) (int, error) {
+	db := config.GetDB()
+
+	query := `
+		INSERT INTO entities (user_id, name, checksum, prompt, created)
+		VALUES ($1, $2, $3, $4, CURRENT_DATE)
+		RETURNING id
+	`
+
+	var id int
+	err := db.QueryRow(query, id_owner, name, checksum, prompt).Scan(&id)
+	if err != nil {
+		return -1, fmt.Errorf("error while registering user: %w", err)
+	}
+
+	return id, nil
+}
+
 func GetPermissionByIdRefacto(id int) (int, error) {
 	db := config.GetDB()
 
@@ -443,4 +462,36 @@ func ConnectRefacto(password string, identifier string) (int, error) {
 	}
 
 	return userId, nil
+}
+
+func GetEntitiesByUserID(userID string) ([]models.Entity, error) {
+	db := config.GetDB()
+
+	query := `
+		SELECT id, user_id, name, checksum, prompt, created
+		FROM entities
+		WHERE user_id = $1
+	`
+
+	rows, err := db.Query(query, userID)
+	if err != nil {
+		return nil, fmt.Errorf("error querying entities: %w", err)
+	}
+	defer rows.Close()
+
+	var entities []models.Entity
+
+	for rows.Next() {
+		var e models.Entity
+		if err := rows.Scan(&e.ID, &e.UserID, &e.Name, &e.Checksum, &e.Prompt, &e.Created); err != nil {
+			return nil, fmt.Errorf("error scanning entity: %w", err)
+		}
+		entities = append(entities, e)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("row iteration error: %w", err)
+	}
+
+	return entities, nil
 }

@@ -1,14 +1,14 @@
-- [ ] main
+- [x] main
 - [x] config/DataBaseConnection
 - [x] config/DrawLogo
 - [x] config/GetEnvVariableConfig
-- [ ] internal/handlers/ConnectHandler
-- [ ] internal/handlers/DisconnectHandler
+- [x] internal/handlers/ConnectHandler
+- [x] internal/handlers/DisconnectHandler
 - [ ] internal/handlers/MakeDecisionHandler
-- [ ] internal/handlers/RegisterHandler
-- [ ] internal/handlers/RemoveHandler
+- [x] internal/handlers/RegisterHandler
+- [x] internal/handlers/RemoveHandler
 - [ ] internal/handlers/NewMessageHandler
-- [ ] internal/handlers/WebSocketHandler
+- [x] internal/handlers/WebSocketHandler
 
 ... models ...
 ... services ...

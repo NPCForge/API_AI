@@ -1,0 +1,32 @@
+{
+    "folder-color.pathColors": [
+        {
+            "folderPath": "API_AI/internal/handlers/",
+            "color": "foldercolorizer.color_0066cc"
+        },
+        {
+            "folderPath": "API_AI/internal/services/",
+            "color": "foldercolorizer.color_00cc66"
+        },
+        {
+            "folderPath": "API_AI/internal/models/",
+            "color": "foldercolorizer.color_9900cc"
+        },
+        {
+            "folderPath": "API_AI/config/",
+            "color": "foldercolorizer.color_cc0033"
+        },
+        {
+            "folderPath": "API_AI/internal/utils/",
+            "color": "foldercolorizer.color_ccffff"
+        },
+        {
+            "folderPath": "API_AI/pkg/",
+            "color": "foldercolorizer.color_99ffff"
+        },
+        {
+            "folderPath": "API_AI/internal/",
+            "color": "foldercolorizer.color_0066ff"
+        }
+    ]
+}
