@@ -1,0 +1,52 @@
+﻿name: Run Tests with Docker Compose
+
+on:
+  push:
+    branches: [ main, dev, refacto ]
+  pull_request:
+    branches: [ main, dev, refacto ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    services:
+      docker:
+        image: docker:20.10.16
+        options: --privileged
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.21'
+
+      - name: Copy .env.example to .env
+        run: cp .env.exemple .env.local
+
+      - name: Set up Docker Compose
+        run: sudo apt-get update && sudo apt-get install -y docker-compose
+
+      - name: Build and start services
+        run: docker-compose up -d --build
+
+      - name: Wait for API (status 200)
+        run: |
+          for i in {1..120}; do
+            status=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:3000/health)
+            if [ "$status" -eq 200 ]; then
+              echo "✅ API is up (HTTP 200)"
+              break
+            fi
+            echo "Waiting for API... status=$status"
+            sleep 2
+          done
+
+      - name: Run Go tests
+        run: go test -v ./tests
+
+      - name: Shutdown
+        run: docker-compose down

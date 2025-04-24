@@ -15,6 +15,14 @@ import (
 	"github.com/gorilla/mux"
 )
 
+func Health(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusOK)
+	_, err := w.Write([]byte("OK"))
+	if err != nil {
+		return
+	}
+}
+
 func main() {
 	log.SetFlags(log.Lshortfile)
 	r := mux.NewRouter()
@@ -40,6 +48,8 @@ func main() {
 	protected.HandleFunc("/Remove", httpHandlers.RemoveHandler).Methods("POST")
 	protected.HandleFunc("/MakeDecision", httpHandlers.MakeDecisionHandler).Methods("POST")
 	protected.HandleFunc("/CreateEntity", httpHandlers.CreateEntityHandler).Methods("POST")
+
+	r.HandleFunc("/health", Health).Methods("GET")
 
 	port := ":3000"
 	pkg.DisplayContext(fmt.Sprintf("Serveur démarré sur http://localhost%s", port), pkg.Update)

@@ -6,4 +6,4 @@ db_data
 tmp/
 logfile
 bin/
-script/testUnitaire/token.json
+token.json
