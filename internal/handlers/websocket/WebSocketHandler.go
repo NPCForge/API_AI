@@ -69,6 +69,12 @@ var actions = []websocketModels.WebSocketDispatcher{
 		Protected:  true,
 		IsBlocking: false,
 	},
+	{
+		Name:       "RemoveEntity",
+		Handler:    RemoveEntityHandlerWebSocket,
+		Protected:  true,
+		IsBlocking: false,
+	},
 }
 
 func handleBlockingEvent(triggerConn *websocket.Conn) {

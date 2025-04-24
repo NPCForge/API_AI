@@ -416,6 +416,21 @@ func CreateEntity(name string, prompt string, checksum string, id_owner string) 
 	return id, nil
 }
 
+func DropEntityByChecksum(checksum string) error {
+	db := config.GetDB()
+
+	query := `
+		DELETE FROM entities WHERE checksum = $1
+	`
+
+	_, err := db.Exec(query, checksum)
+	if err != nil {
+		return fmt.Errorf("error while deleting entity: %w", err)
+	}
+
+	return nil
+}
+
 func GetPermissionByIdRefacto(id int) (int, error) {
 	db := config.GetDB()
 
@@ -494,4 +509,22 @@ func GetEntitiesByUserID(userID string) ([]models.Entity, error) {
 	}
 
 	return entities, nil
+}
+
+func GetEntitiesOwnerByChecksum(checksum string) (int, error) {
+	db := config.GetDB()
+
+	query := `
+		SELECT user_id
+		FROM entities
+		WHERE checksum = $1
+	`
+
+	var id int
+	err := db.QueryRow(query, checksum).Scan(&id)
+	if err != nil {
+		return -1, fmt.Errorf("erreur lors de la récupération de l'utilisateur : %w", err)
+	}
+
+	return id, nil
 }
