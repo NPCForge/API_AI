@@ -1,14 +1,12 @@
-package exemples
+package sharedModel
 
-type Request struct {
+type RemoveEntityRequest struct {
 	Action   string `json:"string"`
-	Name     string `json:"name"`
-	Prompt   string `json:"prompt"`
 	Checksum string `json:"checksum"`
 	Token    string `json:"token"`
 }
 
-type Response struct {
+type RemoveEntityResponse struct {
 	Message string `json:"message"`
 	Status  int    `json:"status"`
 }

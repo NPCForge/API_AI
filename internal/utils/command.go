@@ -42,10 +42,6 @@ func reset() {
 	color.Cyan("💥 Tokenstore vidé.")
 }
 
-func generateNewRoute(name string) {
-
-}
-
 func Commande() {
 	reader := bufio.NewReader(os.Stdin)
 
@@ -63,7 +59,7 @@ func Commande() {
 		if strings.HasPrefix(input, "new route ") {
 			name := strings.TrimPrefix(input, "new route ")
 			name = strings.TrimSpace(name)
-			generateNewRoute(name)
+			GenerateNewRoute(name)
 			continue
 		}
 
