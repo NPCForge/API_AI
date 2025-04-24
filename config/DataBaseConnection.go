@@ -53,6 +53,8 @@ func InitDB() {
 		maxRetries := 4
 		retryDelay := 10 * time.Second
 
+		fmt.Println("📡 Connexion à PostgreSQL avec :", connStr)
+
 		// Réessayer de se connecter plusieurs fois
 		for retries := 0; retries < maxRetries; retries++ {
 			// Tenter d'ouvrir la connexion
