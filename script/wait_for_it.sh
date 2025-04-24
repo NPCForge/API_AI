@@ -6,7 +6,7 @@ echo "⏳ Attente que $URL réponde avec \"$EXPECTED\"..."
 
 for ((i=0; i<TIMEOUT; i++)); do
 response=$(curl -s "$URL")
-echo response
+echo "$response"
 if [[ "$response" == "$EXPECTED" ]]; then
 echo "✅ Service prêt après $i secondes."
 exit 0
