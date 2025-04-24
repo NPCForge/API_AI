@@ -22,7 +22,7 @@ services:
       - ./db_data:/var/lib/postgresql/data
       - ./migrations:/docker-entrypoint-initdb.d
     healthcheck:
-      test: [ "CMD", "pg_isready", "-U", "postgres" ]
+      test: [ "CMD", "pg_isready", "-U", "API" ]
       interval: 5s
       timeout: 3s
       retries: 10
