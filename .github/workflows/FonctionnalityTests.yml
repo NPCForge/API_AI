@@ -48,3 +48,7 @@ jobs:
 
       - name: Shutdown
         run: docker-compose down
+
+      - name: Show container logs
+        if: failure()
+        run: docker-compose logs
