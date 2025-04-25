@@ -43,7 +43,7 @@ func RegisterHandlerWebsocket(
 		return
 	}
 
-	private, err := service.RegisterService(msg.Password, msg.Identifier)
+	private, id, err := service.RegisterService(msg.Password, msg.Identifier)
 
 	if err != nil {
 		sendError(conn, initialRoute, map[string]interface{}{
@@ -54,5 +54,6 @@ func RegisterHandlerWebsocket(
 
 	sendResponse(conn, initialRoute, map[string]interface{}{
 		"token": private,
+		"id":    id,
 	})
 }

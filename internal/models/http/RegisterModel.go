@@ -19,4 +19,5 @@ type RegisterResponse struct {
 	Message string `json:"message"`
 	Status  int    `json:"status"`
 	Private string `json:"token"`
+	Id      string `json:"id"`
 }

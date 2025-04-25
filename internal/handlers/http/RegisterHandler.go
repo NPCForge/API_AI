@@ -33,7 +33,7 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if req.Password != "" && req.Identifier != "" {
-		private, err := service.RegisterService(req.Password, req.Identifier)
+		private, id, err := service.RegisterService(req.Password, req.Identifier)
 
 		if err != nil {
 			http.Error(w, "Server Error", 500)
@@ -43,10 +43,12 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 		res.Private = private
 		res.Status = 201
 		res.Message = "User created"
+		res.Id = id
 	} else {
 		res.Private = "null"
 		res.Status = 204
 		res.Message = "Password or Identifier is not given"
+		res.Id = "null"
 	}
 
 	w.Header().Set("Content-Type", "application/json")
