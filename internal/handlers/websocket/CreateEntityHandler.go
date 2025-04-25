@@ -44,7 +44,8 @@ func CreateEntityHandlerWebSocket(
 	}
 
 	sendResponse(conn, initialRoute, map[string]interface{}{
-		"message": "Success",
-		"id":      fmt.Sprintf("%d", id),
+		"message":  "Success",
+		"id":       fmt.Sprintf("%d", id),
+		"checksum": req.Checksum,
 	})
 }

@@ -14,5 +14,6 @@ type ConnectRequest struct {
 type ConnectResponse struct {
 	Message  string `json:"message"`
 	Status   int    `json:"status"`
+	Id       string `json:"id"`
 	TmpToken string `json:"token"`
 }

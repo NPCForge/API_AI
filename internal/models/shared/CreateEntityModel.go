@@ -9,7 +9,8 @@ type RequestCreateEntity struct {
 }
 
 type ResponseCreateEntity struct {
-	Id      string `json:"id"`
-	Message string `json:"message"`
-	Status  string `json:"status"`
+	Id       string `json:"id"`
+	Checksum string `json:"checksum"`
+	Message  string `json:"message"`
+	Status   string `json:"status"`
 }

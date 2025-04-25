@@ -9,7 +9,7 @@ import (
 	"github.com/fatih/color"
 	"github.com/gorilla/websocket"
 
-	websocketModels "my-api/internal/models/websocket"
+	sharedModel "my-api/internal/models/shared"
 	"my-api/internal/services"
 	"my-api/internal/types"
 	"my-api/internal/utils"
@@ -68,7 +68,7 @@ func TalkToWebSocket(token string, message string, interlocutor string) (string,
 	}
 }
 
-func TalkToPreprocess(msg websocketModels.MakeDecisionRequest, entity_names []string) (string, error, bool) {
+func TalkToPreprocess(msg sharedModel.MakeDecisionRequest, entity_names []string) (string, error, bool) {
 	from, err := utils.GetUserIDFromJWT(msg.Token)
 
 	if err != nil {
@@ -120,7 +120,7 @@ func TalkToPreprocess(msg websocketModels.MakeDecisionRequest, entity_names []st
 
 func MakeDecisionWebSocket(
 	conn *websocket.Conn,
-	msg websocketModels.MakeDecisionRequest,
+	msg sharedModel.MakeDecisionRequest,
 	sendResponse types.SendResponseFunc,
 	sendError types.SendErrorFunc,
 ) {
@@ -157,7 +157,7 @@ func MakeDecisionWebSocket(
 			"message": "Error while calling MakeDecision service",
 		})
 		return
-	}
+	}	
 
 	if strings.Contains(back, "TalkTo:") {
 

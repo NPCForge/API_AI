@@ -109,25 +109,25 @@ func GetNewMessages(receiver string) ([]websocketModels.Message, error) {
 	}
 
 	query := `WITH filtered_messages AS (
-    SELECT m.id, m.sender_user_id, m.message, m.timestamp
-    FROM messages m
-    JOIN message_receivers mr ON m.id = mr.message_id
-    WHERE mr.receiver_user_id = $1
-    AND mr.is_new_message = TRUE
-)
-SELECT 
-    fm.sender_user_id,
-    sender_entity.name AS SenderName,
-    fm.message,
-    ARRAY_AGG(receiver_entity.name) AS ReceiverNames
-FROM filtered_messages fm
-JOIN entity sender_entity ON fm.sender_user_id = sender_entity.id
-JOIN message_receivers mr ON fm.id = mr.message_id
-JOIN entity receiver_entity ON mr.receiver_user_id = receiver_entity.id
-GROUP BY fm.id, fm.sender_user_id, sender_entity.name, fm.message, fm.timestamp
-ORDER BY fm.timestamp
-LIMIT 5;
-`
+		SELECT m.id, m.sender_user_id, m.message, m.timestamp
+		FROM messages m
+		JOIN message_receivers mr ON m.id = mr.message_id
+		WHERE mr.receiver_user_id = $1
+		AND mr.is_new_message = TRUE
+	)
+	SELECT
+		fm.sender_user_id,
+		sender_entity.name AS SenderName,
+		fm.message,
+		ARRAY_AGG(receiver_entity.name) AS ReceiverNames
+	FROM filtered_messages fm
+	JOIN entity sender_entity ON fm.sender_user_id = sender_entity.id
+	JOIN message_receivers mr ON fm.id = mr.message_id
+	JOIN entity receiver_entity ON mr.receiver_user_id = receiver_entity.id
+	GROUP BY fm.id, fm.sender_user_id, sender_entity.name, fm.message, fm.timestamp
+	ORDER BY fm.timestamp
+	LIMIT 5;
+	`
 
 	rows, err := db.Query(query, receiver)
 	if err != nil {
@@ -165,21 +165,6 @@ LIMIT 5;
 		println("Error after rows")
 		return nil, err
 	}
-
-	//if len(messageIDs) > 0 {
-	//	updateQuery := `UPDATE message_receivers SET is_new_message = FALSE WHERE message_id IN (` + placeholders(len(messageIDs)) + `) AND receiver_user_id = $1;`
-	//	args := make([]interface{}, len(messageIDs)+1)
-	//	for i, id := range messageIDs {
-	//		args[i] = id
-	//	}
-	//	args[len(messageIDs)] = receiver
-	//
-	//	_, err = db.Exec(updateQuery, args...)
-	//	if err != nil {
-	//		println("Error updating messages:", err.Error())
-	//		return nil, err
-	//	}
-	//}
 
 	return messages, nil
 }

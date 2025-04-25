@@ -21,7 +21,7 @@ func ConnectHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	pass, err := service.ConnectService(req.Password, req.Identifier)
+	pass, id, err := service.ConnectService(req.Password, req.Identifier)
 	var res httpModels.ConnectResponse
 
 	if err != nil {
@@ -34,6 +34,7 @@ func ConnectHandler(w http.ResponseWriter, r *http.Request) {
 		res = httpModels.ConnectResponse{
 			Message:  "Successfully connected",
 			Status:   200,
+			Id:       id,
 			TmpToken: pass,
 		}
 	}

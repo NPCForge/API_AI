@@ -8,20 +8,20 @@ import (
 	"strconv"
 )
 
-func ConnectService(password string, identifier string) (string, error) {
+func ConnectService(password string, identifier string) (string, string, error) {
 	id, err := services.ConnectRefacto(password, identifier)
 
 	if err != nil {
-		return "", errors.New("error connecting service")
+		return "", "", errors.New("error connecting service")
 	}
 
 	key, err := utils.GenerateJWT(strconv.Itoa(id))
 
 	if err != nil {
-		return "", errors.New("error while registering, JWT")
+		return "", "", errors.New("error while registering, JWT")
 	}
 
 	pkg.SetToken(strconv.Itoa(id), key)
 
-	return key, nil
+	return key, strconv.Itoa(id), nil
 }

@@ -42,9 +42,10 @@ func CreateEntityHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	resp := sharedModel.ResponseCreateEntity{
-		Id:      fmt.Sprintf("%d", id),
-		Message: "Entity created successfully",
-		Status:  "success",
+		Id:       fmt.Sprintf("%d", id),
+		Message:  "Entity created successfully",
+		Checksum: req.Checksum,
+		Status:   "success",
 	}
 
 	w.Header().Set("Content-Type", "application/json")

@@ -2,9 +2,10 @@ package websocketHandlers
 
 import (
 	"encoding/json"
-	"github.com/gorilla/websocket"
 	websocketModels "my-api/internal/models/websocket"
 	service "my-api/internal/services/merged"
+
+	"github.com/gorilla/websocket"
 )
 
 func ConnectHandlerWebSocket(
@@ -30,7 +31,7 @@ func ConnectHandlerWebSocket(
 		return
 	}
 
-	private, err := service.ConnectService(msg.Password, msg.Identifier)
+	private, id, err := service.ConnectService(msg.Password, msg.Identifier)
 
 	if err != nil {
 		sendError(conn, initialRoute, map[string]interface{}{
@@ -41,5 +42,6 @@ func ConnectHandlerWebSocket(
 
 	sendResponse(conn, initialRoute, map[string]interface{}{
 		"token": private,
+		"id":    id,
 	})
 }
