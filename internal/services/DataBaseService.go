@@ -109,23 +109,24 @@ func GetNewMessages(receiver string) ([]websocketModels.Message, error) {
 	}
 
 	query := `WITH filtered_messages AS (
-		SELECT m.id, m.sender_user_id, m.message, m.timestamp
-		FROM messages m
-		JOIN message_receivers mr ON m.id = mr.message_id
-		WHERE mr.receiver_user_id = $1
-		AND mr.is_new_message = TRUE
+    SELECT messages.id, messages.sender_user_id, messages.message, messages.timestamp
+    FROM messages
+    JOIN message_receivers ON messages.id = message_receivers.message_id
+    WHERE message_receivers.receiver_user_id = $1
+      AND message_receivers.is_new_message = TRUE
 	)
 	SELECT
-		fm.sender_user_id,
-		sender_entity.name AS SenderName,
-		fm.message,
+		filtered_messages.sender_user_id,
+		entity.name AS SenderName,
+		filtered_messages.message,
 		ARRAY_AGG(receiver_entity.name) AS ReceiverNames
-	FROM filtered_messages fm
-	JOIN entity sender_entity ON fm.sender_user_id = sender_entity.id
-	JOIN message_receivers mr ON fm.id = mr.message_id
-	JOIN entity receiver_entity ON mr.receiver_user_id = receiver_entity.id
-	GROUP BY fm.id, fm.sender_user_id, sender_entity.name, fm.message, fm.timestamp
-	ORDER BY fm.timestamp
+	FROM filtered_messages
+	JOIN entity ON filtered_messages.sender_user_id = entity.id
+	JOIN message_receivers ON filtered_messages.id = message_receivers.message_id
+	JOIN entity AS receiver_entity ON message_receivers.receiver_user_id = receiver_entity.id
+	GROUP BY filtered_messages.id, filtered_messages.sender_user_id, entity.name,
+	filtered_messages.message, filtered_messages.timestamp
+	ORDER BY filtered_messages.timestamp
 	LIMIT 5;
 	`
 
