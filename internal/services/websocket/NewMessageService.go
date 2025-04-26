@@ -29,7 +29,7 @@ func NewMessageWebSocket(
 	}
 
 	for _, receiver := range msg.Receivers {
-		receiverId, err := services.GetEntityByName(receiver)
+		receiverId, err := services.GetEntityIDByName(receiver)
 		if err != nil {
 			color.Red("❌ Error while getting IDs: %v", err)
 			sendError(conn, initialRoute, map[string]interface{}{

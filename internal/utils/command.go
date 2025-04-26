@@ -2,10 +2,10 @@ package utils
 
 import (
 	"bufio"
+	"my-api/internal/services"
 	"os"
 	"strings"
 
-	"my-api/internal/services"
 	"my-api/pkg"
 
 	"github.com/fatih/color"

@@ -17,7 +17,7 @@ func GetIDFromDB(checksum string) (int, error) {
 	db := config.GetDB()
 
 	var id int
-	query := `SELECT id FROM entity WHERE checksum = $1`
+	query := `SELECT id FROM entities WHERE checksum = $1`
 	err := db.QueryRow(query, checksum).Scan(&id)
 
 	if err == sql.ErrNoRows {
@@ -99,74 +99,50 @@ func placeholders(n int) string {
 	return strings.Join(placeholders, ", ")
 }
 
-func GetNewMessages(receiver string) ([]websocketModels.Message, error) {
+// Refacto ✅
+func GetNewMessages(Checksum string) (*sql.Rows, string, error) {
 	db := config.GetDB()
-	receiverName, err := GetNameByID(receiver)
+	receiverName, err := GetEntityNameByChecksum(Checksum)
 
 	if err != nil {
-		return nil, err
+		return nil, "", err
 	}
 
 	query := `WITH filtered_messages AS (
-    SELECT messages.id, messages.sender_user_id, messages.message, messages.timestamp
-    FROM messages
-    JOIN message_receivers ON messages.id = message_receivers.message_id
-    WHERE message_receivers.receiver_user_id = $1
-      AND message_receivers.is_new_message = TRUE
+		SELECT messages.id, messages.sender_user_id, messages.message, messages.timestamp
+		FROM messages
+		JOIN message_receivers ON messages.id = message_receivers.message_id
+		WHERE message_receivers.receiver_user_id = $1
+		  AND message_receivers.is_new_message = TRUE
 	)
 	SELECT
 		filtered_messages.sender_user_id,
-		entity.name AS SenderName,
+		entities.name AS SenderName,
 		filtered_messages.message,
 		ARRAY_AGG(receiver_entity.name) AS ReceiverNames
-	FROM filtered_messages
-	JOIN entity ON filtered_messages.sender_user_id = entity.id
-	JOIN message_receivers ON filtered_messages.id = message_receivers.message_id
-	JOIN entity AS receiver_entity ON message_receivers.receiver_user_id = receiver_entity.id
-	GROUP BY filtered_messages.id, filtered_messages.sender_user_id, entity.name,
-	filtered_messages.message, filtered_messages.timestamp
-	ORDER BY filtered_messages.timestamp
-	LIMIT 5;
+		FROM filtered_messages
+		JOIN entities ON filtered_messages.sender_user_id = entities.id
+		JOIN message_receivers ON filtered_messages.id = message_receivers.message_id
+		JOIN entities AS receiver_entity ON message_receivers.receiver_user_id = receiver_entity.id
+		GROUP BY filtered_messages.id, filtered_messages.sender_user_id, entities.name,
+		filtered_messages.message, filtered_messages.timestamp
+		ORDER BY filtered_messages.timestamp
+		LIMIT 5;
 	`
 
-	rows, err := db.Query(query, receiver)
+	rows, err := db.Query(query, Checksum)
 	if err != nil {
-		println("Error after query:", err.Error())
-		return nil, err
+		pkg.DisplayContext("Error after query:", pkg.Error, err)
+		return nil, "", err
 	}
-	defer rows.Close()
-
-	var messages []websocketModels.Message
-	var messageIDs []int
-
-	for rows.Next() {
-		var senderUserID, messageID int
-		var receiverNames pq.StringArray
-		var msg websocketModels.Message
-
-		err := rows.Scan(&senderUserID, &msg.SenderName, &msg.Message, &receiverNames)
+	defer func(rows *sql.Rows) {
+		err := rows.Close()
 		if err != nil {
-			println("Error after row scan:", err.Error())
-			return nil, err
+			pkg.DisplayContext("Error closing rows:", pkg.Error, err)
 		}
-		msg.ReceiverNames = receiverNames
+	}(rows)
 
-		for i, r := range receiverNames {
-			if r == receiverName {
-				receiverNames[i] = "You"
-			}
-		}
-
-		messages = append(messages, msg)
-		messageIDs = append(messageIDs, messageID)
-	}
-
-	if err := rows.Err(); err != nil {
-		println("Error after rows")
-		return nil, err
-	}
-
-	return messages, nil
+	return rows, receiverName, nil
 }
 
 func GetDiscussion(from string, to string) ([]websocketModels.Message, error) {
@@ -200,10 +176,15 @@ ORDER BY fm.timestamp`
 
 	rows, err := db.Query(query, from, to)
 	if err != nil {
-		println("Error after query")
+		pkg.DisplayContext("Error after query:", pkg.Error, err)
 		return nil, err
 	}
-	defer rows.Close()
+	defer func(rows *sql.Rows) {
+		err := rows.Close()
+		if err != nil {
+			pkg.DisplayContext("Error after row close:", pkg.Error, err)
+		}
+	}(rows)
 
 	var messages []websocketModels.Message
 
@@ -214,7 +195,7 @@ ORDER BY fm.timestamp`
 
 		err := rows.Scan(&senderUserID, &msg.SenderName, &msg.Message, &receiverNames)
 		if err != nil {
-			println("Error after row scan:", err.Error())
+			pkg.DisplayContext("Error after row scan:", pkg.Error, err)
 			return nil, err
 		}
 		msg.ReceiverNames = receiverNames
@@ -233,7 +214,7 @@ ORDER BY fm.timestamp`
 	}
 
 	if err := rows.Err(); err != nil {
-		println("Error after rows")
+		pkg.DisplayContext("Error after row scan:", pkg.Error, err)
 		return nil, err
 	}
 
@@ -263,7 +244,7 @@ func NewMessage(senderId int, receiverId int, message string) (int64, error) {
 	return id, nil
 }
 
-func GetEntityByName(name string) (string, error) {
+func GetEntityIDByName(name string) (string, error) {
 	db := config.GetDB()
 
 	var entity string
@@ -486,7 +467,12 @@ func GetEntitiesByUserID(userID string) ([]models.Entity, error) {
 	if err != nil {
 		return nil, fmt.Errorf("error querying entities: %w", err)
 	}
-	defer rows.Close()
+	defer func(rows *sql.Rows) {
+		err := rows.Close()
+		if err != nil {
+			pkg.DisplayContext("Error after row close: ", pkg.Error, err)
+		}
+	}(rows)
 
 	var entities []models.Entity
 
@@ -510,6 +496,42 @@ func GetEntitiesOwnerByChecksum(checksum string) (int, error) {
 
 	query := `
 		SELECT user_id
+		FROM entities
+		WHERE checksum = $1
+	`
+
+	var id int
+	err := db.QueryRow(query, checksum).Scan(&id)
+	if err != nil {
+		return -1, fmt.Errorf("erreur lors de la récupération de l'utilisateur : %w", err)
+	}
+
+	return id, nil
+}
+
+func GetEntityNameByChecksum(checksum string) (string, error) {
+	db := config.GetDB()
+
+	query := `
+		SELECT name
+		FROM entities
+		WHERE checksum = $1
+	`
+
+	var name string
+	err := db.QueryRow(query, checksum).Scan(&name)
+	if err != nil {
+		return "", fmt.Errorf("erreur lors de la récupération de l'utilisateur : %w", err)
+	}
+
+	return name, nil
+}
+
+func GetEntityIdByChecksum(checksum string) (int, error) {
+	db := config.GetDB()
+
+	query := `
+		SELECT id
 		FROM entities
 		WHERE checksum = $1
 	`
