@@ -3,10 +3,8 @@ package service
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
-	"my-api/pkg"
-
 	"github.com/go-resty/resty/v2"
+	"io/ioutil"
 
 	"my-api/config"
 	httpModels "my-api/internal/models/http"
@@ -36,11 +34,11 @@ func GptSimpleRequest(userPrompt string, systemPrompt string) (string, error) {
 		},
 	}
 
-	pkg.DisplayContext("GPTTalkToRequest: \n"+
-		"UserPrompt = {\n"+userPrompt+"\n}\n"+
-		"SystemPrompt = {\n"+systemPrompt+"\n}\n",
-		pkg.Debug,
-	)
+	//pkg.DisplayContext("GPTTalkToRequest: \n"+
+	//	"UserPrompt = \n{\n"+userPrompt+"\n}\n"+
+	//	"SystemPrompt = \n{\n"+systemPrompt+"\n}\n",
+	//	pkg.Debug,
+	//)
 
 	// Create the request body
 	body := httpModels.ChatGptSimpleRequestBody{

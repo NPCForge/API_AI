@@ -5,15 +5,17 @@ import (
 	"log"
 	sharedModel "my-api/internal/models/shared"
 	service "my-api/internal/services/merged"
-	"my-api/pkg"
 	"net/http"
 )
 
-func RemoveHandler(w http.ResponseWriter, r *http.Request) {
+func RemoveUserHandler(w http.ResponseWriter, r *http.Request) {
 	var req sharedModel.RemoveUserRequest
 	var res sharedModel.RemoveUserResponse
 
-	// delete
+	res = sharedModel.RemoveUserResponse{
+		Message: "Successfully deleted",
+		Status:  200,
+	}
 
 	if r.Method != http.MethodPost {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
@@ -27,23 +29,14 @@ func RemoveHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if req.DeleteUserIdentifier == "" || req.Token == "" {
-		http.Error(w, "Bad Request", http.StatusBadRequest)
-		return
-	}
+	token := r.Header.Get("Authorization")
 
-	disconnect, err := service.RemoveService(req.Token, req.DeleteUserIdentifier)
+	err = service.RemoveUserService(token, req.UserName)
 
 	if err != nil {
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
-
-	if disconnect {
-		pkg.DisplayContext("Remove Handler need to Disconnect HTTP", pkg.Debug)
-	}
-
-	// disconnect
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(res.Status)

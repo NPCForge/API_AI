@@ -8,23 +8,28 @@ import (
 	"net/http"
 )
 
-func TestWebSocketAndHTTPDisconnect() error {
-	err := disconnectViaWebSocket()
+func NewMessage() error {
+
+	fmt.Println("NewMessage WS")
+	err := newMessageViaWebSocket()
 	if err != nil {
+		fmt.Println("Error removing user via WebSocket:", err)
 		return err
 	}
 
-	err = disconnectEntityViaHTTP()
+	fmt.Println("NewMessage HTTP")
+	err = newMessageViaHTTP()
 	if err != nil {
+		fmt.Println("Error removing user via Http:", err)
 		return err
 	}
-
 	return nil
 }
 
-func disconnectViaWebSocket() error {
+func newMessageViaWebSocket() error {
 	conn, _, err := websocket.DefaultDialer.Dial(WsConnectURL, nil)
 	if err != nil {
+
 		return fmt.Errorf("WebSocket dial error: %w", err)
 	}
 	defer conn.Close()
@@ -35,9 +40,12 @@ func disconnectViaWebSocket() error {
 		return fmt.Errorf("WebSocket token read error: %w", err)
 	}
 
-	message := map[string]string{
-		"action": "Disconnect",
-		"token":  token,
+	message := map[string]interface{}{
+		"action":    "NewMessage",
+		"sender":    "WsChecksum",
+		"receivers": []string{"WsChecksum"},
+		"message":   "hello ws",
+		"token":     token,
 	}
 
 	if err := conn.WriteJSON(message); err != nil {
@@ -55,30 +63,35 @@ func disconnectViaWebSocket() error {
 	}
 
 	status := response["status"]
-	if status == "Success" {
-		return fmt.Errorf("missing success in response: %s", msg)
+	if status != "success" {
+		return fmt.Errorf("received error: %s", msg)
 	}
 
 	return nil
 }
 
-func disconnectEntityViaHTTP() error {
+func newMessageViaHTTP() error {
 	token, err := ReadTokens("http")
 
 	if err != nil {
 		return fmt.Errorf("http read token error: %w", err)
 	}
 
-	payload := map[string]string{}
+	payload := map[string]interface{}{
+		"sender":    "HttpChecksum",
+		"receivers": []string{"HttpChecksum"},
+		"message":   "hello http",
+		"token":     token,
+	}
 
 	body, _ := json.Marshal(payload)
 
-	req, err := http.NewRequest("POST", HttpBaseUrl+"Disconnect", bytes.NewBuffer(body))
+	req, err := http.NewRequest("POST", HttpBaseUrl+"NewMessage", bytes.NewBuffer(body))
 	if err != nil {
 		return fmt.Errorf("error building request: %w", err)
 	}
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", token) // ✅ correct
+	req.Header.Set("Authorization", token)
 
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
@@ -86,8 +99,14 @@ func disconnectEntityViaHTTP() error {
 	}
 	defer resp.Body.Close()
 
-	if resp.StatusCode != 200 {
-		return fmt.Errorf("unexpected status code: %d", resp.StatusCode)
+	var data map[string]interface{}
+	if err := json.NewDecoder(resp.Body).Decode(&data); err != nil {
+		return fmt.Errorf("JSON decode failed: %w", err)
+	}
+
+	status, ok := data["status"].(float64)
+	if !ok || status != 200 {
+		return fmt.Errorf("invalid status received: %v", data)
 	}
 
 	return nil

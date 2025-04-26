@@ -8,7 +8,7 @@ import (
 	"net/http"
 )
 
-func TestWebSocketAndHTTPCreateEntity() error {
+func CreateEntity() error {
 	wsID, err := createEntityViaWebSocket()
 	if err != nil {
 		return err

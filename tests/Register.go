@@ -9,7 +9,7 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-func TestWebsocketAndHTTPRegister() error {
+func Register() error {
 	err := ResetTokenFile()
 
 	isWSRegisterSuccess := true

@@ -1,4 +1,4 @@
-﻿package sharedModel
+package sharedModel
 
 type DisconnectRequest struct {
 	Action string `json:"action"`

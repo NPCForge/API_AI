@@ -8,35 +8,28 @@ import (
 	"net/http"
 )
 
-type Entity struct {
-	Id       string `json:"id"`
-	Checksum string `json:"checksum"`
-}
+func RemoveUser() error {
 
-type GetEntitiesResponse struct {
-	Route    string   `json:"route"`
-	Status   string   `json:"status"`
-	Message  string   `json:"message"`
-	Entities []Entity `json:"entities"`
-}
-
-func GetEntities() error {
-	err := getEntitiesViaWebSocket()
+	fmt.Println("RemoveUser WS")
+	err := removeUserViaWebSocket()
 	if err != nil {
+		fmt.Println("Error removing user via WebSocket:", err)
 		return err
 	}
 
-	err = getEntitiesViaHTTP()
+	fmt.Println("RemoveUser HTTP")
+	err = removeUserViaHTTP()
 	if err != nil {
+		fmt.Println("Error removing user via Http:", err)
 		return err
 	}
-
 	return nil
 }
 
-func getEntitiesViaWebSocket() error {
+func removeUserViaWebSocket() error {
 	conn, _, err := websocket.DefaultDialer.Dial(WsConnectURL, nil)
 	if err != nil {
+
 		return fmt.Errorf("WebSocket dial error: %w", err)
 	}
 	defer conn.Close()
@@ -48,7 +41,7 @@ func getEntitiesViaWebSocket() error {
 	}
 
 	message := map[string]string{
-		"action": "GetEntities",
+		"action": "RemoveUser",
 		"token":  token,
 	}
 
@@ -61,21 +54,20 @@ func getEntitiesViaWebSocket() error {
 		return fmt.Errorf("read message failed: %w", err)
 	}
 
-	var response GetEntitiesResponse
+	var response map[string]string
 	if err := json.Unmarshal(msg, &response); err != nil {
 		return fmt.Errorf("invalid JSON: %w", err)
 	}
 
-	status := response.Status
-
+	status := response["status"]
 	if status != "success" {
-		return fmt.Errorf("invalid status: %s", status)
+		return fmt.Errorf("received error: %s", msg)
 	}
 
 	return nil
 }
 
-func getEntitiesViaHTTP() error {
+func removeUserViaHTTP() error {
 	token, err := ReadTokens("http")
 
 	if err != nil {
@@ -86,7 +78,7 @@ func getEntitiesViaHTTP() error {
 
 	body, _ := json.Marshal(payload)
 
-	req, err := http.NewRequest("GET", HttpBaseUrl+"GetEntities", bytes.NewBuffer(body))
+	req, err := http.NewRequest("POST", HttpBaseUrl+"RemoveUser", bytes.NewBuffer(body))
 	if err != nil {
 		return fmt.Errorf("error building request: %w", err)
 	}
@@ -104,10 +96,9 @@ func getEntitiesViaHTTP() error {
 		return fmt.Errorf("JSON decode failed: %w", err)
 	}
 
-	status, ok := data["status"].(string)
-
-	if !ok || status != "success" {
-		return fmt.Errorf("invalid status: %s", status)
+	status, ok := data["status"].(float64)
+	if !ok || status != 200 {
+		return fmt.Errorf("invalid status received: %v", data)
 	}
 
 	return nil

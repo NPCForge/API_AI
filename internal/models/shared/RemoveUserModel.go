@@ -1,9 +1,9 @@
-﻿package sharedModel
+package sharedModel
 
 type RemoveUserRequest struct {
-	Action               string `json:"string"`
-	Token                string `json:"token"`
-	DeleteUserIdentifier string `json:"deleteUser"`
+	Action   string `json:"string"`
+	Token    string `json:"token"`
+	UserName string `json:"username"`
 }
 
 type RemoveUserResponse struct {

@@ -8,25 +8,13 @@ import (
 	"net/http"
 )
 
-type Entity struct {
-	Id       string `json:"id"`
-	Checksum string `json:"checksum"`
-}
-
-type GetEntitiesResponse struct {
-	Route    string   `json:"route"`
-	Status   string   `json:"status"`
-	Message  string   `json:"message"`
-	Entities []Entity `json:"entities"`
-}
-
-func GetEntities() error {
-	err := getEntitiesViaWebSocket()
+func Disconnect() error {
+	err := disconnectViaWebSocket()
 	if err != nil {
 		return err
 	}
 
-	err = getEntitiesViaHTTP()
+	err = disconnectEntityViaHTTP()
 	if err != nil {
 		return err
 	}
@@ -34,7 +22,7 @@ func GetEntities() error {
 	return nil
 }
 
-func getEntitiesViaWebSocket() error {
+func disconnectViaWebSocket() error {
 	conn, _, err := websocket.DefaultDialer.Dial(WsConnectURL, nil)
 	if err != nil {
 		return fmt.Errorf("WebSocket dial error: %w", err)
@@ -48,7 +36,7 @@ func getEntitiesViaWebSocket() error {
 	}
 
 	message := map[string]string{
-		"action": "GetEntities",
+		"action": "Disconnect",
 		"token":  token,
 	}
 
@@ -61,21 +49,20 @@ func getEntitiesViaWebSocket() error {
 		return fmt.Errorf("read message failed: %w", err)
 	}
 
-	var response GetEntitiesResponse
+	var response map[string]string
 	if err := json.Unmarshal(msg, &response); err != nil {
 		return fmt.Errorf("invalid JSON: %w", err)
 	}
 
-	status := response.Status
-
+	status := response["status"]
 	if status != "success" {
-		return fmt.Errorf("invalid status: %s", status)
+		return fmt.Errorf("missing success in response: %s", msg)
 	}
 
 	return nil
 }
 
-func getEntitiesViaHTTP() error {
+func disconnectEntityViaHTTP() error {
 	token, err := ReadTokens("http")
 
 	if err != nil {
@@ -86,12 +73,12 @@ func getEntitiesViaHTTP() error {
 
 	body, _ := json.Marshal(payload)
 
-	req, err := http.NewRequest("GET", HttpBaseUrl+"GetEntities", bytes.NewBuffer(body))
+	req, err := http.NewRequest("POST", HttpBaseUrl+"Disconnect", bytes.NewBuffer(body))
 	if err != nil {
 		return fmt.Errorf("error building request: %w", err)
 	}
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", token)
+	req.Header.Set("Authorization", token) // ✅ correct
 
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
@@ -99,15 +86,8 @@ func getEntitiesViaHTTP() error {
 	}
 	defer resp.Body.Close()
 
-	var data map[string]interface{}
-	if err := json.NewDecoder(resp.Body).Decode(&data); err != nil {
-		return fmt.Errorf("JSON decode failed: %w", err)
-	}
-
-	status, ok := data["status"].(string)
-
-	if !ok || status != "success" {
-		return fmt.Errorf("invalid status: %s", status)
+	if resp.StatusCode != 200 {
+		return fmt.Errorf("unexpected status code: %d", resp.StatusCode)
 	}
 
 	return nil

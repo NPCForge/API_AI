@@ -7,13 +7,12 @@ import (
 	"my-api/internal/models"
 	websocketModels "my-api/internal/models/websocket"
 	"my-api/pkg"
-	"strings"
 
 	"github.com/lib/pq"
 )
 
-// GetIDFromDB récupère l'ID correspondant à un checksum donné
-func GetIDFromDB(checksum string) (int, error) {
+// GetIDByChecksum get entity id for a given checksum
+func GetIDByChecksum(checksum string) (int, error) {
 	db := config.GetDB()
 
 	var id int
@@ -51,7 +50,7 @@ func GetPromptByID(id string) (string, error) {
 	db := config.GetDB()
 
 	var prompt string
-	query := `SELECT prompt FROM entity WHERE id = $1`
+	query := `SELECT prompt FROM entities WHERE id = $1`
 	err := db.QueryRow(query, id).Scan(&prompt)
 
 	if err == sql.ErrNoRows {
@@ -67,7 +66,7 @@ func GetNameByID(id string) (string, error) {
 	db := config.GetDB()
 
 	var name string
-	query := `SELECT name FROM entity WHERE id = $1`
+	query := `SELECT name FROM entities WHERE id = $1`
 	err := db.QueryRow(query, id).Scan(&name)
 
 	if err != nil {
@@ -91,48 +90,41 @@ func ResetGame() error {
 	return nil
 }
 
-func placeholders(n int) string {
-	placeholders := make([]string, n)
-	for i := range placeholders {
-		placeholders[i] = "$" + fmt.Sprintf("%d", i+1)
-	}
-	return strings.Join(placeholders, ", ")
-}
-
 // Refacto ✅
-func GetNewMessages(Checksum string) (*sql.Rows, string, error) {
+func GetNewMessages(ReceiverEntityChecksum string) (*sql.Rows, string, error) {
 	db := config.GetDB()
-	receiverName, err := GetEntityNameByChecksum(Checksum)
+	receiverName, err := GetEntityNameByChecksum(ReceiverEntityChecksum)
+	receiverId, err := GetIDByChecksum(ReceiverEntityChecksum)
 
 	if err != nil {
 		return nil, "", err
 	}
 
 	query := `WITH filtered_messages AS (
-		SELECT messages.id, messages.sender_user_id, messages.message, messages.timestamp
+		SELECT messages.id, messages.sender_entity_id, messages.message, messages.timestamp
 		FROM messages
 		JOIN message_receivers ON messages.id = message_receivers.message_id
-		WHERE message_receivers.receiver_user_id = $1
+		WHERE message_receivers.receiver_entity_id = $1
 		  AND message_receivers.is_new_message = TRUE
 	)
 	SELECT
-		filtered_messages.sender_user_id,
+		filtered_messages.sender_entity_id,
 		entities.name AS SenderName,
 		filtered_messages.message,
 		ARRAY_AGG(receiver_entity.name) AS ReceiverNames
 		FROM filtered_messages
-		JOIN entities ON filtered_messages.sender_user_id = entities.id
+		JOIN entities ON filtered_messages.sender_entity_id = entities.id
 		JOIN message_receivers ON filtered_messages.id = message_receivers.message_id
-		JOIN entities AS receiver_entity ON message_receivers.receiver_user_id = receiver_entity.id
-		GROUP BY filtered_messages.id, filtered_messages.sender_user_id, entities.name,
+		JOIN entities AS receiver_entity ON message_receivers.receiver_entity_id = receiver_entity.id
+		GROUP BY filtered_messages.id, filtered_messages.sender_entity_id, entities.name,
 		filtered_messages.message, filtered_messages.timestamp
 		ORDER BY filtered_messages.timestamp
 		LIMIT 5;
 	`
 
-	rows, err := db.Query(query, Checksum)
+	rows, err := db.Query(query, receiverId)
 	if err != nil {
-		pkg.DisplayContext("Error after query:", pkg.Error, err)
+		pkg.DisplayContext("Error after GetNewMessages query:", pkg.Error, err)
 		return nil, "", err
 	}
 	defer func(rows *sql.Rows) {
@@ -154,29 +146,28 @@ func GetDiscussion(from string, to string) ([]websocketModels.Message, error) {
 	}
 
 	query := `WITH filtered_messages AS (
-    SELECT m.id, m.sender_user_id, m.message, m.timestamp
+    SELECT m.id, m.sender_entity_id, m.message, m.timestamp
     FROM messages m
     JOIN message_receivers mr ON m.id = mr.message_id
-    WHERE m.sender_user_id = $1
-    AND mr.receiver_user_id = $2
-  	OR m.sender_user_id = $2
-  	AND mr.receiver_user_id = $1
+    WHERE (m.sender_entity_id = $1 AND mr.receiver_entity_id = $2)
+       OR (m.sender_entity_id = $2 AND mr.receiver_entity_id = $1)
 )
 SELECT 
-    fm.sender_user_id,
+    fm.sender_entity_id,
     sender_entity.name AS SenderName,
     fm.message,
     ARRAY_AGG(receiver_entity.name) AS ReceiverNames
 FROM filtered_messages fm
-JOIN entity sender_entity ON fm.sender_user_id = sender_entity.id
+JOIN entities sender_entity ON fm.sender_entity_id = sender_entity.id
 JOIN message_receivers mr ON fm.id = mr.message_id
-JOIN entity receiver_entity ON mr.receiver_user_id = receiver_entity.id
-GROUP BY fm.id, fm.sender_user_id, sender_entity.name, fm.message, fm.timestamp
-ORDER BY fm.timestamp`
+JOIN entities receiver_entity ON mr.receiver_entity_id = receiver_entity.id
+GROUP BY fm.id, fm.sender_entity_id, sender_entity.name, fm.message, fm.timestamp
+ORDER BY fm.timestamp
+`
 
 	rows, err := db.Query(query, from, to)
 	if err != nil {
-		pkg.DisplayContext("Error after query:", pkg.Error, err)
+		pkg.DisplayContext("Error after GetDiscussion query:", pkg.Error, err)
 		return nil, err
 	}
 	defer func(rows *sql.Rows) {
@@ -189,18 +180,18 @@ ORDER BY fm.timestamp`
 	var messages []websocketModels.Message
 
 	for rows.Next() {
-		var senderUserID int
+		var senderEntityID int
 		var msg websocketModels.Message
 		var receiverNames pq.StringArray
 
-		err := rows.Scan(&senderUserID, &msg.SenderName, &msg.Message, &receiverNames)
+		err := rows.Scan(&senderEntityID, &msg.SenderName, &msg.Message, &receiverNames)
 		if err != nil {
 			pkg.DisplayContext("Error after row scan:", pkg.Error, err)
 			return nil, err
 		}
 		msg.ReceiverNames = receiverNames
 
-		if fmt.Sprintf("%d", senderUserID) == from {
+		if fmt.Sprintf("%d", senderEntityID) == from {
 			msg.SenderName = "You"
 		}
 
@@ -224,7 +215,7 @@ ORDER BY fm.timestamp`
 func NewMessage(senderId int, receiverId int, message string) (int64, error) {
 	db := config.GetDB()
 
-	query := `INSERT INTO messages (sender_user_id, message) VALUES ($1, $2) RETURNING id`
+	query := `INSERT INTO messages (sender_entity_id, message) VALUES ($1, $2) RETURNING id`
 
 	var id int64
 	err := db.QueryRow(query, senderId, message).Scan(&id)
@@ -233,7 +224,7 @@ func NewMessage(senderId int, receiverId int, message string) (int64, error) {
 		return 0, fmt.Errorf("error while insert message : %w", err)
 	}
 
-	query = `INSERT INTO message_receivers (message_id, receiver_user_id) VALUES ($1, $2)`
+	query = `INSERT INTO message_receivers (message_id, receiver_entity_id) VALUES ($1, $2)`
 
 	_, err = db.Exec(query, id, receiverId)
 
@@ -248,7 +239,7 @@ func GetEntityIDByName(name string) (string, error) {
 	db := config.GetDB()
 
 	var entity string
-	query := `SELECT id FROM entity WHERE LOWER(name) = LOWER($1)`
+	query := `SELECT id FROM entities WHERE LOWER(name) = LOWER($1)`
 	err := db.QueryRow(query, name).Scan(&entity)
 
 	if err == sql.ErrNoRows {
@@ -285,7 +276,7 @@ func IsExist(checksum string) (bool, error) {
 	db := config.GetDB()
 
 	var exists bool
-	query := `SELECT EXISTS (SELECT 1 FROM entity WHERE checksum = $1)`
+	query := `SELECT EXISTS (SELECT 1 FROM entities WHERE checksum = $1)`
 	err := db.QueryRow(query, checksum).Scan(&exists)
 
 	if err != nil {
@@ -299,7 +290,7 @@ func IsExistById(id string) (bool, error) {
 	db := config.GetDB()
 
 	var exists bool
-	query := `SELECT EXISTS (SELECT 1 FROM entity WHERE id = $1)`
+	query := `SELECT EXISTS (SELECT 1 FROM entities WHERE id = $1)`
 	err := db.QueryRow(query, id).Scan(&exists)
 
 	if err != nil {
@@ -311,7 +302,7 @@ func IsExistById(id string) (bool, error) {
 
 // === Refacto === ✅
 
-func RegisterRefacto(password string, identifier string) (int, error) {
+func Register(password string, identifier string) (int, error) {
 	db := config.GetDB()
 
 	// Hasher le mot de passe
@@ -406,7 +397,7 @@ func DropEntityByChecksum(checksum string) error {
 	return nil
 }
 
-func GetPermissionByIdRefacto(id int) (int, error) {
+func GetPermissionById(id int) (int, error) {
 	db := config.GetDB()
 
 	var perm int
@@ -420,7 +411,7 @@ func GetPermissionByIdRefacto(id int) (int, error) {
 	return perm, nil
 }
 
-func GetUserIdByNameRefacto(name string) (int, error) {
+func GetUserIdByName(name string) (int, error) {
 	db := config.GetDB()
 
 	var perm int
@@ -434,7 +425,7 @@ func GetUserIdByNameRefacto(name string) (int, error) {
 	return perm, nil
 }
 
-func ConnectRefacto(password string, identifier string) (int, error) {
+func Connect(password string, identifier string) (int, error) {
 	db := config.GetDB()
 
 	var userId int
@@ -522,6 +513,23 @@ func GetEntityNameByChecksum(checksum string) (string, error) {
 	err := db.QueryRow(query, checksum).Scan(&name)
 	if err != nil {
 		return "", fmt.Errorf("erreur lors de la récupération de l'utilisateur : %w", err)
+	}
+
+	return name, nil
+}
+
+func GetEntityNameByID(id int) (string, error) {
+	db := config.GetDB()
+	query := `
+SELECT name
+FROM entities
+WHERE id = $1
+`
+
+	var name string
+	err := db.QueryRow(query, id).Scan(&name)
+	if err != nil {
+		return "", fmt.Errorf("error while querying entity: %w", err)
 	}
 
 	return name, nil

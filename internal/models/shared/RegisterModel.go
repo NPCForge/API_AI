@@ -1,4 +1,4 @@
-﻿package sharedModel
+package sharedModel
 
 type RegisterRequest struct {
 	Action     string `json:"action"`

@@ -33,6 +33,5 @@ func RemoveEntityHandlerWebSocket(
 
 	sendResponse(conn, route, map[string]interface{}{
 		"message": "Entity successfully deleted",
-		"status":  200,
 	})
 }

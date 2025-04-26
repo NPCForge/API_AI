@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	sharedModel "my-api/internal/models/shared"
 	service "my-api/internal/services/merged"
+	"my-api/pkg"
 
 	"github.com/gorilla/websocket"
 )
@@ -34,8 +35,9 @@ func MakeDecisionHandlerWebSocket(
 	msg, err := service.MakeDecisionService(req.Message, req.Checksum, req.Token)
 
 	if err != nil {
+		pkg.DisplayContext("internal server error", pkg.Error, err)
 		sendError(conn, initialRoute, map[string]interface{}{
-			"message": err,
+			"message": "Internal server error",
 		})
 		return
 	}

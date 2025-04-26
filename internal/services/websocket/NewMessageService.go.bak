@@ -19,7 +19,7 @@ func NewMessageWebSocket(
 
 	color.Cyan("✉️  Handling new message from: %s", msg.Sender)
 
-	senderId, err := services.GetIDFromDB(msg.Sender)
+	senderId, err := services.GetIDByChecksum(msg.Sender)
 	if err != nil {
 		color.Red("❌ Failed to get sender ID: %v", err)
 		sendError(conn, initialRoute, map[string]interface{}{

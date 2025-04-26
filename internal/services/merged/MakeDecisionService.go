@@ -71,7 +71,7 @@ func getAllDiscussionsForEntity(EntityChecksum string, InterlocutorNames []strin
 		interlocutorID, err := services.GetEntityIDByName(name)
 
 		if err != nil {
-			pkg.DisplayContext("Cannot get Interlocutor ID using checksum", pkg.Error, err)
+			pkg.DisplayContext("Cannot get Interlocutor ID using name: "+name, pkg.Error, err)
 			return "", err
 		}
 
@@ -145,7 +145,7 @@ func askLLMForDecision(Message string, Checksum string) (string, error) {
 		return "", err
 	}
 
-	Message += "New Messages: {" + strings.Join(newMessages, ", ") + "}"
+	Message += "\nNew Messages: {" + strings.Join(newMessages, ", ") + "}"
 
 	// Read the "curriculum.txt" file to get the system prompt
 	systemPrompt, err := readPromptFromFile("prompts/curriculum.txt")

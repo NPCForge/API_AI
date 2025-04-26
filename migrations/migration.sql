@@ -18,17 +18,17 @@ CREATE TABLE IF NOT EXISTS entities (
 
 CREATE TABLE IF NOT EXISTS messages (
     id SERIAL PRIMARY KEY,
-    sender_user_id INT NOT NULL,
+    sender_entity_id INT NOT NULL,
     message TEXT NOT NULL,
     timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (sender_user_id) REFERENCES entities(id) ON DELETE CASCADE
+    FOREIGN KEY (sender_entity_id) REFERENCES entities(id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS message_receivers (
     message_id INT NOT NULL,
-    receiver_user_id INT NOT NULL,
+    receiver_entity_id INT NOT NULL,
     is_new_message BOOLEAN NOT NULL DEFAULT TRUE,
-    PRIMARY KEY (message_id, receiver_user_id),
+    PRIMARY KEY (message_id, receiver_entity_id),
     FOREIGN KEY (message_id) REFERENCES messages(id) ON DELETE CASCADE,
-    FOREIGN KEY (receiver_user_id) REFERENCES entities(id) ON DELETE CASCADE
+    FOREIGN KEY (receiver_entity_id) REFERENCES entities(id) ON DELETE CASCADE
 );

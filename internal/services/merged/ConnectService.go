@@ -9,7 +9,7 @@ import (
 )
 
 func ConnectService(password string, identifier string) (string, string, error) {
-	id, err := services.ConnectRefacto(password, identifier)
+	id, err := services.Connect(password, identifier)
 
 	if err != nil {
 		return "", "", errors.New("error connecting service")

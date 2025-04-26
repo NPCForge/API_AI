@@ -10,7 +10,7 @@ import (
 
 func RegisterService(password string, identifier string) (string, string, error) {
 	// pkg.DisplayContext("RegisterService", pkg.Debug)
-	id, err := services.RegisterRefacto(password, identifier)
+	id, err := services.Register(password, identifier)
 
 	if err != nil {
 		return "", "", errors.New("error while registering, DB")

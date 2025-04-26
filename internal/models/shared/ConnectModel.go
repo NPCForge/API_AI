@@ -1,4 +1,4 @@
-﻿package sharedModel
+package sharedModel
 
 type ConnectRequest struct {
 	Password   string `json:"password"`

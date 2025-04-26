@@ -8,7 +8,7 @@ import (
 	"net/http"
 )
 
-func TestWebSocketAndHTTPConnect() error {
+func Connect() error {
 	err := ResetTokenFile()
 
 	isWSConnectSuccess := true

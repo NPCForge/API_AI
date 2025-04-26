@@ -1,4 +1,4 @@
-﻿package service
+package service
 
 import (
 	"my-api/internal/services"

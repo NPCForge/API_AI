@@ -5,6 +5,7 @@ import (
 	"log"
 	websocketModels "my-api/internal/models/websocket"
 	websocketServices "my-api/internal/services/websocket"
+	"my-api/pkg"
 
 	"my-api/internal/utils"
 
@@ -41,8 +42,8 @@ var actions = []websocketModels.WebSocketDispatcher{
 		Protected: true,
 	},
 	{
-		Name:      "Remove",
-		Handler:   RemoveHandlerWebSocket,
+		Name:      "RemoveUser",
+		Handler:   RemoveUserHandlerWebSocket,
 		Protected: true,
 	},
 	{
@@ -107,6 +108,7 @@ func handleWebSocketMessage(conn *websocket.Conn, messageType int, message []byt
 			return
 		}
 	}
+	pkg.DisplayContext("Cannot find matching route for: "+msg.Action, pkg.Error)
 }
 
 func WebsocketHandler(w http.ResponseWriter, r *http.Request) {

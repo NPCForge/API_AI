@@ -45,7 +45,7 @@ func main() {
 	r.HandleFunc("/Register", httpHandlers.RegisterHandler).Methods("POST")
 
 	protected.HandleFunc("/Disconnect", httpHandlers.DisconnectHandler).Methods("POST")
-	protected.HandleFunc("/Remove", httpHandlers.RemoveHandler).Methods("POST")
+	protected.HandleFunc("/RemoveUser", httpHandlers.RemoveUserHandler).Methods("POST")
 	protected.HandleFunc("/MakeDecision", httpHandlers.MakeDecisionHandler).Methods("POST")
 	protected.HandleFunc("/CreateEntity", httpHandlers.CreateEntityHandler).Methods("POST")
 	protected.HandleFunc("/RemoveEntity", httpHandlers.RemoveEntityHandler).Methods("POST")
