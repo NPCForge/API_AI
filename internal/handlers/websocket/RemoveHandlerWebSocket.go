@@ -2,7 +2,7 @@ package websocketHandlers
 
 import (
 	"encoding/json"
-	websocketModels "my-api/internal/models/websocket"
+	sharedModel "my-api/internal/models/shared"
 	service "my-api/internal/services/merged"
 	"my-api/pkg"
 
@@ -14,7 +14,7 @@ func RemoveHandlerWebSocket(
 	sendResponse func(*websocket.Conn, string, map[string]interface{}),
 	sendError func(*websocket.Conn, string, map[string]interface{}),
 ) {
-	var req websocketModels.RemoveRequestRefacto
+	var req sharedModel.RemoveUserRequest
 	var initialRoute = "Remove"
 
 	err := json.Unmarshal(message, &req)

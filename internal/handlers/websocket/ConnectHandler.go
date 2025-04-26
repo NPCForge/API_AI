@@ -2,7 +2,7 @@ package websocketHandlers
 
 import (
 	"encoding/json"
-	websocketModels "my-api/internal/models/websocket"
+	sharedModel "my-api/internal/models/shared"
 	service "my-api/internal/services/merged"
 
 	"github.com/gorilla/websocket"
@@ -13,7 +13,7 @@ func ConnectHandlerWebSocket(
 	sendResponse func(*websocket.Conn, string, map[string]interface{}),
 	sendError func(*websocket.Conn, string, map[string]interface{}),
 ) {
-	var msg websocketModels.ConnectRequestRefacto
+	var msg sharedModel.ConnectRequest
 	var initialRoute = "Connect"
 
 	err := json.Unmarshal(message, &msg)

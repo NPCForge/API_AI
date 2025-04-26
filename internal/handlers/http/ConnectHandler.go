@@ -3,7 +3,7 @@ package httpHandlers
 import (
 	"encoding/json"
 	"log"
-	httpModels "my-api/internal/models/http"
+	sharedModel "my-api/internal/models/shared"
 	service "my-api/internal/services/merged"
 	"net/http"
 )
@@ -14,7 +14,7 @@ func ConnectHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var req httpModels.ConnectRequestRefacto
+	var req sharedModel.ConnectRequest
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
 		http.Error(w, "Bad Request", http.StatusBadRequest)
@@ -22,16 +22,16 @@ func ConnectHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	pass, id, err := service.ConnectService(req.Password, req.Identifier)
-	var res httpModels.ConnectResponse
+	var res sharedModel.ConnectResponse
 
 	if err != nil {
-		res = httpModels.ConnectResponse{
+		res = sharedModel.ConnectResponse{
 			Message:  "Unauthorized",
 			Status:   401,
 			TmpToken: "",
 		}
 	} else {
-		res = httpModels.ConnectResponse{
+		res = sharedModel.ConnectResponse{
 			Message:  "Successfully connected",
 			Status:   200,
 			Id:       id,

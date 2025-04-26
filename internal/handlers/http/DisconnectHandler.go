@@ -3,13 +3,13 @@ package httpHandlers
 import (
 	"encoding/json"
 	"log"
-	httpModels "my-api/internal/models/http"
+	sharedModel "my-api/internal/models/shared"
 	service "my-api/internal/services/merged"
 	"net/http"
 )
 
 func DisconnectHandler(w http.ResponseWriter, r *http.Request) {
-	res := httpModels.DisconnectResponse{
+	res := sharedModel.DisconnectResponse{
 		Message: "Successfully disconnected",
 		Status:  200,
 	}
@@ -18,7 +18,7 @@ func DisconnectHandler(w http.ResponseWriter, r *http.Request) {
 	err := service.DisconnectService(token)
 
 	if err != nil {
-		res = httpModels.DisconnectResponse{
+		res = sharedModel.DisconnectResponse{
 			Message: "Error while disconnecting",
 			Status:  401,
 		}

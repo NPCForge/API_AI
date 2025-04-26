@@ -3,7 +3,7 @@ package websocketHandlers
 import (
 	"encoding/json"
 	"github.com/gorilla/websocket"
-	websocketModels "my-api/internal/models/websocket"
+	sharedModel "my-api/internal/models/shared"
 	service "my-api/internal/services/merged"
 )
 
@@ -12,7 +12,7 @@ func DisconnectHandlerWebsocket(
 	sendResponse func(*websocket.Conn, string, map[string]interface{}),
 	sendError func(*websocket.Conn, string, map[string]interface{}),
 ) {
-	var msg websocketModels.DisconnectRequest
+	var msg sharedModel.DisconnectRequest
 	var initialRoute = "Disconnect"
 
 	err := json.Unmarshal(message, &msg)

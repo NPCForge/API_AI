@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"my-api/config"
 	"my-api/internal/models"
-	httpModels "my-api/internal/models/http"
 	websocketModels "my-api/internal/models/websocket"
 	"my-api/pkg"
 	"strings"
@@ -326,34 +325,6 @@ func IsExistById(id string) (bool, error) {
 	}
 
 	return exists, nil
-}
-
-func Register(checksum string, entity httpModels.RegisterRequest) (int64, error) {
-	db := config.GetDB()
-
-	query := `INSERT INTO entity (name, checksum, prompt, created) VALUES ($1, $2, $3, CURRENT_DATE) RETURNING id`
-
-	var id int64
-	err := db.QueryRow(query, entity.Name, checksum, entity.Prompt).Scan(&id)
-	if err != nil {
-		return 0, fmt.Errorf("error while registering entity : %w", err)
-	}
-
-	return id, nil
-}
-
-func RegisterWebsocket(checksum string, entity websocketModels.RegisterRequest) (int64, error) {
-	db := config.GetDB()
-
-	query := `INSERT INTO entity (name, checksum, prompt, created) VALUES ($1, $2, $3, CURRENT_DATE) RETURNING id`
-
-	var id int64
-	err := db.QueryRow(query, entity.Name, checksum, entity.Prompt).Scan(&id)
-	if err != nil {
-		return 0, fmt.Errorf("error while registering entity : %w", err)
-	}
-
-	return id, nil
 }
 
 // === Refacto === ✅

@@ -3,7 +3,7 @@ package websocketHandlers
 import (
 	"encoding/json"
 	"my-api/config"
-	websocketModels "my-api/internal/models/websocket"
+	sharedModel "my-api/internal/models/shared"
 	service "my-api/internal/services/merged"
 
 	"github.com/gorilla/websocket"
@@ -15,7 +15,7 @@ func RegisterHandlerWebsocket(
 	sendResponse func(*websocket.Conn, string, map[string]interface{}),
 	sendError func(*websocket.Conn, string, map[string]interface{}),
 ) {
-	var msg websocketModels.RegisterRequestRefacto
+	var msg sharedModel.RegisterRequest
 	var initialRoute = "Register"
 
 	err := json.Unmarshal(message, &msg)
@@ -35,7 +35,6 @@ func RegisterHandlerWebsocket(
 
 	apiKey := config.GetEnvVariable("API_KEY_REGISTER")
 
-	// Check if the token is valid
 	if msg.Token != apiKey {
 		sendError(conn, initialRoute, map[string]interface{}{
 			"message": "Invalid API Key",

@@ -3,15 +3,15 @@ package httpHandlers
 import (
 	"encoding/json"
 	"log"
-	httpModels "my-api/internal/models/http"
+	sharedModel "my-api/internal/models/shared"
 	service "my-api/internal/services/merged"
 	"my-api/pkg"
 	"net/http"
 )
 
 func RemoveHandler(w http.ResponseWriter, r *http.Request) {
-	var req httpModels.RemoveRequestRefacto
-	var res httpModels.RemoveResponseRefacto
+	var req sharedModel.RemoveUserRequest
+	var res sharedModel.RemoveUserResponse
 
 	// delete
 

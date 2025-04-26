@@ -3,15 +3,15 @@ package httpHandlers
 import (
 	"encoding/json"
 	"my-api/config"
-	httpModels "my-api/internal/models/http"
+	sharedModel "my-api/internal/models/shared"
 	service "my-api/internal/services/merged"
 	"my-api/pkg"
 	"net/http"
 )
 
 func RegisterHandler(w http.ResponseWriter, r *http.Request) {
-	var req httpModels.RegisterRequestRefacto
-	var res httpModels.RegisterResponse
+	var req sharedModel.RegisterRequest
+	var res sharedModel.RegisterResponse
 
 	if r.Method != http.MethodPost {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)

@@ -27,11 +27,6 @@ type BodyEntity struct {
 	Name   string `json:"name"`
 }
 
-type DisconnectResponse struct {
-	Message string `json:"message"`
-	Status  int    `json:"status"`
-}
-
 type RemoveResponse struct {
 	Message string `json:"message"`
 	Status  int    `json:"status"`
