@@ -2,7 +2,6 @@ package websocketServices
 
 import (
 	"fmt"
-	"my-api/internal/handlers"
 	"regexp"
 	"strings"
 
@@ -177,27 +176,13 @@ func MakeDecisionWebSocket(
 				})
 				return
 			}
-			if handlers.WS.IsBlocking {
-				sendError(conn, initialRoute, map[string]interface{}{
-					"message": "API currently blocked",
-				})
-				return
-			} else {
-				sendResponse(conn, initialRoute, map[string]interface{}{
-					"message": "TalkTo: " + namesString + "\nMessage: " + message,
-				})
-				return
-			}
+			sendResponse(conn, initialRoute, map[string]interface{}{
+				"message": "TalkTo: " + namesString + "\nMessage: " + message,
+			})
+			return
 		}
 	}
 
-	if handlers.WS.IsBlocking {
-		sendError(conn, initialRoute, map[string]interface{}{
-			"message": "API currently blocked",
-		})
-		return
-	} else {
-		println("[MakeDecisionWebSocket]: Unable to find TalkTo")
-	}
+	println("[MakeDecisionWebSocket]: Unable to find TalkTo")
 
 }

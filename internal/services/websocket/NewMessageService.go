@@ -3,7 +3,6 @@ package websocketServices
 import (
 	"github.com/fatih/color"
 	"github.com/gorilla/websocket"
-	websocketHandlers "my-api/internal/handlers"
 	websocketModels "my-api/internal/models/websocket"
 	"my-api/internal/services"
 	"my-api/internal/types"
@@ -35,13 +34,6 @@ func NewMessageWebSocket(
 			color.Red("❌ Error while getting IDs: %v", err)
 			sendError(conn, initialRoute, map[string]interface{}{
 				"message": "Error in getting IDs",
-			})
-			return
-		}
-
-		if websocketHandlers.WS.IsBlocking {
-			sendError(conn, initialRoute, map[string]interface{}{
-				"message": "API currently blocked",
 			})
 			return
 		}

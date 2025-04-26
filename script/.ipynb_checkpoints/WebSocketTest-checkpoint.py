@@ -25,7 +25,7 @@ def on_close(ws, close_status_code, close_msg):
 
 def on_open(ws):
     print("Connexion ouverte")
-    print("Entrez une commande (Register, Connection, TakeDecision, Disconnect, Remove, NewMessage) ou 'exit' pour quitter.")
+    print("Entrez une commande (Register, Connection, MakeDecision, Disconnect, Remove, NewMessage) ou 'exit' pour quitter.")
 
 def listen_to_stdin(ws):
     global token, action
@@ -50,10 +50,10 @@ def listen_to_stdin(ws):
                 "action": "Connection",
                 "checksum": "azerty"
             })
-        elif user_input.lower() == "takedecision":
+        elif user_input.lower() == "MakeDecision":
             if token:
                 message = json.dumps({
-                    "action": "TakeDecision",
+                    "action": "MakeDecision",
                     "token": token,
                     "message": "Nearby Entities: {[Name = Tom]}"
                 })
@@ -90,7 +90,7 @@ def listen_to_stdin(ws):
                 print("Erreur : Aucun token disponible. Veuillez vous connecter ou vous enregistrer d'abord.")
                 continue
         else:
-            print("Commande inconnue. Essayez 'Register', 'Connection', 'TakeDecision', 'Disconnect', 'Remove', 'NewMessage' ou 'exit'.")
+            print("Commande inconnue. Essayez 'Register', 'Connection', 'MakeDecision', 'Disconnect', 'Remove', 'NewMessage' ou 'exit'.")
             continue
 
         action = user_input.lower()
