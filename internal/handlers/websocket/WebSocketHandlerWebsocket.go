@@ -47,7 +47,7 @@ var actions = []websocketModels.WebSocketDispatcher{
 	},
 	{
 		Name:      "NewMessage",
-		Handler:   NewMessageHandlerWebsocket,
+		Handler:   NewMessageHandlerWebSocket,
 		Protected: true,
 	},
 	{
