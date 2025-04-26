@@ -157,7 +157,7 @@ func MakeDecisionWebSocket(
 			"message": "Error while calling MakeDecision service",
 		})
 		return
-	}	
+	}
 
 	if strings.Contains(back, "TalkTo:") {
 
