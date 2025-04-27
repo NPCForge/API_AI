@@ -3,19 +3,21 @@ package services
 import (
 	"database/sql"
 	"fmt"
+	"my-api/config"
+	"my-api/internal/models"
+	sharedModel "my-api/internal/models/shared"
+	"my-api/pkg"
 	"strings"
 
-	"my-api/config"
-	httpModels "my-api/internal/models/http"
-	websocketModels "my-api/internal/models/websocket"
+	"github.com/lib/pq"
 )
 
-// GetIDFromDB récupère l'ID correspondant à un checksum donné
-func GetIDFromDB(checksum string) (int, error) {
+// GetIDByChecksum get entity id for a given checksum
+func GetIDByChecksum(checksum string) (int, error) {
 	db := config.GetDB()
 
 	var id int
-	query := `SELECT id FROM entity WHERE checksum = $1`
+	query := `SELECT id FROM entities WHERE checksum = $1`
 	err := db.QueryRow(query, checksum).Scan(&id)
 
 	if err == sql.ErrNoRows {
@@ -31,7 +33,7 @@ func GetIDFromDB(checksum string) (int, error) {
 func DropAllUser() (int64, error) {
 	db := config.GetDB()
 
-	query := `DELETE FROM entity`
+	query := `DELETE FROM users`
 	result, err := db.Exec(query)
 	if err != nil {
 		return 0, fmt.Errorf("erreur lors de la suppression : %w", err)
@@ -49,7 +51,7 @@ func GetPromptByID(id string) (string, error) {
 	db := config.GetDB()
 
 	var prompt string
-	query := `SELECT prompt FROM entity WHERE id = $1`
+	query := `SELECT prompt FROM entities WHERE id = $1`
 	err := db.QueryRow(query, id).Scan(&prompt)
 
 	if err == sql.ErrNoRows {
@@ -65,7 +67,7 @@ func GetNameByID(id string) (string, error) {
 	db := config.GetDB()
 
 	var name string
-	query := `SELECT name FROM entity WHERE id = $1`
+	query := `SELECT name FROM entities WHERE id = $1`
 	err := db.QueryRow(query, id).Scan(&name)
 
 	if err != nil {
@@ -75,132 +77,207 @@ func GetNameByID(id string) (string, error) {
 	return name, nil
 }
 
-func placeholders(n int) string {
-	placeholders := make([]string, n)
-	for i := range placeholders {
-		placeholders[i] = "$" + fmt.Sprintf("%d", i+1)
-	}
-	return strings.Join(placeholders, ", ")
-}
-
-func GetNewMessages(receiver string) ([]websocketModels.Message, error) {
+func ResetGame() error {
 	db := config.GetDB()
 
-	query := `
-	SELECT d.id, d.sender_user_id, d.receiver_user_id, e1.name AS sender_name, e2.name AS receiver_name, d.message, d.is_new_message
-	FROM discussions d
-	JOIN entity e1 ON d.sender_user_id = e1.id
-	JOIN entity e2 ON d.receiver_user_id = e2.id
-	WHERE d.receiver_user_id = $1 AND d.is_new_message = TRUE
-	ORDER BY d.timestamp
-	LIMIT 5;
-	`
+	query := "DELETE FROM discussions"
 
-	rows, err := db.Query(query, receiver)
+	_, err := db.Exec(query)
+
 	if err != nil {
-		println("Error after query:", err.Error())
-		return nil, err
+		return fmt.Errorf("error while getting name : %w", err)
 	}
-	defer rows.Close()
 
-	var messages []websocketModels.Message
-	var messageIDs []int
+	return nil
+}
+
+func formatNewMessages(rows *sql.Rows, selfName string) ([]string, error) {
+	var formattedMessages []string
 
 	for rows.Next() {
-		var msg websocketModels.Message
-		var senderUserID, receiverUserID, messageID int
+		var senderUserID int
+		var receiverNames pq.StringArray
+		var senderName, messageContent string
 
-		err := rows.Scan(&messageID, &senderUserID, &receiverUserID, &msg.SenderName, &msg.ReceiverName, &msg.Message, &msg.IsNewMessage)
+		err := rows.Scan(&senderUserID, &senderName, &messageContent, &receiverNames)
 		if err != nil {
-			println("Error after row scan:", err.Error())
+			pkg.DisplayContext("Error after row scan: ", pkg.Error, err)
 			return nil, err
 		}
 
-		if fmt.Sprintf("%d", receiverUserID) == receiver {
-			msg.ReceiverName = "You"
+		for i, value := range receiverNames {
+			if value == selfName {
+				receiverNames[i] = "You"
+			}
 		}
 
-		messages = append(messages, msg)
-		messageIDs = append(messageIDs, messageID)
+		formattedMessages = append(
+			formattedMessages,
+			fmt.Sprintf("[%s -> %s: \"%s\"]", senderName, strings.Join(receiverNames, ", "), messageContent),
+		)
 	}
 
 	if err := rows.Err(); err != nil {
-		println("Error after rows")
+		pkg.DisplayContext("Error after rows iteration: ", pkg.Error, err)
 		return nil, err
 	}
 
-	if len(messageIDs) > 0 {
-		updateQuery := `UPDATE discussions SET is_new_message = FALSE WHERE id IN (` + placeholders(len(messageIDs)) + `);`
-		args := make([]interface{}, len(messageIDs))
-		for i, id := range messageIDs {
-			args[i] = id
-		}
-
-		_, err = db.Exec(updateQuery, args...)
-		if err != nil {
-			println("Error updating messages:", err.Error())
-			return nil, err
-		}
-	}
-
-	return messages, nil
+	return formattedMessages, nil
 }
 
-func GetDiscussion(from string, to string) ([]websocketModels.Message, error) {
+// Refacto ✅
+func GetNewMessages(ReceiverEntityChecksum string) ([]string, error) {
 	db := config.GetDB()
+	receiverName, err := GetEntityNameByChecksum(ReceiverEntityChecksum)
+	receiverId, err := GetIDByChecksum(ReceiverEntityChecksum)
 
-	query := `
-	SELECT d.sender_user_id, d.receiver_user_id, e1.name AS sender_name, e2.name AS receiver_name, d.message, d.is_new_message
-	FROM discussions d
-	JOIN entity e1 ON d.sender_user_id = e1.id
-	JOIN entity e2 ON d.receiver_user_id = e2.id
-	WHERE (d.sender_user_id = $1 AND d.receiver_user_id = $2)
-	   OR (d.sender_user_id = $2 AND d.receiver_user_id = $1)
-	ORDER BY d.timestamp;
+	if err != nil {
+		return nil, err
+	}
+
+	query := `WITH filtered_messages AS (
+		SELECT messages.id, messages.sender_entity_id, messages.message, messages.timestamp
+		FROM messages
+		JOIN message_receivers ON messages.id = message_receivers.message_id
+		WHERE message_receivers.receiver_entity_id = $1
+		  AND message_receivers.is_new_message = TRUE
+	)
+	SELECT
+		filtered_messages.sender_entity_id,
+		entities.name AS SenderName,
+		filtered_messages.message,
+		ARRAY_AGG(receiver_entity.name) AS ReceiverNames
+		FROM filtered_messages
+		JOIN entities ON filtered_messages.sender_entity_id = entities.id
+		JOIN message_receivers ON filtered_messages.id = message_receivers.message_id
+		JOIN entities AS receiver_entity ON message_receivers.receiver_entity_id = receiver_entity.id
+		GROUP BY filtered_messages.id, filtered_messages.sender_entity_id, entities.name,
+		filtered_messages.message, filtered_messages.timestamp
+		ORDER BY filtered_messages.timestamp
+		LIMIT 5;
 	`
+
+	rows, err := db.Query(query, receiverId)
+	if err != nil {
+		pkg.DisplayContext("Error after GetNewMessages query:", pkg.Error, err)
+		return nil, err
+	}
+
+	formatedMessages, err := formatNewMessages(rows, receiverName)
+
+	defer func(rows *sql.Rows) {
+		err := rows.Close()
+		if err != nil {
+			pkg.DisplayContext("Error closing rows:", pkg.Error, err)
+		}
+	}(rows)
+
+	return formatedMessages, nil
+}
+
+func GetDiscussion(from string, to string) ([]sharedModel.Message, error) {
+	db := config.GetDB()
+	receiverName, err := GetNameByID(from)
+
+	if err != nil {
+		return nil, err
+	}
+
+	query := `WITH filtered_messages AS (
+    SELECT m.id, m.sender_entity_id, m.message, m.timestamp
+    FROM messages m
+    JOIN message_receivers mr ON m.id = mr.message_id
+    WHERE (m.sender_entity_id = $1 AND mr.receiver_entity_id = $2)
+       OR (m.sender_entity_id = $2 AND mr.receiver_entity_id = $1)
+)
+SELECT 
+    fm.sender_entity_id,
+    sender_entity.name AS SenderName,
+    fm.message,
+    ARRAY_AGG(receiver_entity.name) AS ReceiverNames
+FROM filtered_messages fm
+JOIN entities sender_entity ON fm.sender_entity_id = sender_entity.id
+JOIN message_receivers mr ON fm.id = mr.message_id
+JOIN entities receiver_entity ON mr.receiver_entity_id = receiver_entity.id
+GROUP BY fm.id, fm.sender_entity_id, sender_entity.name, fm.message, fm.timestamp
+ORDER BY fm.timestamp
+`
 
 	rows, err := db.Query(query, from, to)
 	if err != nil {
-		println("Error after query")
+		pkg.DisplayContext("Error after GetDiscussion query:", pkg.Error, err)
 		return nil, err
 	}
-	defer rows.Close()
+	defer func(rows *sql.Rows) {
+		err := rows.Close()
+		if err != nil {
+			pkg.DisplayContext("Error after row close:", pkg.Error, err)
+		}
+	}(rows)
 
-	var messages []websocketModels.Message
+	var messages []sharedModel.Message
 
 	for rows.Next() {
-		var msg websocketModels.Message
-		var senderUserID, receiverUserID int
+		var senderEntityID int
+		var msg sharedModel.Message
+		var receiverNames pq.StringArray
 
-		err := rows.Scan(&senderUserID, &receiverUserID, &msg.SenderName, &msg.ReceiverName, &msg.Message, &msg.IsNewMessage)
+		err := rows.Scan(&senderEntityID, &msg.SenderName, &msg.Message, &receiverNames)
 		if err != nil {
-			println("Error after row scan:", err.Error())
+			pkg.DisplayContext("Error after row scan:", pkg.Error, err)
 			return nil, err
 		}
+		msg.ReceiverNames = receiverNames
 
-		if fmt.Sprintf("%d", senderUserID) == from {
+		if fmt.Sprintf("%d", senderEntityID) == from {
 			msg.SenderName = "You"
 		}
-		if fmt.Sprintf("%d", receiverUserID) == from {
-			msg.ReceiverName = "You"
+
+		for i, r := range receiverNames {
+			if r == receiverName {
+				receiverNames[i] = "You"
+			}
 		}
 
 		messages = append(messages, msg)
 	}
 
 	if err := rows.Err(); err != nil {
-		println("Error after rows")
+		pkg.DisplayContext("Error after row scan:", pkg.Error, err)
 		return nil, err
 	}
 
 	return messages, nil
 }
 
-func GetEntityByName(name string) (string, error) {
+func NewMessage(senderId int, receiverId int, message string) (int64, error) {
+	db := config.GetDB()
+
+	query := `INSERT INTO messages (sender_entity_id, message) VALUES ($1, $2) RETURNING id`
+
+	var id int64
+	err := db.QueryRow(query, senderId, message).Scan(&id)
+
+	if err != nil {
+		return 0, fmt.Errorf("error while insert message : %w", err)
+	}
+
+	query = `INSERT INTO message_receivers (message_id, receiver_entity_id) VALUES ($1, $2)`
+
+	_, err = db.Exec(query, id, receiverId)
+
+	if err != nil {
+		return 0, fmt.Errorf("error while insert message : %w", err)
+	}
+
+	return id, nil
+}
+
+func GetEntityIDByName(name string) (string, error) {
 	db := config.GetDB()
 
 	var entity string
-	query := `SELECT id FROM entity WHERE LOWER(name) = LOWER($1)`
+	query := `SELECT id FROM entities WHERE LOWER(name) = LOWER($1)`
 	err := db.QueryRow(query, name).Scan(&entity)
 
 	if err == sql.ErrNoRows {
@@ -210,33 +287,34 @@ func GetEntityByName(name string) (string, error) {
 	return entity, nil
 }
 
-func DropUser(id string) (string, error) {
+// refacto ✅
+func DropUser(id int) error {
 	db := config.GetDB()
 
-	query := `DELETE FROM entity WHERE id = $1`
+	query := `DELETE FROM users WHERE id = $1`
 	result, err := db.Exec(query, id)
 
 	if err != nil {
-		return "", fmt.Errorf("erreur lors de la suppression de l'utilisateur : %w", err)
+		return fmt.Errorf("erreur lors de la suppression de l'utilisateur : %w", err)
 	}
 
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
-		return "", fmt.Errorf("erreur lors de la vérification des lignes supprimées : %w", err)
+		return fmt.Errorf("erreur lors de la vérification des lignes supprimées : %w", err)
 	}
 
 	if rowsAffected == 0 {
-		return "", fmt.Errorf("aucun utilisateur avec cet id trouvé")
+		return fmt.Errorf("aucun utilisateur avec cet id trouvé")
 	}
 
-	return "success", nil
+	return nil
 }
 
 func IsExist(checksum string) (bool, error) {
 	db := config.GetDB()
 
 	var exists bool
-	query := `SELECT EXISTS (SELECT 1 FROM entity WHERE checksum = $1)`
+	query := `SELECT EXISTS (SELECT 1 FROM entities WHERE checksum = $1)`
 	err := db.QueryRow(query, checksum).Scan(&exists)
 
 	if err != nil {
@@ -250,7 +328,7 @@ func IsExistById(id string) (bool, error) {
 	db := config.GetDB()
 
 	var exists bool
-	query := `SELECT EXISTS (SELECT 1 FROM entity WHERE id = $1)`
+	query := `SELECT EXISTS (SELECT 1 FROM entities WHERE id = $1)`
 	err := db.QueryRow(query, id).Scan(&exists)
 
 	if err != nil {
@@ -260,43 +338,254 @@ func IsExistById(id string) (bool, error) {
 	return exists, nil
 }
 
-func Register(checksum string, entity httpModels.RegisterRequest) (int64, error) {
+// === Refacto === ✅
+
+func Register(password string, identifier string) (int, error) {
 	db := config.GetDB()
 
-	query := `INSERT INTO entity (name, checksum, prompt, created) VALUES ($1, $2, $3, CURRENT_DATE) RETURNING id`
+	// Hasher le mot de passe
+	pass, err := pkg.HashPassword(password)
 
-	var id int64
-	err := db.QueryRow(query, entity.Name, checksum, entity.Prompt).Scan(&id)
 	if err != nil {
-		return 0, fmt.Errorf("error while registering entity : %w", err)
+		return -1, fmt.Errorf("error hashing password: %w", err)
+	}
+
+	query := `
+		INSERT INTO users (name, password_hash, created)
+		VALUES ($1, $2, CURRENT_DATE)
+		RETURNING id
+	`
+
+	var id int
+	err = db.QueryRow(query, identifier, pass).Scan(&id)
+	if err != nil {
+		return -1, fmt.Errorf("error while registering user: %w", err)
 	}
 
 	return id, nil
 }
 
-func RegisterWebsocket(checksum string, entity websocketModels.RegisterRequest) (int64, error) {
+func CreateEntity(name string, prompt string, checksum string, id_owner string) (int, error) {
 	db := config.GetDB()
 
-	query := `INSERT INTO entity (name, checksum, prompt, created) VALUES ($1, $2, $3, CURRENT_DATE) RETURNING id`
+	query := `
+		INSERT INTO entities (user_id, name, checksum, prompt, created)
+		VALUES ($1, $2, $3, $4, CURRENT_DATE)
+		RETURNING id
+	`
 
-	var id int64
-	err := db.QueryRow(query, entity.Name, checksum, entity.Prompt).Scan(&id)
+	var id int
+	err := db.QueryRow(query, id_owner, name, checksum, prompt).Scan(&id)
 	if err != nil {
-		return 0, fmt.Errorf("error while registering entity : %w", err)
+		return -1, fmt.Errorf("error while registering user: %w", err)
 	}
 
 	return id, nil
 }
 
-func NewMessage(senderId int, receiverId string, message string) (int64, error) {
+func GetEntities(id_owner string) (ids []string, checksums []string, err error) {
 	db := config.GetDB()
 
-	query := `INSERT INTO discussions (sender_user_id, receiver_user_id, message) VALUES ($1, $2, $3) RETURNING id`
+	query := `SELECT id, checksum FROM entities WHERE user_id = $1`
 
-	var id int64
-	err := db.QueryRow(query, senderId, receiverId, message).Scan(&id)
+	rows, err := db.Query(query, id_owner)
+
 	if err != nil {
-		return 0, fmt.Errorf("error while insert message : %w", err)
+		return nil, nil, fmt.Errorf("error while getting entities: %w", err)
+	}
+
+	defer func(rows *sql.Rows) {
+		err := rows.Close()
+		if err != nil {
+			return
+		}
+	}(rows)
+
+	for rows.Next() {
+		var id string
+		var checksum string
+
+		if err := rows.Scan(&id, &checksum); err != nil {
+			return nil, nil, fmt.Errorf("error while scanning row: %w", err)
+		}
+
+		ids = append(ids, id)
+		checksums = append(checksums, checksum)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, nil, fmt.Errorf("rows iteration error: %w", err)
+	}
+
+	return ids, checksums, nil
+}
+
+func DropEntityByChecksum(checksum string) error {
+	db := config.GetDB()
+
+	query := `
+		DELETE FROM entities WHERE checksum = $1
+	`
+
+	_, err := db.Exec(query, checksum)
+	if err != nil {
+		return fmt.Errorf("error while deleting entity: %w", err)
+	}
+
+	return nil
+}
+
+func GetPermissionById(id int) (int, error) {
+	db := config.GetDB()
+
+	var perm int
+	query := `SELECT permission FROM users WHERE id = $1`
+	err := db.QueryRow(query, id).Scan(&perm)
+
+	if err != nil {
+		return -1, fmt.Errorf("erreur lors de la vérification de l'existence : %w", err)
+	}
+
+	return perm, nil
+}
+
+func GetUserIdByName(name string) (int, error) {
+	db := config.GetDB()
+
+	var perm int
+	query := `SELECT id FROM users WHERE name = $1`
+	err := db.QueryRow(query, name).Scan(&perm)
+
+	if err != nil {
+		return -1, fmt.Errorf("erreur lors de la vérification de l'existence : %w", err)
+	}
+
+	return perm, nil
+}
+
+func Connect(password string, identifier string) (int, error) {
+	db := config.GetDB()
+
+	var userId int
+	var pass string
+
+	query := `SELECT id, password_hash FROM users WHERE LOWER(name) = LOWER($1)`
+	err := db.QueryRow(query, identifier).Scan(&userId, &pass)
+
+	if err != nil {
+		return -1, fmt.Errorf("error while connecting user: %w", err)
+	}
+
+	if !pkg.CheckPasswordHash(password, pass) {
+		err = fmt.Errorf("error while connecting user")
+	}
+
+	return userId, nil
+}
+
+func GetEntitiesByUserID(userID string) ([]models.Entity, error) {
+	db := config.GetDB()
+
+	query := `
+		SELECT id, user_id, name, checksum, prompt, created
+		FROM entities
+		WHERE user_id = $1
+	`
+
+	rows, err := db.Query(query, userID)
+	if err != nil {
+		return nil, fmt.Errorf("error querying entities: %w", err)
+	}
+	defer func(rows *sql.Rows) {
+		err := rows.Close()
+		if err != nil {
+			pkg.DisplayContext("Error after row close: ", pkg.Error, err)
+		}
+	}(rows)
+
+	var entities []models.Entity
+
+	for rows.Next() {
+		var e models.Entity
+		if err := rows.Scan(&e.ID, &e.UserID, &e.Name, &e.Checksum, &e.Prompt, &e.Created); err != nil {
+			return nil, fmt.Errorf("error scanning entity: %w", err)
+		}
+		entities = append(entities, e)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("row iteration error: %w", err)
+	}
+
+	return entities, nil
+}
+
+func GetEntitiesOwnerByChecksum(checksum string) (int, error) {
+	db := config.GetDB()
+
+	query := `
+		SELECT user_id
+		FROM entities
+		WHERE checksum = $1
+	`
+
+	var id int
+	err := db.QueryRow(query, checksum).Scan(&id)
+	if err != nil {
+		return -1, fmt.Errorf("erreur lors de la récupération de l'utilisateur : %w", err)
+	}
+
+	return id, nil
+}
+
+func GetEntityNameByChecksum(checksum string) (string, error) {
+	db := config.GetDB()
+
+	query := `
+		SELECT name
+		FROM entities
+		WHERE checksum = $1
+	`
+
+	var name string
+	err := db.QueryRow(query, checksum).Scan(&name)
+	if err != nil {
+		return "", fmt.Errorf("erreur lors de la récupération de l'utilisateur : %w", err)
+	}
+
+	return name, nil
+}
+
+func GetEntityNameByID(id int) (string, error) {
+	db := config.GetDB()
+	query := `
+SELECT name
+FROM entities
+WHERE id = $1
+`
+
+	var name string
+	err := db.QueryRow(query, id).Scan(&name)
+	if err != nil {
+		return "", fmt.Errorf("error while querying entity: %w", err)
+	}
+
+	return name, nil
+}
+
+func GetEntityIdByChecksum(checksum string) (int, error) {
+	db := config.GetDB()
+
+	query := `
+		SELECT id
+		FROM entities
+		WHERE checksum = $1
+	`
+
+	var id int
+	err := db.QueryRow(query, checksum).Scan(&id)
+	if err != nil {
+		return -1, fmt.Errorf("erreur lors de la récupération de l'utilisateur : %w", err)
 	}
 
 	return id, nil

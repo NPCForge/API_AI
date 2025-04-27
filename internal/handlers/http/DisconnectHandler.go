@@ -3,30 +3,30 @@ package httpHandlers
 import (
 	"encoding/json"
 	"log"
-	httpModels "my-api/internal/models/http"
-	httpServices "my-api/internal/services/http"
+	sharedModel "my-api/internal/models/shared"
+	service "my-api/internal/services/merged"
 	"net/http"
 )
 
 func DisconnectHandler(w http.ResponseWriter, r *http.Request) {
-	res := httpModels.DisconnectResponse{
-		Message: "Deconnexion réussie",
+	res := sharedModel.DisconnectResponse{
+		Message: "Successfully disconnected",
 		Status:  200,
 	}
 
 	token := r.Header.Get("Authorization")
-	_, err := httpServices.Disconnect(token)
+	err := service.DisconnectService(token)
 
 	if err != nil {
-		res = httpModels.DisconnectResponse{
-			Message: "Erreur lors de la deconnexion",
+		res = sharedModel.DisconnectResponse{
+			Message: "Error while disconnecting",
 			Status:  401,
 		}
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
+	w.WriteHeader(res.Status)
 	if err := json.NewEncoder(w).Encode(res); err != nil {
-		log.Printf("Erreur lors de l'envoi de la réponse JSON : %v", err)
+		log.Printf("Error while sending json : %v", err)
 	}
 }
