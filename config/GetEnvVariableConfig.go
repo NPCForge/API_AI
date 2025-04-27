@@ -20,13 +20,13 @@ func setDefaultVariable() {
 
 // GetEnvVariable load environment variable from .env.local
 func GetEnvVariable(c string) string {
-	if err := godotenv.Load(".env.local"); err != nil {
-		DisplayContext("Error while loading .env.local", Error, true)
-	}
+	// Always load .env.local (it's safe)
+	_ = godotenv.Load(".env.local")
 
+	// Now read the environment variable
 	variable := os.Getenv(c)
 	if variable == "" {
-		DisplayContext(fmt.Sprintf("%s undefined in .env.local", c), Error, true)
+		DisplayContext(fmt.Sprintf("%s undefined", c), Error, true)
 	}
 
 	return variable
