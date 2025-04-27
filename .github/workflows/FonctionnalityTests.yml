@@ -26,8 +26,8 @@ jobs:
         with:
           go-version: '1.21'
 
-      - name: Copy .env.workflow to .env
-        run: cp .env.workflow .env.local
+      - name: Copy .env.exemple to .env
+        run: cp .env.exemple .env.local
 
       - name: Build and start services
         run: docker-compose up -d
