@@ -2,9 +2,9 @@
 
 on:
   push:
-    branches: [ main, dev, refacto ]
+    branches: [ main, dev ]
   pull_request:
-    branches: [ main, dev, refacto ]
+    branches: [ main, dev ]
 
 jobs:
   test:
