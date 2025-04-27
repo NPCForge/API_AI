@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"my-api/config"
 	"my-api/internal/models"
-	websocketModels "my-api/internal/models/websocket"
+	sharedModel "my-api/internal/models/shared"
 	"my-api/pkg"
 	"strings"
 
@@ -175,7 +175,7 @@ func GetNewMessages(ReceiverEntityChecksum string) ([]string, error) {
 	return formatedMessages, nil
 }
 
-func GetDiscussion(from string, to string) ([]websocketModels.Message, error) {
+func GetDiscussion(from string, to string) ([]sharedModel.Message, error) {
 	db := config.GetDB()
 	receiverName, err := GetNameByID(from)
 
@@ -215,11 +215,11 @@ ORDER BY fm.timestamp
 		}
 	}(rows)
 
-	var messages []websocketModels.Message
+	var messages []sharedModel.Message
 
 	for rows.Next() {
 		var senderEntityID int
-		var msg websocketModels.Message
+		var msg sharedModel.Message
 		var receiverNames pq.StringArray
 
 		err := rows.Scan(&senderEntityID, &msg.SenderName, &msg.Message, &receiverNames)

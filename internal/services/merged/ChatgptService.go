@@ -7,7 +7,7 @@ import (
 	"io/ioutil"
 
 	"my-api/config"
-	httpModels "my-api/internal/models/http"
+	sharedModels "my-api/internal/models/shared"
 )
 
 // Function to read the content of a file
@@ -23,7 +23,7 @@ func GptSimpleRequest(userPrompt string, systemPrompt string) (string, error) {
 	GptClient := resty.New()
 
 	// Prepare messages with a system prompt
-	var Messages = []httpModels.ChatGptSimpleRequestBodyMessage{
+	var Messages = []sharedModels.ChatGptSimpleRequestBodyMessage{
 		{
 			Role:    "system",
 			Content: systemPrompt,
@@ -35,7 +35,7 @@ func GptSimpleRequest(userPrompt string, systemPrompt string) (string, error) {
 	}
 
 	// Create the request body
-	body := httpModels.ChatGptSimpleRequestBody{
+	body := sharedModels.ChatGptSimpleRequestBody{
 		Model:    "gpt-3.5-turbo",
 		Messages: Messages,
 	}
@@ -52,7 +52,7 @@ func GptSimpleRequest(userPrompt string, systemPrompt string) (string, error) {
 	}
 
 	// Process the response
-	var response httpModels.ChatGPTResponse
+	var response sharedModels.ChatGPTResponse
 	if err := json.Unmarshal(resp.Body(), &response); err != nil {
 		return "", fmt.Errorf("error decoding the response: %w", err)
 	}
