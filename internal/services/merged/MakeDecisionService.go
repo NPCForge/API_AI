@@ -1,10 +1,8 @@
 package service
 
 import (
-	"database/sql"
 	"errors"
 	"fmt"
-	"github.com/lib/pq"
 	"my-api/internal/services"
 	"my-api/internal/utils"
 	"my-api/pkg"
@@ -96,50 +94,9 @@ func getAllDiscussionsForEntity(EntityChecksum string, InterlocutorNames []strin
 	return allDiscussions, nil
 }
 
-func formatNewMessages(rows *sql.Rows, selfName string) ([]string, error) {
-	var formattedMessages []string
-
-	for rows.Next() {
-		var senderUserID int
-		var receiverNames pq.StringArray
-		var senderName, messageContent string
-
-		err := rows.Scan(&senderUserID, &senderName, &messageContent, &receiverNames)
-		if err != nil {
-			pkg.DisplayContext("Error after row scan: ", pkg.Error, err)
-			return nil, err
-		}
-
-		for i, value := range receiverNames {
-			if value == selfName {
-				receiverNames[i] = "You"
-			}
-		}
-
-		formattedMessages = append(
-			formattedMessages,
-			fmt.Sprintf("[%s -> %s: \"%s\"]", senderName, strings.Join(receiverNames, ", "), messageContent),
-		)
-	}
-
-	if err := rows.Err(); err != nil {
-		pkg.DisplayContext("Error after rows iteration: ", pkg.Error, err)
-		return nil, err
-	}
-
-	return formattedMessages, nil
-}
-
 func askLLMForDecision(Message string, Checksum string) (string, error) {
 	// Get raw new messages from db to format them
-	rawNewMessages, receiverName, err := services.GetNewMessages(Checksum)
-
-	if err != nil {
-		return "", err
-	}
-
-	// Format new messages as a string to sent it as a prompt
-	newMessages, err := formatNewMessages(rawNewMessages, receiverName)
+	newMessages, err := services.GetNewMessages(Checksum)
 
 	if err != nil {
 		return "", err

@@ -7,6 +7,7 @@ import (
 	"my-api/internal/models"
 	websocketModels "my-api/internal/models/websocket"
 	"my-api/pkg"
+	"strings"
 
 	"github.com/lib/pq"
 )
@@ -90,14 +91,48 @@ func ResetGame() error {
 	return nil
 }
 
+func formatNewMessages(rows *sql.Rows, selfName string) ([]string, error) {
+	var formattedMessages []string
+
+	for rows.Next() {
+		var senderUserID int
+		var receiverNames pq.StringArray
+		var senderName, messageContent string
+
+		err := rows.Scan(&senderUserID, &senderName, &messageContent, &receiverNames)
+		if err != nil {
+			pkg.DisplayContext("Error after row scan: ", pkg.Error, err)
+			return nil, err
+		}
+
+		for i, value := range receiverNames {
+			if value == selfName {
+				receiverNames[i] = "You"
+			}
+		}
+
+		formattedMessages = append(
+			formattedMessages,
+			fmt.Sprintf("[%s -> %s: \"%s\"]", senderName, strings.Join(receiverNames, ", "), messageContent),
+		)
+	}
+
+	if err := rows.Err(); err != nil {
+		pkg.DisplayContext("Error after rows iteration: ", pkg.Error, err)
+		return nil, err
+	}
+
+	return formattedMessages, nil
+}
+
 // Refacto ✅
-func GetNewMessages(ReceiverEntityChecksum string) (*sql.Rows, string, error) {
+func GetNewMessages(ReceiverEntityChecksum string) ([]string, error) {
 	db := config.GetDB()
 	receiverName, err := GetEntityNameByChecksum(ReceiverEntityChecksum)
 	receiverId, err := GetIDByChecksum(ReceiverEntityChecksum)
 
 	if err != nil {
-		return nil, "", err
+		return nil, err
 	}
 
 	query := `WITH filtered_messages AS (
@@ -125,8 +160,11 @@ func GetNewMessages(ReceiverEntityChecksum string) (*sql.Rows, string, error) {
 	rows, err := db.Query(query, receiverId)
 	if err != nil {
 		pkg.DisplayContext("Error after GetNewMessages query:", pkg.Error, err)
-		return nil, "", err
+		return nil, err
 	}
+
+	formatedMessages, err := formatNewMessages(rows, receiverName)
+
 	defer func(rows *sql.Rows) {
 		err := rows.Close()
 		if err != nil {
@@ -134,7 +172,7 @@ func GetNewMessages(ReceiverEntityChecksum string) (*sql.Rows, string, error) {
 		}
 	}(rows)
 
-	return rows, receiverName, nil
+	return formatedMessages, nil
 }
 
 func GetDiscussion(from string, to string) ([]websocketModels.Message, error) {
