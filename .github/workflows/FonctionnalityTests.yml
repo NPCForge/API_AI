@@ -9,6 +9,8 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    env:
+      CHATGPT_TOKEN: ${{ secrets.CHATGPT_TOKEN }}
 
     steps:
       - uses: actions/checkout@v4.2.2
