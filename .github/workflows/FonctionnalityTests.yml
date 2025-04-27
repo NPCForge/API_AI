@@ -29,6 +29,9 @@ jobs:
       - name: Copy .env.exemple to .env
         run: cp .env.exemple .env.local
 
+      - name: Export secret for Docker
+        run: echo "CHATGPT_TOKEN=${CHATGPT_TOKEN}" >> $GITHUB_ENV
+
       - name: Build and start services
         run: docker-compose up -d
 
