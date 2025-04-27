@@ -1,16 +1,14 @@
 package config
 
 import (
-	"fmt"
 	"io/ioutil"
-	"log"
+	"my-api/pkg"
 )
 
 func DrawLogo() {
 	content, err := ioutil.ReadFile("config/asset/logo.txt")
 	if err != nil {
-		log.Fatalf("Erreur lors de la lecture du fichier : %v", err)
+		pkg.DisplayContext("Erreur lors de la lecture du fichier", pkg.Error, err, true)
 	}
-
-	fmt.Println(string(content))
+	pkg.DisplayContext(string(content), pkg.Default)
 }

@@ -1,7 +1,10 @@
 *.env.local
 .DS_Store
 .idea
+.venv
+.vscode
 db_data
 tmp/
 logfile
 bin/
+token.json

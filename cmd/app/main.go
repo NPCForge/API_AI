@@ -1,8 +1,10 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"my-api/config"
+	"my-api/pkg"
 	"net/http"
 
 	httpHandlers "my-api/internal/handlers/http"
@@ -12,6 +14,14 @@ import (
 
 	"github.com/gorilla/mux"
 )
+
+func Health(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusOK)
+	_, err := w.Write([]byte("OK"))
+	if err != nil {
+		return
+	}
+}
 
 func main() {
 	log.SetFlags(log.Lshortfile)
@@ -35,12 +45,18 @@ func main() {
 	r.HandleFunc("/Register", httpHandlers.RegisterHandler).Methods("POST")
 
 	protected.HandleFunc("/Disconnect", httpHandlers.DisconnectHandler).Methods("POST")
-	protected.HandleFunc("/Remove", httpHandlers.RemoveHandler).Methods("POST")
+	protected.HandleFunc("/RemoveUser", httpHandlers.RemoveUserHandler).Methods("POST")
 	protected.HandleFunc("/MakeDecision", httpHandlers.MakeDecisionHandler).Methods("POST")
+	protected.HandleFunc("/CreateEntity", httpHandlers.CreateEntityHandler).Methods("POST")
+	protected.HandleFunc("/RemoveEntity", httpHandlers.RemoveEntityHandler).Methods("POST")
+	protected.HandleFunc("/NewMessage", httpHandlers.NewMessageHandler).Methods("POST")
+	protected.HandleFunc("/GetEntities", httpHandlers.GetEntitiesHandler).Methods("GET")
 
-	port := ":3000"
-	log.Printf("Serveur démarré sur http://localhost%s\n", port)
+	r.HandleFunc("/health", Health).Methods("GET")
+
+	port := "0.0.0.0:3000"
+	pkg.DisplayContext(fmt.Sprintf("Serveur démarré sur http://%s", port), pkg.Update)
 	if err := http.ListenAndServe(port, r); err != nil {
-		log.Fatalf("Erreur lors du lancement du serveur : %v", err)
+		pkg.DisplayContext("Erreur lors du lancement du serveur", pkg.Error, err, true)
 	}
 }

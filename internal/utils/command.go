@@ -2,10 +2,10 @@ package utils
 
 import (
 	"bufio"
+	"my-api/internal/services"
 	"os"
 	"strings"
 
-	"my-api/internal/services"
 	"my-api/pkg"
 
 	"github.com/fatih/color"
@@ -55,8 +55,23 @@ func Commande() {
 			continue
 		}
 
-		switch input {
+		if strings.HasPrefix(input, "new route ") {
+			name := strings.TrimPrefix(input, "new route ")
+			name = strings.TrimSpace(name)
+			GenerateNewRoute(name)
+			continue
+		}
+
+		switch strings.ToLower(input) {
 		case "stop":
+			color.Red("⛔ Arrêt du serveur...")
+			os.Exit(0)
+
+		case "quit":
+			color.Red("⛔ Arrêt du serveur...")
+			os.Exit(0)
+
+		case "exit":
 			color.Red("⛔ Arrêt du serveur...")
 			os.Exit(0)
 

@@ -27,7 +27,7 @@ def send_request(endpoint, payload=None):
 
 def main():
     global token
-    print("Entrez une commande (Register, Connection, TakeDecision, Disconnect) ou 'exit' pour quitter.")
+    print("Entrez une commande (Register, Connection, MakeDecision, Disconnect) ou 'exit' pour quitter.")
 
     while True:
         user_input = input("Commande : ").strip().lower()
@@ -63,7 +63,7 @@ def main():
             else:
                 print("Erreur : Échec de la connexion.")
 
-        elif user_input == "takedecision":
+        elif user_input == "MakeDecision":
             if token:
                 payload = {
                     "message": "Hello World"
@@ -91,7 +91,7 @@ def main():
                 print("Erreur : Aucun token disponible. Veuillez vous connecter ou vous enregistrer d'abord.")
 
         else:
-            print("Commande inconnue. Essayez 'Register', 'Connection', 'TakeDecision', 'Disconnect', ou 'exit'.")
+            print("Commande inconnue. Essayez 'Register', 'Connection', 'MakeDecision', 'Disconnect', ou 'exit'.")
 
 if __name__ == "__main__":
     main()
