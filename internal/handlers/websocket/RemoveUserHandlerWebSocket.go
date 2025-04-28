@@ -10,22 +10,22 @@ import (
 
 func RemoveUserHandlerWebSocket(
 	conn *websocket.Conn, message []byte,
-	sendResponse func(*websocket.Conn, string, map[string]interface{}),
-	sendError func(*websocket.Conn, string, map[string]interface{}),
+	sendResponse func(*websocket.Conn, string, string, map[string]interface{}),
+	sendError func(*websocket.Conn, string, string, map[string]interface{}),
 ) {
 	var req sharedModel.RemoveUserRequest
 	var initialRoute = "RemoveUser"
 
 	err := json.Unmarshal(message, &req)
 	if err != nil {
-		sendError(conn, initialRoute, map[string]interface{}{
+		sendError(conn, initialRoute, "", map[string]interface{}{
 			"message": "Error while decoding JSON message",
 		})
 		return
 	}
 
 	if req.Token == "" {
-		sendError(conn, initialRoute, map[string]interface{}{
+		sendError(conn, initialRoute, "", map[string]interface{}{
 			"message": "Bad Request",
 		})
 		return
@@ -35,13 +35,13 @@ func RemoveUserHandlerWebSocket(
 
 	if err != nil {
 		pkg.DisplayContext("Internal Server Error", pkg.Error, err)
-		sendError(conn, initialRoute, map[string]interface{}{
+		sendError(conn, initialRoute, "", map[string]interface{}{
 			"message": "Internal Server Error",
 		})
 		return
 	}
 
-	sendResponse(conn, initialRoute, map[string]interface{}{
+	sendResponse(conn, initialRoute, "", map[string]interface{}{
 		"message": "Success",
 	})
 }

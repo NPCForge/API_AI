@@ -34,6 +34,8 @@ func GptSimpleRequest(userPrompt string, systemPrompt string) (string, error) {
 		},
 	}
 
+	//pkg.DisplayContext("SystemPrompt = "+systemPrompt+"UserPrompt = "+userPrompt, pkg.Debug)
+
 	// Create the request body
 	body := sharedModels.ChatGptSimpleRequestBody{
 		Model:    "gpt-3.5-turbo",
@@ -56,8 +58,6 @@ func GptSimpleRequest(userPrompt string, systemPrompt string) (string, error) {
 	if err := json.Unmarshal(resp.Body(), &response); err != nil {
 		return "", fmt.Errorf("error decoding the response: %w", err)
 	}
-
-	println(config.GetEnvVariable("CHATGPT_TOKEN"))
 
 	// Check if there are valid choices in the response
 	if len(response.Choices) > 0 {

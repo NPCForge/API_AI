@@ -18,10 +18,10 @@ This project is a Go-based API that interacts with a PostgreSQL database. It pro
 ## **Configuration**
 
 ### 1. Environment Variables
-An example `.env.local` file is provided as `.env.example`. Copy it and adjust the values as needed:
+An example `.env` file is provided as `.env.example`. Copy it and adjust the values as needed:
 
 ```bash
-cp .env.example .env.local
+cp .env.example .env
 ```
 
 **Example `.env.example` file:**
@@ -37,7 +37,7 @@ APP_PORT=8080           # API listening port
 
 ### 2. PostgreSQL Setup
 #### Create the Database
-1. Create a PostgreSQL database with the information in `.env.local`:
+1. Create a PostgreSQL database with the information in `.env`:
    ```sql
    CREATE DATABASE api_db;
    CREATE USER API WITH PASSWORD 'password';
@@ -106,10 +106,10 @@ docker-compose down
 
 ### Common Issues
 1. **PostgreSQL Connection Error**:
-   - Ensure the database is reachable at the host and port specified in `.env.local`.
+   - Ensure the database is reachable at the host and port specified in `.env`.
    - If using a remote database, make sure its firewall allows connections from the server running Docker.
 
-2. **Missing `.env.local` File**:
+2. **Missing `.env` File**:
    - Ensure the file exists and is correctly configured. You can use `.env.example` as a template.
 
 ---
@@ -130,7 +130,7 @@ docker-compose down
 ├── docker-compose.yml # Docker Compose configuration
 ├── go.mod           # Go project dependencies
 ├── .env.example     # Example environment variables file
-├── .env.local       # Local environment variables file
+├── .env       # Local environment variables file
 └── README.md        # Project documentation
 ```
 

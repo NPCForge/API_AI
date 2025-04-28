@@ -18,10 +18,10 @@ func setDefaultVariable() {
 	}
 }
 
-// GetEnvVariable load environment variable from .env.local
+// GetEnvVariable load environment variable from .env
 func GetEnvVariable(c string) string {
-	// Always load .env.local (it's safe)
-	_ = godotenv.Load(".env.local")
+	// Always load .env (it's safe)
+	_ = godotenv.Load(".env")
 
 	// Now read the environment variable
 	variable := os.Getenv(c)

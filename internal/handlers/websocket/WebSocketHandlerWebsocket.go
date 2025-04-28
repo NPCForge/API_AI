@@ -51,11 +51,11 @@ var actions = []websocketModels.WebSocketDispatcher{
 		Handler:   NewMessageHandlerWebSocket,
 		Protected: true,
 	},
-	{
-		Name:      "ResetGame",
-		Handler:   ResetGameWebsocket,
-		Protected: false,
-	},
+	//{
+	//	Name:      "ResetGame",
+	//	Handler:   ResetGameWebsocket,
+	//	Protected: false,
+	//},
 	{
 		Name:      "CreateEntity",
 		Handler:   CreateEntityHandlerWebSocket,
@@ -79,14 +79,14 @@ func handleWebSocketMessage(conn *websocket.Conn, messageType int, message []byt
 
 	err := json.Unmarshal(message, &msg)
 	if err != nil {
-		utils.SendError(conn, initialRoute, map[string]interface{}{
+		utils.SendError(conn, initialRoute, "", map[string]interface{}{
 			"message": "Error while decoding JSON message",
 		})
 		return
 	}
 
 	if msg.Action == "" {
-		utils.SendError(conn, initialRoute, map[string]interface{}{
+		utils.SendError(conn, initialRoute, "", map[string]interface{}{
 			"message": "Missing required fields in the JSON message",
 		})
 		return

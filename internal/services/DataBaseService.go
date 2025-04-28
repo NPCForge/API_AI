@@ -63,6 +63,18 @@ func GetPromptByID(id string) (string, error) {
 	return prompt, nil
 }
 
+func GetNameByChecksum(checksum string) (string, error) {
+	db := config.GetDB()
+
+	var name string
+	query := `SELECT name FROM entities WHERE checksum = $1`
+	err := db.QueryRow(query, checksum).Scan(&name)
+	if err != nil {
+		return "", fmt.Errorf("error while getting name : %w", err)
+	}
+	return name, nil
+}
+
 func GetNameByID(id string) (string, error) {
 	db := config.GetDB()
 
@@ -91,29 +103,29 @@ func ResetGame() error {
 	return nil
 }
 
-func formatNewMessages(rows *sql.Rows, selfName string) ([]string, error) {
+func formatNewMessages(rows *sql.Rows, selfChecksum string) ([]string, error) {
 	var formattedMessages []string
 
 	for rows.Next() {
 		var senderUserID int
-		var receiverNames pq.StringArray
-		var senderName, messageContent string
+		var receiverChecksums pq.StringArray
+		var senderChecksum, messageContent string
 
-		err := rows.Scan(&senderUserID, &senderName, &messageContent, &receiverNames)
+		err := rows.Scan(&senderUserID, &senderChecksum, &messageContent, &receiverChecksums)
 		if err != nil {
 			pkg.DisplayContext("Error after row scan: ", pkg.Error, err)
 			return nil, err
 		}
 
-		for i, value := range receiverNames {
-			if value == selfName {
-				receiverNames[i] = "You"
+		for i, value := range receiverChecksums {
+			if value == selfChecksum {
+				receiverChecksums[i] = "You"
 			}
 		}
 
 		formattedMessages = append(
 			formattedMessages,
-			fmt.Sprintf("[%s -> %s: \"%s\"]", senderName, strings.Join(receiverNames, ", "), messageContent),
+			fmt.Sprintf("[%s -> %s: \"%s\"]", senderChecksum, strings.Join(receiverChecksums, ", "), messageContent),
 		)
 	}
 
@@ -128,7 +140,7 @@ func formatNewMessages(rows *sql.Rows, selfName string) ([]string, error) {
 // Refacto ✅
 func GetNewMessages(ReceiverEntityChecksum string) ([]string, error) {
 	db := config.GetDB()
-	receiverName, err := GetEntityNameByChecksum(ReceiverEntityChecksum)
+	//receiverName, err := GetEntityNameByChecksum(ReceiverEntityChecksum)
 	receiverId, err := GetIDByChecksum(ReceiverEntityChecksum)
 
 	if err != nil {
@@ -144,14 +156,14 @@ func GetNewMessages(ReceiverEntityChecksum string) ([]string, error) {
 	)
 	SELECT
 		filtered_messages.sender_entity_id,
-		entities.name AS SenderName,
+		entities.checksum AS EntityChecksum,
 		filtered_messages.message,
-		ARRAY_AGG(receiver_entity.name) AS ReceiverNames
+		ARRAY_AGG(receiver_entity.checksum) AS ReceiverChecksum
 		FROM filtered_messages
 		JOIN entities ON filtered_messages.sender_entity_id = entities.id
 		JOIN message_receivers ON filtered_messages.id = message_receivers.message_id
 		JOIN entities AS receiver_entity ON message_receivers.receiver_entity_id = receiver_entity.id
-		GROUP BY filtered_messages.id, filtered_messages.sender_entity_id, entities.name,
+		GROUP BY filtered_messages.id, filtered_messages.sender_entity_id, entities.checksum,
 		filtered_messages.message, filtered_messages.timestamp
 		ORDER BY filtered_messages.timestamp
 		LIMIT 5;
@@ -163,7 +175,7 @@ func GetNewMessages(ReceiverEntityChecksum string) ([]string, error) {
 		return nil, err
 	}
 
-	formatedMessages, err := formatNewMessages(rows, receiverName)
+	formatedMessages, err := formatNewMessages(rows, ReceiverEntityChecksum)
 
 	defer func(rows *sql.Rows) {
 		err := rows.Close()
@@ -177,11 +189,11 @@ func GetNewMessages(ReceiverEntityChecksum string) ([]string, error) {
 
 func GetDiscussion(from string, to string) ([]sharedModel.Message, error) {
 	db := config.GetDB()
-	receiverName, err := GetNameByID(from)
+	//receiverName, err := GetNameByChecksum(from)
 
-	if err != nil {
-		return nil, err
-	}
+	//if err != nil {
+	//	return nil, err
+	//}
 
 	query := `WITH filtered_messages AS (
     SELECT m.id, m.sender_entity_id, m.message, m.timestamp
@@ -192,14 +204,14 @@ func GetDiscussion(from string, to string) ([]sharedModel.Message, error) {
 )
 SELECT 
     fm.sender_entity_id,
-    sender_entity.name AS SenderName,
+    sender_entity.checksum AS SenderChecksum,
     fm.message,
-    ARRAY_AGG(receiver_entity.name) AS ReceiverNames
+    ARRAY_AGG(receiver_entity.checksum) AS ReceiverChecksum
 FROM filtered_messages fm
 JOIN entities sender_entity ON fm.sender_entity_id = sender_entity.id
 JOIN message_receivers mr ON fm.id = mr.message_id
 JOIN entities receiver_entity ON mr.receiver_entity_id = receiver_entity.id
-GROUP BY fm.id, fm.sender_entity_id, sender_entity.name, fm.message, fm.timestamp
+GROUP BY fm.id, fm.sender_entity_id, sender_entity.checksum, fm.message, fm.timestamp
 ORDER BY fm.timestamp
 `
 
@@ -220,22 +232,22 @@ ORDER BY fm.timestamp
 	for rows.Next() {
 		var senderEntityID int
 		var msg sharedModel.Message
-		var receiverNames pq.StringArray
+		var receiverChecksums pq.StringArray
 
-		err := rows.Scan(&senderEntityID, &msg.SenderName, &msg.Message, &receiverNames)
+		err := rows.Scan(&senderEntityID, &msg.SenderChecksum, &msg.Message, &receiverChecksums)
 		if err != nil {
 			pkg.DisplayContext("Error after row scan:", pkg.Error, err)
 			return nil, err
 		}
-		msg.ReceiverNames = receiverNames
+		msg.ReceiverChecksums = receiverChecksums
 
 		if fmt.Sprintf("%d", senderEntityID) == from {
-			msg.SenderName = "You"
+			msg.SenderChecksum = "You"
 		}
 
-		for i, r := range receiverNames {
-			if r == receiverName {
-				receiverNames[i] = "You"
+		for i, r := range receiverChecksums {
+			if r == from {
+				receiverChecksums[i] = "You"
 			}
 		}
 

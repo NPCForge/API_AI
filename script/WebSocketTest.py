@@ -56,7 +56,7 @@ def listen_to_stdin(ws):
                     "action": "CreateEntity",
                     "name": "tom_entity",
                     "prompt": "a fisherman named tom_entity",
-                    "checksum": "checksum",
+                    "checksum": "TomChecksum",
                     "token": token,
                 })
             else:
@@ -67,8 +67,8 @@ def listen_to_stdin(ws):
                 message = json.dumps({
                     "action": "MakeDecision",
                     "token": token,
-                    "message": "Nearby Entities: {[Name = tom_entity]}",
-                    "checksum": "checksum",
+                    "message": "Nearby Entities: {[Checksum = TomChecksum]}",
+                    "checksum": "TomChecksum",
                 })
             else:
                 print("Erreur : Aucun token disponible. Veuillez vous connecter ou vous enregistrer d'abord.")
@@ -86,8 +86,8 @@ def listen_to_stdin(ws):
             if token:
                 message = json.dumps({
                     "action":    "NewMessage",
-                    "sender":    "checksum",
-                    "receivers": ["checksum"],
+                    "sender":    "TomChecksum",
+                    "receivers": ["TomChecksum"],
                     "message":   "hello tom",
                     "token":     token,
                 })

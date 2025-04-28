@@ -43,7 +43,7 @@ func makeDecisionViaWebSocket() error {
 	message := map[string]string{
 		"action":   "MakeDecision",
 		"checksum": "WsChecksum",
-		"message":  "Nearby Entities: {[Name = WsEntity]}",
+		"message":  "Nearby Entities: {[Checksum = WsChecksum]}",
 		"token":    token,
 	}
 
@@ -78,7 +78,7 @@ func makeDecisionViaHTTP() error {
 
 	payload := map[string]string{
 		"checksum": "HttpChecksum",
-		"message":  "Nearby Entities: {[Name = HttpEntity]}",
+		"message":  "Nearby Entities: {[Checksum = HttpChecksum]}",
 	}
 
 	body, _ := json.Marshal(payload)

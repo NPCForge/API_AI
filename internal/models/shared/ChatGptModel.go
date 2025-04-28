@@ -19,7 +19,7 @@ type ChatGPTResponse struct {
 }
 
 type Message struct {
-	SenderName    string
-	ReceiverNames []string
-	Message       string
+	SenderChecksum    string
+	ReceiverChecksums []string
+	Message           string
 }

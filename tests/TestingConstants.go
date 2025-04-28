@@ -8,13 +8,13 @@ import (
 )
 
 func getEnvVariable(c string) string {
-	if err := godotenv.Load("../.env.local"); err != nil {
-		DisplayContext("Error while loading .env.local", Error, true)
+	if err := godotenv.Load("../.env"); err != nil {
+		DisplayContext("Error while loading .env", Error, true)
 	}
 
 	variable := os.Getenv(c)
 	if variable == "" {
-		DisplayContext(fmt.Sprintf("%s undefined in .env.local", c), Error, true)
+		DisplayContext(fmt.Sprintf("%s undefined in .env", c), Error, true)
 	}
 
 	return variable
