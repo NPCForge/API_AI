@@ -5,7 +5,7 @@ import (
 	"fmt"
 	sharedModel "my-api/internal/models/shared"
 
-	service "my-api/internal/services/merged"
+	sharedServices "my-api/internal/services/shared"
 
 	"github.com/gorilla/websocket"
 )
@@ -34,7 +34,7 @@ func CreateEntityHandlerWebSocket(
 		return
 	}
 
-	id, err := service.CreateEntityService(req.Name, req.Prompt, req.Checksum, req.Token)
+	id, err := sharedServices.CreateEntityService(req.Name, req.Prompt, req.Checksum, req.Token)
 
 	if err != nil {
 		sendError(conn, initialRoute, "", map[string]interface{}{

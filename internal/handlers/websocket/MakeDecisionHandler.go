@@ -3,7 +3,7 @@ package websocketHandlers
 import (
 	"encoding/json"
 	sharedModel "my-api/internal/models/shared"
-	service "my-api/internal/services/merged"
+	sharedServices "my-api/internal/services/shared"
 	"my-api/pkg"
 
 	"github.com/gorilla/websocket"
@@ -32,7 +32,7 @@ func MakeDecisionHandlerWebSocket(
 		return
 	}
 
-	msg, err := service.MakeDecisionService(req.Message, req.Checksum, req.Token)
+	msg, err := sharedServices.MakeDecisionService(req.Message, req.Checksum, req.Token)
 
 	if err != nil {
 		pkg.DisplayContext("internal server error", pkg.Error, err)

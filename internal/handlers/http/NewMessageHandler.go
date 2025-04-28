@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"log"
 	sharedModel "my-api/internal/models/shared"
-	service "my-api/internal/services/merged"
+	sharedServices "my-api/internal/services/shared"
 	"net/http"
 )
 
@@ -26,7 +26,7 @@ func NewMessageHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = service.NewMessageService(req.Sender, req.Receivers, req.Message)
+	err = sharedServices.NewMessageService(req.Sender, req.Receivers, req.Message)
 
 	if err != nil {
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)

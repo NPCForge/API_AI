@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"log"
 	sharedModel "my-api/internal/models/shared"
-	service "my-api/internal/services/merged"
+	sharedServices "my-api/internal/services/shared"
 	"net/http"
 )
 
@@ -31,7 +31,7 @@ func RemoveUserHandler(w http.ResponseWriter, r *http.Request) {
 
 	token := r.Header.Get("Authorization")
 
-	err = service.RemoveUserService(token, req.UserName)
+	err = sharedServices.RemoveUserService(token, req.UserName)
 
 	if err != nil {
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)

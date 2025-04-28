@@ -1,4 +1,4 @@
-package service
+package services
 
 import (
 	"encoding/json"
@@ -11,7 +11,7 @@ import (
 )
 
 // Function to read the content of a file
-func readPromptFromFile(filePath string) (string, error) {
+func ReadPromptFromFile(filePath string) (string, error) {
 	content, err := ioutil.ReadFile(filePath)
 	if err != nil {
 		return "", fmt.Errorf("error reading the file: %w", err)

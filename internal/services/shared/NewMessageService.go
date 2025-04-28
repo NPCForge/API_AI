@@ -1,4 +1,4 @@
-package service
+package sharedServices
 
 import "my-api/internal/services"
 

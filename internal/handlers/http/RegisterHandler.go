@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"my-api/config"
 	sharedModel "my-api/internal/models/shared"
-	service "my-api/internal/services/merged"
+	sharedServices "my-api/internal/services/shared"
 	"my-api/pkg"
 	"net/http"
 )
@@ -33,7 +33,7 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if req.Password != "" && req.Identifier != "" {
-		private, id, err := service.RegisterService(req.Password, req.Identifier)
+		private, id, err := sharedServices.RegisterService(req.Password, req.Identifier)
 
 		if err != nil {
 			http.Error(w, "Server Error", 500)

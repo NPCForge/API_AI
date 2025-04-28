@@ -3,7 +3,7 @@ package websocketHandlers
 import (
 	"encoding/json"
 	sharedModel "my-api/internal/models/shared"
-	service "my-api/internal/services/merged"
+	sharedServices "my-api/internal/services/shared"
 
 	"github.com/gorilla/websocket"
 )
@@ -31,7 +31,7 @@ func NewMessageHandlerWebSocket(
 		return
 	}
 
-	err = service.NewMessageService(req.Sender, req.Receivers, req.Message)
+	err = sharedServices.NewMessageService(req.Sender, req.Receivers, req.Message)
 
 	if err != nil {
 		sendError(conn, initialRoute, "", map[string]interface{}{

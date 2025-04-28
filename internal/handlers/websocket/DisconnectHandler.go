@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"github.com/gorilla/websocket"
 	sharedModel "my-api/internal/models/shared"
-	service "my-api/internal/services/merged"
+	sharedServices "my-api/internal/services/shared"
 )
 
 func DisconnectHandlerWebsocket(
@@ -30,7 +30,7 @@ func DisconnectHandlerWebsocket(
 		return
 	}
 
-	err = service.DisconnectService(msg.Token)
+	err = sharedServices.DisconnectService(msg.Token)
 
 	if err != nil {
 		sendError(conn, initialRoute, "", map[string]interface{}{

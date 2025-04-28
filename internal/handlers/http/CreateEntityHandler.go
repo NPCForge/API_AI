@@ -6,7 +6,7 @@ import (
 	sharedModel "my-api/internal/models/shared"
 	"net/http"
 
-	service "my-api/internal/services/merged"
+	sharedServices "my-api/internal/services/shared"
 )
 
 func CreateEntityHandler(w http.ResponseWriter, r *http.Request) {
@@ -30,7 +30,7 @@ func CreateEntityHandler(w http.ResponseWriter, r *http.Request) {
 
 	token := r.Header.Get("Authorization")
 
-	id, err := service.CreateEntityService(req.Name, req.Prompt, req.Checksum, token)
+	id, err := sharedServices.CreateEntityService(req.Name, req.Prompt, req.Checksum, token)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(sharedModel.ResponseCreateEntity{

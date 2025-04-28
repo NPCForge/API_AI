@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"log"
 	sharedModel "my-api/internal/models/shared"
-	service "my-api/internal/services/merged"
+	sharedServices "my-api/internal/services/shared"
 	"net/http"
 )
 
@@ -15,7 +15,7 @@ func DisconnectHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	token := r.Header.Get("Authorization")
-	err := service.DisconnectService(token)
+	err := sharedServices.DisconnectService(token)
 
 	if err != nil {
 		res = sharedModel.DisconnectResponse{

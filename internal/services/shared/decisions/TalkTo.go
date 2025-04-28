@@ -1,10 +1,9 @@
-package service
+package decisions
 
 import (
-	"errors"
 	"fmt"
 	"my-api/internal/services"
-	"my-api/internal/utils"
+	"my-api/internal/services/helpers"
 	"my-api/pkg"
 	"regexp"
 	"strconv"
@@ -26,7 +25,7 @@ func talkTo(Checksum string, message string, interlocutorChecksum string) (strin
 		return "", err, false
 	}
 
-	systemPrompt, err := readPromptFromFile("prompts/discussion.txt")
+	systemPrompt, err := services.ReadPromptFromFile("prompts/discussion.txt")
 	if err != nil {
 		return "", fmt.Errorf("error retrieving the system prompt: %w", err), false
 	}
@@ -34,11 +33,11 @@ func talkTo(Checksum string, message string, interlocutorChecksum string) (strin
 	systemPrompt += "\n" + prompt
 	userPrompt := "Interlocutor: " + interlocutorChecksum + "\nDiscussion: { " + message + " }"
 
-	back, err := GptSimpleRequest(userPrompt, systemPrompt)
+	back, err := services.GptSimpleRequest(userPrompt, systemPrompt)
 
-	pkg.DisplayContext("TalkTo GPT request = "+back, pkg.Debug)
+	//pkg.DisplayContext("TalkTo GPT request = "+back, pkg.Debug)
 
-	if NeedToFinish(back) {
+	if helpers.NeedToFinish(back) {
 		pkg.DisplayContext("After this, need to finish", pkg.Debug)
 	}
 
@@ -47,8 +46,8 @@ func talkTo(Checksum string, message string, interlocutorChecksum string) (strin
 
 	if len(match) > 1 {
 		response := match[1]
-		pkg.DisplayContext("Expected response: "+response, pkg.Debug)
-		return response, nil, NeedToFinish(back)
+		//pkg.DisplayContext("Expected response: "+response, pkg.Debug)
+		return response, nil, helpers.NeedToFinish(back)
 	} else {
 		pkg.DisplayContext("Response pattern not found in GPT output: "+back, pkg.Error)
 		return "", fmt.Errorf("error during the process"), false
@@ -94,32 +93,7 @@ func getAllDiscussionsForEntity(EntityChecksum string, InterlocutorChecksums []s
 	return allDiscussions, nil
 }
 
-func askLLMForDecision(Message string, Checksum string) (string, error) {
-	// Get raw new messages from db to format them
-	newMessages, err := services.GetNewMessages(Checksum)
-
-	if err != nil {
-		return "", err
-	}
-
-	Message += "\nNew Messages: {" + strings.Join(newMessages, ", ") + "}"
-
-	// Read the "curriculum.txt" file to get the system prompt
-	systemPrompt, err := readPromptFromFile("prompts/curriculum.txt")
-	if err != nil {
-		return "", fmt.Errorf("error retrieving the system prompt: %w", err)
-	}
-
-	decision, err := GptSimpleRequest(Message, systemPrompt)
-	if err != nil {
-		pkg.DisplayContext("GptSimpleRequest failed: ", pkg.Error, err)
-		return "", err
-	}
-
-	return decision, nil
-}
-
-func handleTalkToLogic(Decision string, Checksum string) (string, error) {
+func HandleTalkToLogic(Decision string, Checksum string) (string, error) {
 	re := regexp.MustCompile(`\[(.*?)\]`)
 	matches := re.FindStringSubmatch(Decision)
 
@@ -143,46 +117,4 @@ func handleTalkToLogic(Decision string, Checksum string) (string, error) {
 		return "TalkTo: " + checksumsString + "\nMessage: " + message, nil
 	}
 	return "", fmt.Errorf("Cannot find interlocutor checksums: " + Decision)
-}
-
-func interpretLLMDecision(Decision string, Checksum string) (string, error) {
-	if strings.Contains(Decision, "TalkTo:") {
-		return handleTalkToLogic(Decision, Checksum)
-	}
-
-	return "", fmt.Errorf("no such Decision: %s", Decision)
-}
-
-func MakeDecisionService(Message string, Checksum string, Token string) (string, error) {
-	id, err := utils.GetUserIDFromJWT(Token)
-
-	if err != nil {
-		return "", err
-	}
-
-	val, err := IsMyEntity(Checksum, id)
-
-	if err != nil {
-		return "", err
-	}
-
-	if !val {
-		return "", errors.New("access denied to this entity")
-	}
-
-	decision, err := askLLMForDecision(Message, Checksum)
-
-	if err != nil {
-		pkg.DisplayContext("Error after decision making: ", pkg.Error, err)
-		return "", err
-	}
-
-	task, err := interpretLLMDecision(decision, Checksum)
-
-	if err != nil {
-		pkg.DisplayContext("Error after llm response interpretation: ", pkg.Error, err)
-		return "", err
-	}
-
-	return task, nil
 }

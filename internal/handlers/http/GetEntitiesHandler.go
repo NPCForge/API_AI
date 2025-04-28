@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	sharedModel "my-api/internal/models/shared"
-	service "my-api/internal/services/merged"
+	sharedServices "my-api/internal/services/shared"
 	"net/http"
 )
 
@@ -18,7 +18,7 @@ func GetEntitiesHandler(w http.ResponseWriter, r *http.Request) {
 
 	token := r.Header.Get("Authorization")
 
-	entities, err := service.GetEntitiesService(token)
+	entities, err := sharedServices.GetEntitiesService(token)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(sharedModel.ResponseGetEntities{

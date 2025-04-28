@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"github.com/gorilla/websocket"
 	sharedModel "my-api/internal/models/shared"
-	service "my-api/internal/services/merged"
+	sharedServices "my-api/internal/services/shared"
 	"my-api/pkg"
 )
 
@@ -31,7 +31,7 @@ func RemoveUserHandlerWebSocket(
 		return
 	}
 
-	err = service.RemoveUserService(req.Token, req.UserName)
+	err = sharedServices.RemoveUserService(req.Token, req.UserName)
 
 	if err != nil {
 		pkg.DisplayContext("Internal Server Error", pkg.Error, err)

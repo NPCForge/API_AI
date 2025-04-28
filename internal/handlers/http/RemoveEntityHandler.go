@@ -3,7 +3,7 @@ package httpHandlers
 import (
 	"encoding/json"
 	sharedModel "my-api/internal/models/shared"
-	service "my-api/internal/services/merged"
+	sharedServices "my-api/internal/services/shared"
 	"my-api/pkg"
 	"net/http"
 )
@@ -28,7 +28,7 @@ func RemoveEntityHandler(w http.ResponseWriter, r *http.Request) {
 
 	token := r.Header.Get("Authorization")
 
-	err = service.RemoveEntityService(req.Checksum, token)
+	err = sharedServices.RemoveEntityService(req.Checksum, token)
 
 	var res sharedModel.RemoveEntityResponse
 

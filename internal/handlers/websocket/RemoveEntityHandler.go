@@ -3,7 +3,7 @@ package websocketHandlers
 import (
 	"encoding/json"
 	sharedModel "my-api/internal/models/shared"
-	service "my-api/internal/services/merged"
+	sharedServices "my-api/internal/services/shared"
 
 	"github.com/gorilla/websocket"
 )
@@ -24,7 +24,7 @@ func RemoveEntityHandlerWebSocket(
 		return
 	}
 
-	if err := service.RemoveEntityService(req.Checksum, req.Token); err != nil {
+	if err := sharedServices.RemoveEntityService(req.Checksum, req.Token); err != nil {
 		sendError(conn, route, "", map[string]interface{}{
 			"message": err.Error(),
 		})

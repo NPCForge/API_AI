@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"my-api/config"
 	sharedModel "my-api/internal/models/shared"
-	service "my-api/internal/services/merged"
+	sharedServices "my-api/internal/services/shared"
 
 	"github.com/gorilla/websocket"
 )
@@ -42,7 +42,7 @@ func RegisterHandlerWebsocket(
 		return
 	}
 
-	private, id, err := service.RegisterService(msg.Password, msg.Identifier)
+	private, id, err := sharedServices.RegisterService(msg.Password, msg.Identifier)
 
 	if err != nil {
 		sendError(conn, initialRoute, "", map[string]interface{}{

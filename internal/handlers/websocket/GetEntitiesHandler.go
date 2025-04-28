@@ -3,7 +3,7 @@ package websocketHandlers
 import (
 	"encoding/json"
 	sharedModel "my-api/internal/models/shared"
-	service "my-api/internal/services/merged"
+	sharedServices "my-api/internal/services/shared"
 
 	"github.com/gorilla/websocket"
 )
@@ -25,7 +25,7 @@ func GetEntitiesHandlerWebSocket(
 		return
 	}
 
-	entities, err := service.GetEntitiesService(req.Token)
+	entities, err := sharedServices.GetEntitiesService(req.Token)
 
 	if err != nil {
 		sendError(conn, initialRoute, "", map[string]interface{}{

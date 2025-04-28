@@ -140,7 +140,6 @@ func formatNewMessages(rows *sql.Rows, selfChecksum string) ([]string, error) {
 // Refacto ✅
 func GetNewMessages(ReceiverEntityChecksum string) ([]string, error) {
 	db := config.GetDB()
-	//receiverName, err := GetEntityNameByChecksum(ReceiverEntityChecksum)
 	receiverId, err := GetIDByChecksum(ReceiverEntityChecksum)
 
 	if err != nil {
