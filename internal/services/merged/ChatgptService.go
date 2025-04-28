@@ -57,8 +57,6 @@ func GptSimpleRequest(userPrompt string, systemPrompt string) (string, error) {
 		return "", fmt.Errorf("error decoding the response: %w", err)
 	}
 
-	println(config.GetEnvVariable("CHATGPT_TOKEN"))
-
 	// Check if there are valid choices in the response
 	if len(response.Choices) > 0 {
 		return response.Choices[0].Message.Content, nil

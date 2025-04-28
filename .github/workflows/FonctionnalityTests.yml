@@ -27,7 +27,7 @@ jobs:
           go-version: '1.21'
 
       - name: Copy .env.exemple to .env
-        run: cp .env.exemple .env.local
+        run: cp .env.exemple .env
 
       - name: Export secret for Docker
         run: echo "CHATGPT_TOKEN=${CHATGPT_TOKEN}" >> $GITHUB_ENV

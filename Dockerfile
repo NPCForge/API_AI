@@ -26,7 +26,7 @@ COPY --from=builder /app/config/asset config/asset
 COPY --from=builder /app/prompts prompts
 
 # Copier les fichiers de config (env local)
-COPY ./.env.local .env.local
+COPY ./.env .env
 
 # Ajouter le script d'entrypoint
 COPY ./entrypoint.sh /entrypoint.sh

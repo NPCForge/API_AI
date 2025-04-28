@@ -7,7 +7,7 @@ services:
     ports:
       - "3000:3000"
     env_file:
-      - .env.local
+      - .env
     depends_on:
       - postgres
     environment:
@@ -17,7 +17,7 @@ services:
     image: postgres:15
     restart: unless-stopped
     env_file:
-      - .env.local
+      - .env
     ports:
       - "5432:5432"
     volumes:
