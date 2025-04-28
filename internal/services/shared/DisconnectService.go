@@ -7,11 +7,11 @@ import (
 	"my-api/pkg"
 )
 
+// DisconnectService verifies a JWT token and disconnects the associated user if valid.
 func DisconnectService(token string) error {
 	result, err := utils.VerifyJWT(token)
-
 	if err != nil {
-		return errors.New("error disconnecting service : " + err.Error())
+		return errors.New("error during disconnection: " + err.Error())
 	}
 
 	if result != nil {

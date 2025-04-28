@@ -8,6 +8,7 @@ import (
 	"my-api/pkg"
 )
 
+// RemoveUserHandlerWebSocket handles WebSocket requests to remove a user based on a token and username.
 func RemoveUserHandlerWebSocket(
 	conn *websocket.Conn, message []byte,
 	sendResponse func(*websocket.Conn, string, string, map[string]interface{}),
@@ -26,13 +27,12 @@ func RemoveUserHandlerWebSocket(
 
 	if req.Token == "" {
 		sendError(conn, initialRoute, "", map[string]interface{}{
-			"message": "Bad Request",
+			"message": "Missing required fields in the JSON body",
 		})
 		return
 	}
 
 	err = sharedServices.RemoveUserService(req.Token, req.UserName)
-
 	if err != nil {
 		pkg.DisplayContext("Internal Server Error", pkg.Error, err)
 		sendError(conn, initialRoute, "", map[string]interface{}{

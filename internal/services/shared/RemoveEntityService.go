@@ -7,6 +7,7 @@ import (
 	"strconv"
 )
 
+// RemoveEntityService deletes an entity if the requesting user is the verified owner.
 func RemoveEntityService(checksum string, self string) error {
 	id, err := services.GetEntitiesOwnerByChecksum(checksum)
 	if err != nil {

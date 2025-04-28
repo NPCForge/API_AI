@@ -8,6 +8,7 @@ import (
 	"github.com/gorilla/websocket"
 )
 
+// RemoveEntityHandlerWebSocket handles WebSocket requests to delete an entity by its checksum.
 func RemoveEntityHandlerWebSocket(
 	conn *websocket.Conn,
 	message []byte,

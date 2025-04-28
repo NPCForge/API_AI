@@ -8,18 +8,16 @@ import (
 	"strconv"
 )
 
+// RegisterService registers a new user by creating an account, generating a JWT, and storing the token.
 func RegisterService(password string, identifier string) (string, string, error) {
-	// pkg.DisplayContext("RegisterService", pkg.Debug)
 	id, err := services.Register(password, identifier)
-
 	if err != nil {
-		return "", "", errors.New("error while registering, DB")
+		return "", "", errors.New("error while registering to the database")
 	}
 
 	key, err := utils.GenerateJWT(strconv.Itoa(id))
-
 	if err != nil {
-		return "", "", errors.New("error while registering, JWT")
+		return "", "", errors.New("error while generating JWT")
 	}
 
 	pkg.SetToken(strconv.Itoa(id), key)

@@ -7,6 +7,7 @@ import (
 	"net/http"
 )
 
+// MakeDecisionHandler handles POST requests where an entity makes a decision based on a message.
 func MakeDecisionHandler(w http.ResponseWriter, r *http.Request) {
 	var req sharedModel.MakeDecisionRequest
 	err := json.NewDecoder(r.Body).Decode(&req)
@@ -17,7 +18,7 @@ func MakeDecisionHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if req.Message == "" || req.Checksum == "" {
-		http.Error(w, "Missing required fields in the JSON message", http.StatusBadRequest)
+		http.Error(w, "Missing required fields in the JSON body", http.StatusBadRequest)
 		return
 	}
 
@@ -36,6 +37,6 @@ func MakeDecisionHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(200)
+	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(res)
 }

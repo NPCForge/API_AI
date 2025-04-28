@@ -8,6 +8,7 @@ import (
 	"net/http"
 )
 
+// DisconnectHandler handles user disconnection requests.
 func DisconnectHandler(w http.ResponseWriter, r *http.Request) {
 	res := sharedModel.DisconnectResponse{
 		Message: "Successfully disconnected",
@@ -27,6 +28,6 @@ func DisconnectHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(res.Status)
 	if err := json.NewEncoder(w).Encode(res); err != nil {
-		log.Printf("Error while sending json : %v", err)
+		log.Printf("Error while sending JSON: %v", err)
 	}
 }

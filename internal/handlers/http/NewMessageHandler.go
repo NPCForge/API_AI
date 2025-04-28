@@ -8,6 +8,7 @@ import (
 	"net/http"
 )
 
+// NewMessageHandler handles POST requests to create and send a new message between entities.
 func NewMessageHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Error(w, "Unauthorized method", http.StatusMethodNotAllowed)
@@ -41,6 +42,6 @@ func NewMessageHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 	if err := json.NewEncoder(w).Encode(res); err != nil {
-		log.Printf("Error while sending json : %v", err)
+		log.Printf("Error while sending JSON: %v", err)
 	}
 }

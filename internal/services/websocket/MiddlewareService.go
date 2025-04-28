@@ -10,6 +10,7 @@ import (
 	"my-api/internal/utils"
 )
 
+// LoginMiddlewareWebSocket verifies the JWT token in an incoming WebSocket message before proceeding with protected actions.
 func LoginMiddlewareWebSocket(
 	conn *websocket.Conn,
 	message []byte,
@@ -37,18 +38,18 @@ func LoginMiddlewareWebSocket(
 	if msg.Token == "" {
 		color.Yellow("⚠️ Token missing in request body")
 		utils.SendError(conn, initialRoute, "", map[string]interface{}{
-			"message": "No token in request body",
+			"message": "No token provided in request body",
 		})
 		return false
 	}
 
-	color.Yellow("🔐 Token : " + msg.Token + "\n")
+	color.Yellow("🔐 Token: " + msg.Token)
 
 	_, err = utils.VerifyJWT(msg.Token)
 	if err != nil {
 		color.Red("❌ Invalid JWT: %v", err)
 		utils.SendError(conn, initialRoute, "", map[string]interface{}{
-			"message": "Invalid Token",
+			"message": "Invalid token",
 		})
 		return false
 	}

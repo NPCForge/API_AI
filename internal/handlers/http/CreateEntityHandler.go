@@ -9,6 +9,7 @@ import (
 	sharedServices "my-api/internal/services/shared"
 )
 
+// CreateEntityHandler handles POST requests to create a new entity.
 func CreateEntityHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
@@ -49,6 +50,6 @@ func CreateEntityHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(200)
+	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(resp)
 }

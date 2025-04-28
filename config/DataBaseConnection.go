@@ -18,6 +18,7 @@ var (
 	once     sync.Once
 )
 
+// IsRunningInDocker checks if the application is running inside a Docker container.
 func IsRunningInDocker() bool {
 	file, err := os.Open("/proc/1/cgroup")
 	if err != nil {
@@ -34,11 +35,12 @@ func IsRunningInDocker() bool {
 	return false
 }
 
+// InitDB initializes the PostgreSQL database connection with retry logic.
 func InitDB() {
 	once.Do(func() {
 		var err error
 
-		// Configuration de la connexion
+		// Database connection configuration
 		connStr := "user=" + GetEnvVariable("POSTGRES_USER")
 		connStr += " password=" + GetEnvVariable("POSTGRES_PASSWORD")
 		connStr += " dbname=" + GetEnvVariable("POSTGRES_DB")
@@ -54,44 +56,41 @@ func InitDB() {
 		retryDelay := 10 * time.Second
 
 		for retries := 0; retries < maxRetries; retries++ {
-			// Tenter d'ouvrir la connexion
+			// Try to open the connection
 			dbClient, err = sql.Open("postgres", connStr)
 			if err != nil {
-				var msg string = fmt.Sprintf("Erreur lors de l'ouverture de la connexion à"+
-					"PostgreSQL (tentative %d/%d)", retries+1, maxRetries)
+				msg := fmt.Sprintf("Error opening connection to PostgreSQL (attempt %d/%d)", retries+1, maxRetries)
 				DisplayContext(msg, Error, err)
 			} else {
-				// Tester la connexion
+				// Test the connection
 				err = dbClient.Ping()
 				if err == nil {
-					DisplayContext("Connexion à PostgreSQL réussie !", Update)
+					DisplayContext("Successfully connected to PostgreSQL!", Update)
 					return
 				}
-				var msg string = fmt.Sprintf("Erreur de connexion à "+
-					"PostgreSQL (tentative %d/%d)", retries+1, maxRetries)
+				msg := fmt.Sprintf("Connection error to PostgreSQL (attempt %d/%d)", retries+1, maxRetries)
 				DisplayContext(msg, Error, err)
 			}
 
-			// Fermer la connexion en cas d'erreur pour éviter les fuites
+			// Close the connection on error to avoid leaks
 			if dbClient != nil {
 				dbClient.Close()
 			}
 
-			// Attendre avant la prochaine tentative
+			// Wait before retrying
 			if retries < maxRetries-1 {
-				DisplayContext(fmt.Sprintf("Nouvelle tentative dans %v", retryDelay), Update)
+				DisplayContext(fmt.Sprintf("Retrying in %v", retryDelay), Update)
 				time.Sleep(retryDelay)
 			}
 		}
 
-		// Si toutes les tentatives échouent
-		var msg string = fmt.Sprintf("Échec de connexion à PostgreSQL après %d"+
-			" tentatives : %v", maxRetries, err)
+		// If all attempts fail
+		msg := fmt.Sprintf("Failed to connect to PostgreSQL after %d attempts: %v", maxRetries, err)
 		DisplayContext(msg, Error, true)
 	})
 }
 
-// GetDB retourne le client PostgreSQL
+// GetDB returns the active PostgreSQL database client.
 func GetDB() *sql.DB {
 	if dbClient == nil {
 		InitDB()
@@ -99,14 +98,14 @@ func GetDB() *sql.DB {
 	return dbClient
 }
 
-// CloseDB ferme la connexion à PostgreSQL
+// CloseDB closes the PostgreSQL database connection.
 func CloseDB() {
 	if dbClient != nil {
 		err := dbClient.Close()
 		if err != nil {
-			DisplayContext("Erreur lors de la fermeture de la connexion à PostgreSQL", Error, err)
+			DisplayContext("Error closing PostgreSQL connection", Error, err)
 		} else {
-			fmt.Println("Connexion à PostgreSQL fermée.")
+			fmt.Println("PostgreSQL connection closed.")
 		}
 	}
 }

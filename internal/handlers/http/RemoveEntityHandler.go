@@ -8,6 +8,7 @@ import (
 	"net/http"
 )
 
+// RemoveEntityHandler handles POST requests to delete an entity by its checksum.
 func RemoveEntityHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Error(w, "Unauthorized method", http.StatusMethodNotAllowed)
@@ -33,7 +34,7 @@ func RemoveEntityHandler(w http.ResponseWriter, r *http.Request) {
 	var res sharedModel.RemoveEntityResponse
 
 	if err != nil {
-		pkg.DisplayContext("Error during RemoveEntityService: ", pkg.Error, err)
+		pkg.DisplayContext("Error during RemoveEntityService:", pkg.Error, err)
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 	} else {
 		res = sharedModel.RemoveEntityResponse{

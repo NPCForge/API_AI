@@ -7,8 +7,9 @@ import (
 	"strconv"
 )
 
-// current_user: JWT token
-// delete_user: username (to be deleted)
+// RemoveUserService deletes a user account based on the current user's permission level.
+// current_user: JWT token of the requester.
+// delete_user: username of the user to be deleted (if empty, deletes the requester themselves).
 func RemoveUserService(current_user string, delete_user string) error {
 	// Extract user ID from the JWT token
 	currentIDStr, err := utils.GetUserIDFromJWT(current_user)
@@ -29,7 +30,6 @@ func RemoveUserService(current_user string, delete_user string) error {
 
 	// Get the ID of the user to be deleted
 	deleteUserId := -1
-
 	if delete_user != "" {
 		deleteUserId, err = services.GetUserIdByName(delete_user)
 		if err != nil {
@@ -48,7 +48,7 @@ func RemoveUserService(current_user string, delete_user string) error {
 			return err
 		}
 
-		err := DisconnectService(current_user)
+		err = DisconnectService(current_user)
 		if err != nil {
 			return err
 		}
@@ -62,7 +62,6 @@ func RemoveUserService(current_user string, delete_user string) error {
 	fmt.Println("Deletion authorized for user ID", deleteUserId)
 
 	err = services.DropUser(deleteUserId)
-
 	if err != nil {
 		return err
 	}

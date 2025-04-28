@@ -8,6 +8,7 @@ import (
 	"github.com/gorilla/websocket"
 )
 
+// GetEntitiesHandlerWebSocket handles WebSocket requests to retrieve all entities associated with a user token.
 func GetEntitiesHandlerWebSocket(
 	conn *websocket.Conn, message []byte,
 	sendResponse func(*websocket.Conn, string, string, map[string]interface{}),
@@ -17,7 +18,6 @@ func GetEntitiesHandlerWebSocket(
 	var initialRoute = "GetEntities"
 
 	err := json.Unmarshal(message, &req)
-
 	if err != nil {
 		sendError(conn, initialRoute, "", map[string]interface{}{
 			"message": "Error while decoding JSON message",
@@ -26,10 +26,9 @@ func GetEntitiesHandlerWebSocket(
 	}
 
 	entities, err := sharedServices.GetEntitiesService(req.Token)
-
 	if err != nil {
 		sendError(conn, initialRoute, "", map[string]interface{}{
-			"message": "Error while getting entities",
+			"message": "Error while retrieving entities",
 		})
 		return
 	}

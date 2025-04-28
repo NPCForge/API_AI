@@ -8,6 +8,7 @@ import (
 	"net/http"
 )
 
+// GetEntitiesHandler handles GET requests to retrieve all entities associated with a user.
 func GetEntitiesHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("GetEntitiesHandler called")
 
@@ -34,7 +35,7 @@ func GetEntitiesHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(200)
+	w.WriteHeader(http.StatusOK)
 	err = json.NewEncoder(w).Encode(resp)
 	if err != nil {
 		return

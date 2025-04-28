@@ -11,54 +11,58 @@ import (
 	"github.com/fatih/color"
 )
 
+// status displays the number of currently connected users.
 func status() {
 	store := pkg.GetPopulation() // map[string]string
 
 	color.Cyan("------------ 📊 Status ------------------------------------------------------------")
 	for key, value := range store {
-		color.Green("🔑 Clé : %s → 📦 Valeur : %s", key, value)
+		color.Green("🔑 Key: %s → 📦 Value: %s", key, value)
 	}
-	color.Cyan("------------ 🟢 %d actifs ------------------------------------------------------------\n", len(store))
+	color.Cyan("------------ 🟢 %d active users ---------------------------------------------------\n", len(store))
 }
 
+// help displays all available commands.
 func help() {
-	color.Cyan("------------ ⌨️ Commandes ------------------------------------------------------------")
-	color.Green("status\t: Retourne le nombre de personnes connectées.")
-	color.Green("reset\t: Supprime tous les utilisateurs de la BDD et réinitialise le statut.")
-	color.Green("stop\t: Coupe l'API.")
-	color.Green("resetdiscussions\t: Supprime toutes les discussions de tous les utilisateurs.")
-	color.Green("help\t: Affiche les informations sur les différentes commandes.")
+	color.Cyan("------------ ⌨️ Commands ------------------------------------------------------------")
+	color.Green("status\t: Returns the number of connected users.")
+	color.Green("reset\t: Deletes all users from the database and resets the status.")
+	color.Green("stop\t: Stops the API.")
+	color.Green("resetdiscussions\t: Deletes all discussions for all users.")
+	color.Green("help\t: Displays information about available commands.")
 	color.Cyan("-------------------------------------------------------------------------------------\n")
 }
 
+// reset deletes all users from the database and clears the token store.
 func reset() {
 	rowsAffected, err := services.DropAllUser()
 	if err != nil {
-		color.Red("❌ Erreur lors de la requête SQL : %s", err)
+		color.Red("❌ Error during SQL request: %s", err)
 		return
 	}
-	color.Cyan("💥 %d ligne(s) supprimée(s)", rowsAffected)
+	color.Cyan("💥 %d row(s) deleted", rowsAffected)
 	pkg.ClearTokenStore()
-	color.Cyan("💥 Tokenstore vidé.")
+	color.Cyan("💥 Token store cleared.")
 }
 
+// resetDiscussions deletes all existing discussions.
 func resetDiscussions() {
 	err := services.DropDiscussions()
-
 	if err != nil {
-		pkg.DisplayContext("Cannot reset discussions: ", pkg.Error, err)
+		pkg.DisplayContext("Cannot reset discussions:", pkg.Error, err)
 		return
 	}
 	pkg.DisplayContext("Discussions successfully deleted!", pkg.Update)
 }
 
+// Commande launches the interactive console for server administration.
 func Commande() {
 	reader := bufio.NewReader(os.Stdin)
 
-	color.Magenta("🧠 Console interactive prête. Tape une commande (help, stop, ...)\n")
+	color.Magenta("🧠 Interactive console ready. Type a command (help, stop, ...)\n")
 
 	for {
-		color.White("⤷ Entrez une commande : ")
+		color.White("⤷ Enter a command: ")
 		input, _ := reader.ReadString('\n')
 		input = strings.TrimSpace(input)
 
@@ -74,16 +78,8 @@ func Commande() {
 		}
 
 		switch strings.ToLower(input) {
-		case "stop":
-			color.Red("⛔ Arrêt du serveur...")
-			os.Exit(0)
-
-		case "quit":
-			color.Red("⛔ Arrêt du serveur...")
-			os.Exit(0)
-
-		case "exit":
-			color.Red("⛔ Arrêt du serveur...")
+		case "stop", "quit", "exit":
+			color.Red("⛔ Shutting down the server...")
 			os.Exit(0)
 
 		case "status":
@@ -99,7 +95,7 @@ func Commande() {
 			help()
 
 		default:
-			color.Yellow("❓ Commande inconnue : %s", input)
+			color.Yellow("❓ Unknown command: %s", input)
 		}
 	}
 }
