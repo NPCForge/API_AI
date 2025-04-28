@@ -1,4 +1,4 @@
-package service
+package sharedServices
 
 import (
 	"fmt"
@@ -7,18 +7,17 @@ import (
 	"my-api/internal/utils"
 )
 
+// GetEntitiesService retrieves all entities associated with a user identified by a JWT token.
 func GetEntitiesService(self string) ([]sharedModel.Entity, error) {
 	id, err := utils.GetUserIDFromJWT(self)
-
 	if err != nil {
-		fmt.Printf("GetEntitiesService: %s, token = %s\n", err, self)
+		fmt.Printf("GetEntitiesService error: %s, token = %s\n", err, self)
 		return nil, err
 	}
 
 	ids, checksums, err := services.GetEntities(id)
-
 	if err != nil {
-		fmt.Println(err)
+		fmt.Println("GetEntities error:", err)
 		return nil, err
 	}
 

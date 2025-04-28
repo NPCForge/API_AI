@@ -1,17 +1,16 @@
-package service
+package services
 
 import (
 	"encoding/json"
 	"fmt"
 	"github.com/go-resty/resty/v2"
 	"io/ioutil"
-
 	"my-api/config"
 	sharedModels "my-api/internal/models/shared"
 )
 
-// Function to read the content of a file
-func readPromptFromFile(filePath string) (string, error) {
+// ReadPromptFromFile reads the content of a file and returns it as a string.
+func ReadPromptFromFile(filePath string) (string, error) {
 	content, err := ioutil.ReadFile(filePath)
 	if err != nil {
 		return "", fmt.Errorf("error reading the file: %w", err)
@@ -19,11 +18,12 @@ func readPromptFromFile(filePath string) (string, error) {
 	return string(content), nil
 }
 
+// GptSimpleRequest sends a user prompt and system prompt to the OpenAI API and returns the model's response.
 func GptSimpleRequest(userPrompt string, systemPrompt string) (string, error) {
 	GptClient := resty.New()
 
-	// Prepare messages with a system prompt
-	var Messages = []sharedModels.ChatGptSimpleRequestBodyMessage{
+	// Prepare the chat messages
+	messages := []sharedModels.ChatGptSimpleRequestBodyMessage{
 		{
 			Role:    "system",
 			Content: systemPrompt,
@@ -34,15 +34,13 @@ func GptSimpleRequest(userPrompt string, systemPrompt string) (string, error) {
 		},
 	}
 
-	//pkg.DisplayContext("SystemPrompt = "+systemPrompt+"UserPrompt = "+userPrompt, pkg.Debug)
-
 	// Create the request body
 	body := sharedModels.ChatGptSimpleRequestBody{
 		Model:    "gpt-3.5-turbo",
-		Messages: Messages,
+		Messages: messages,
 	}
 
-	// Make the request to the OpenAI API
+	// Send the request to the OpenAI API
 	resp, err := GptClient.R().
 		SetHeader("Content-Type", "application/json").
 		SetHeader("Authorization", "Bearer "+config.GetEnvVariable("CHATGPT_TOKEN")).

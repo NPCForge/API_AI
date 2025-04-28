@@ -3,11 +3,12 @@ package websocketHandlers
 import (
 	"encoding/json"
 	sharedModel "my-api/internal/models/shared"
-	service "my-api/internal/services/merged"
+	sharedServices "my-api/internal/services/shared"
 
 	"github.com/gorilla/websocket"
 )
 
+// ConnectHandlerWebSocket handles WebSocket connection requests for user authentication.
 func ConnectHandlerWebSocket(
 	conn *websocket.Conn, message []byte,
 	sendResponse func(*websocket.Conn, string, string, map[string]interface{}),
@@ -26,13 +27,12 @@ func ConnectHandlerWebSocket(
 
 	if msg.Action == "" || msg.Identifier == "" || msg.Password == "" {
 		sendError(conn, initialRoute, "", map[string]interface{}{
-			"message": "Missing required fields in the JSON message",
+			"message": "Missing required fields in the JSON body",
 		})
 		return
 	}
 
-	private, id, err := service.ConnectService(msg.Password, msg.Identifier)
-
+	private, id, err := sharedServices.ConnectService(msg.Password, msg.Identifier)
 	if err != nil {
 		sendError(conn, initialRoute, "", map[string]interface{}{
 			"message": err.Error(),

@@ -4,22 +4,22 @@ import (
 	"encoding/json"
 	"my-api/config"
 	sharedModel "my-api/internal/models/shared"
-	service "my-api/internal/services/merged"
+	sharedServices "my-api/internal/services/shared"
 	"my-api/pkg"
 	"net/http"
 )
 
+// RegisterHandler handles POST requests to register a new user after verifying an API key.
 func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 	var req sharedModel.RegisterRequest
 	var res sharedModel.RegisterResponse
 
 	if r.Method != http.MethodPost {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
 		return
 	}
 
 	err := json.NewDecoder(r.Body).Decode(&req)
-
 	if err != nil {
 		http.Error(w, "Bad Request", http.StatusBadRequest)
 		return
@@ -33,21 +33,21 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if req.Password != "" && req.Identifier != "" {
-		private, id, err := service.RegisterService(req.Password, req.Identifier)
+		private, id, err := sharedServices.RegisterService(req.Password, req.Identifier)
 
 		if err != nil {
-			http.Error(w, "Server Error", 500)
+			http.Error(w, "Server Error", http.StatusInternalServerError)
 			return
 		}
 
 		res.Private = private
-		res.Status = 201
+		res.Status = http.StatusCreated
 		res.Message = "User created"
 		res.Id = id
 	} else {
 		res.Private = "null"
-		res.Status = 204
-		res.Message = "Password or Identifier is not given"
+		res.Status = http.StatusNoContent
+		res.Message = "Password or Identifier is missing"
 		res.Id = "null"
 	}
 

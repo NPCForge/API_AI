@@ -15,6 +15,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
+// Health responds to a health check request with "OK".
 func Health(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	_, err := w.Write([]byte("OK"))
@@ -23,27 +24,35 @@ func Health(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// main initializes the server, database, and routes, then starts the HTTP server.
 func main() {
 	log.SetFlags(log.Lshortfile)
+
 	r := mux.NewRouter()
+
+	// Display the server logo
 	config.DrawLogo()
+
+	// Initialize the database connection
 	config.InitDB()
 
-	// Goroutine pour les commandes
+	// Launches a goroutine for CLI commands if not running in Docker
 	if !utils.IsRunningInDocker() {
 		go utils.Commande()
 	}
 
-	// Websocket handler
+	// WebSocket handler
 	r.HandleFunc("/ws", websocketHandlers.WebsocketHandler).Methods("GET")
 
-	// Http handler
+	// HTTP handlers
 	protected := r.PathPrefix("/").Subrouter()
 	protected.Use(httpServices.LoggingMiddleware)
 
+	// Public routes
 	r.HandleFunc("/Connect", httpHandlers.ConnectHandler).Methods("POST")
 	r.HandleFunc("/Register", httpHandlers.RegisterHandler).Methods("POST")
 
+	// Protected routes
 	protected.HandleFunc("/Disconnect", httpHandlers.DisconnectHandler).Methods("POST")
 	protected.HandleFunc("/RemoveUser", httpHandlers.RemoveUserHandler).Methods("POST")
 	protected.HandleFunc("/MakeDecision", httpHandlers.MakeDecisionHandler).Methods("POST")
@@ -52,11 +61,13 @@ func main() {
 	protected.HandleFunc("/NewMessage", httpHandlers.NewMessageHandler).Methods("POST")
 	protected.HandleFunc("/GetEntities", httpHandlers.GetEntitiesHandler).Methods("GET")
 
+	// Health check route
 	r.HandleFunc("/health", Health).Methods("GET")
 
+	// Start the server
 	port := "0.0.0.0:3000"
-	pkg.DisplayContext(fmt.Sprintf("Serveur démarré sur http://%s", port), pkg.Update)
+	pkg.DisplayContext(fmt.Sprintf("Server started on http://%s", port), pkg.Update)
 	if err := http.ListenAndServe(port, r); err != nil {
-		pkg.DisplayContext("Erreur lors du lancement du serveur", pkg.Error, err, true)
+		pkg.DisplayContext("Error while starting the server", pkg.Error, err, true)
 	}
 }

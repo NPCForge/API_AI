@@ -137,10 +137,37 @@ func formatNewMessages(rows *sql.Rows, selfChecksum string) ([]string, error) {
 	return formattedMessages, nil
 }
 
+func markNewMessagesAsRead(receiverID int) error {
+	db := config.GetDB()
+
+	queryUpdate := `
+WITH filtered_messages AS (
+	SELECT messages.id
+	FROM messages
+	JOIN message_receivers ON messages.id = message_receivers.message_id
+	WHERE message_receivers.receiver_entity_id = $1
+	  AND message_receivers.is_new_message = TRUE
+	ORDER BY messages.timestamp
+	LIMIT 5
+)
+UPDATE message_receivers
+SET is_new_message = FALSE
+WHERE message_id IN (SELECT id FROM filtered_messages)
+  AND receiver_entity_id = $1;
+`
+
+	_, err := db.Exec(queryUpdate, receiverID)
+
+	if err != nil {
+		pkg.DisplayContext("[markNewMessagesAsRead]: ", pkg.Error, err)
+		return err
+	}
+	return nil
+}
+
 // Refacto ✅
 func GetNewMessages(ReceiverEntityChecksum string) ([]string, error) {
 	db := config.GetDB()
-	//receiverName, err := GetEntityNameByChecksum(ReceiverEntityChecksum)
 	receiverId, err := GetIDByChecksum(ReceiverEntityChecksum)
 
 	if err != nil {
@@ -184,16 +211,19 @@ func GetNewMessages(ReceiverEntityChecksum string) ([]string, error) {
 		}
 	}(rows)
 
+	err = markNewMessagesAsRead(receiverId)
+
+	if err != nil {
+		return nil, err
+	}
+
 	return formatedMessages, nil
 }
 
 func GetDiscussion(from string, to string) ([]sharedModel.Message, error) {
 	db := config.GetDB()
-	//receiverName, err := GetNameByChecksum(from)
 
-	//if err != nil {
-	//	return nil, err
-	//}
+	limitRows := 10
 
 	query := `WITH filtered_messages AS (
     SELECT m.id, m.sender_entity_id, m.message, m.timestamp
@@ -201,6 +231,8 @@ func GetDiscussion(from string, to string) ([]sharedModel.Message, error) {
     JOIN message_receivers mr ON m.id = mr.message_id
     WHERE (m.sender_entity_id = $1 AND mr.receiver_entity_id = $2)
        OR (m.sender_entity_id = $2 AND mr.receiver_entity_id = $1)
+    ORDER BY m.timestamp
+    LIMIT $3
 )
 SELECT 
     fm.sender_entity_id,
@@ -212,10 +244,10 @@ JOIN entities sender_entity ON fm.sender_entity_id = sender_entity.id
 JOIN message_receivers mr ON fm.id = mr.message_id
 JOIN entities receiver_entity ON mr.receiver_entity_id = receiver_entity.id
 GROUP BY fm.id, fm.sender_entity_id, sender_entity.checksum, fm.message, fm.timestamp
-ORDER BY fm.timestamp
+ORDER BY fm.timestamp;
 `
 
-	rows, err := db.Query(query, from, to)
+	rows, err := db.Query(query, from, to, limitRows)
 	if err != nil {
 		pkg.DisplayContext("Error after GetDiscussion query:", pkg.Error, err)
 		return nil, err
@@ -319,6 +351,19 @@ func DropUser(id int) error {
 		return fmt.Errorf("aucun utilisateur avec cet id trouvé")
 	}
 
+	return nil
+}
+
+func DropDiscussions() error {
+	db := config.GetDB()
+
+	query := `TRUNCATE TABLE message_receivers, messages RESTART IDENTITY CASCADE;`
+
+	_, err := db.Exec(query)
+
+	if err != nil {
+		return fmt.Errorf("error while drop discussions: %w", err)
+	}
 	return nil
 }
 

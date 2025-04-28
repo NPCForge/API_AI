@@ -3,11 +3,12 @@ package websocketHandlers
 import (
 	"encoding/json"
 	sharedModel "my-api/internal/models/shared"
-	service "my-api/internal/services/merged"
+	sharedServices "my-api/internal/services/shared"
 
 	"github.com/gorilla/websocket"
 )
 
+// RemoveEntityHandlerWebSocket handles WebSocket requests to delete an entity by its checksum.
 func RemoveEntityHandlerWebSocket(
 	conn *websocket.Conn,
 	message []byte,
@@ -24,7 +25,7 @@ func RemoveEntityHandlerWebSocket(
 		return
 	}
 
-	if err := service.RemoveEntityService(req.Checksum, req.Token); err != nil {
+	if err := sharedServices.RemoveEntityService(req.Checksum, req.Token); err != nil {
 		sendError(conn, route, "", map[string]interface{}{
 			"message": err.Error(),
 		})

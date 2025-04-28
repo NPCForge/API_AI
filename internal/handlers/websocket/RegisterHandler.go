@@ -4,11 +4,12 @@ import (
 	"encoding/json"
 	"my-api/config"
 	sharedModel "my-api/internal/models/shared"
-	service "my-api/internal/services/merged"
+	sharedServices "my-api/internal/services/shared"
 
 	"github.com/gorilla/websocket"
 )
 
+// RegisterHandlerWebsocket handles WebSocket requests to register a new user after API key verification.
 func RegisterHandlerWebsocket(
 	conn *websocket.Conn,
 	message []byte,
@@ -28,7 +29,7 @@ func RegisterHandlerWebsocket(
 
 	if msg.Action == "" || msg.Token == "" || msg.Identifier == "" || msg.Password == "" {
 		sendError(conn, initialRoute, "", map[string]interface{}{
-			"message": "Missing required fields in the JSON message",
+			"message": "Missing required fields in the JSON body",
 		})
 		return
 	}
@@ -37,13 +38,12 @@ func RegisterHandlerWebsocket(
 
 	if msg.Token != apiKey {
 		sendError(conn, initialRoute, "", map[string]interface{}{
-			"message": "Invalid API Key",
+			"message": "Invalid API key",
 		})
 		return
 	}
 
-	private, id, err := service.RegisterService(msg.Password, msg.Identifier)
-
+	private, id, err := sharedServices.RegisterService(msg.Password, msg.Identifier)
 	if err != nil {
 		sendError(conn, initialRoute, "", map[string]interface{}{
 			"message": err.Error(),

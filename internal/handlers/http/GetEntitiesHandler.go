@@ -4,10 +4,11 @@ import (
 	"encoding/json"
 	"fmt"
 	sharedModel "my-api/internal/models/shared"
-	service "my-api/internal/services/merged"
+	sharedServices "my-api/internal/services/shared"
 	"net/http"
 )
 
+// GetEntitiesHandler handles GET requests to retrieve all entities associated with a user.
 func GetEntitiesHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("GetEntitiesHandler called")
 
@@ -18,7 +19,7 @@ func GetEntitiesHandler(w http.ResponseWriter, r *http.Request) {
 
 	token := r.Header.Get("Authorization")
 
-	entities, err := service.GetEntitiesService(token)
+	entities, err := sharedServices.GetEntitiesService(token)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(sharedModel.ResponseGetEntities{
@@ -34,7 +35,7 @@ func GetEntitiesHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(200)
+	w.WriteHeader(http.StatusOK)
 	err = json.NewEncoder(w).Encode(resp)
 	if err != nil {
 		return

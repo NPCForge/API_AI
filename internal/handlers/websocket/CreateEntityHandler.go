@@ -4,12 +4,12 @@ import (
 	"encoding/json"
 	"fmt"
 	sharedModel "my-api/internal/models/shared"
-
-	service "my-api/internal/services/merged"
+	sharedServices "my-api/internal/services/shared"
 
 	"github.com/gorilla/websocket"
 )
 
+// CreateEntityHandlerWebSocket handles WebSocket requests to create a new entity.
 func CreateEntityHandlerWebSocket(
 	conn *websocket.Conn, message []byte,
 	sendResponse func(*websocket.Conn, string, string, map[string]interface{}),
@@ -19,7 +19,6 @@ func CreateEntityHandlerWebSocket(
 	var initialRoute = "CreateEntity"
 
 	err := json.Unmarshal(message, &req)
-
 	if err != nil {
 		sendError(conn, initialRoute, "", map[string]interface{}{
 			"message": "Error while decoding JSON message",
@@ -29,16 +28,15 @@ func CreateEntityHandlerWebSocket(
 
 	if req.Checksum == "" || req.Name == "" || req.Prompt == "" {
 		sendError(conn, initialRoute, "", map[string]interface{}{
-			"message": "Missing fields in the payload",
+			"message": "Missing required fields in the payload",
 		})
 		return
 	}
 
-	id, err := service.CreateEntityService(req.Name, req.Prompt, req.Checksum, req.Token)
-
+	id, err := sharedServices.CreateEntityService(req.Name, req.Prompt, req.Checksum, req.Token)
 	if err != nil {
 		sendError(conn, initialRoute, "", map[string]interface{}{
-			"message": "Error while Create Entity",
+			"message": "Error while creating entity",
 		})
 		return
 	}

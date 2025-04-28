@@ -4,10 +4,11 @@ import (
 	"encoding/json"
 	"log"
 	sharedModel "my-api/internal/models/shared"
-	service "my-api/internal/services/merged"
+	sharedServices "my-api/internal/services/shared"
 	"net/http"
 )
 
+// NewMessageHandler handles POST requests to create and send a new message between entities.
 func NewMessageHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Error(w, "Unauthorized method", http.StatusMethodNotAllowed)
@@ -26,7 +27,7 @@ func NewMessageHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = service.NewMessageService(req.Sender, req.Receivers, req.Message)
+	err = sharedServices.NewMessageService(req.Sender, req.Receivers, req.Message)
 
 	if err != nil {
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
@@ -41,6 +42,6 @@ func NewMessageHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 	if err := json.NewEncoder(w).Encode(res); err != nil {
-		log.Printf("Error while sending json : %v", err)
+		log.Printf("Error while sending JSON: %v", err)
 	}
 }

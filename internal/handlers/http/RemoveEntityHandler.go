@@ -3,11 +3,12 @@ package httpHandlers
 import (
 	"encoding/json"
 	sharedModel "my-api/internal/models/shared"
-	service "my-api/internal/services/merged"
+	sharedServices "my-api/internal/services/shared"
 	"my-api/pkg"
 	"net/http"
 )
 
+// RemoveEntityHandler handles POST requests to delete an entity by its checksum.
 func RemoveEntityHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Error(w, "Unauthorized method", http.StatusMethodNotAllowed)
@@ -28,12 +29,12 @@ func RemoveEntityHandler(w http.ResponseWriter, r *http.Request) {
 
 	token := r.Header.Get("Authorization")
 
-	err = service.RemoveEntityService(req.Checksum, token)
+	err = sharedServices.RemoveEntityService(req.Checksum, token)
 
 	var res sharedModel.RemoveEntityResponse
 
 	if err != nil {
-		pkg.DisplayContext("Error during RemoveEntityService: ", pkg.Error, err)
+		pkg.DisplayContext("Error during RemoveEntityService:", pkg.Error, err)
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 	} else {
 		res = sharedModel.RemoveEntityResponse{
