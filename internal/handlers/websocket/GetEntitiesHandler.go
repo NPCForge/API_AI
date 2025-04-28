@@ -10,8 +10,8 @@ import (
 
 func GetEntitiesHandlerWebSocket(
 	conn *websocket.Conn, message []byte,
-	sendResponse func(*websocket.Conn, string, map[string]interface{}),
-	sendError func(*websocket.Conn, string, map[string]interface{}),
+	sendResponse func(*websocket.Conn, string, string, map[string]interface{}),
+	sendError func(*websocket.Conn, string, string, map[string]interface{}),
 ) {
 	var req sharedModel.RequestGetEntities
 	var initialRoute = "GetEntities"
@@ -19,7 +19,7 @@ func GetEntitiesHandlerWebSocket(
 	err := json.Unmarshal(message, &req)
 
 	if err != nil {
-		sendError(conn, initialRoute, map[string]interface{}{
+		sendError(conn, initialRoute, "", map[string]interface{}{
 			"message": "Error while decoding JSON message",
 		})
 		return
@@ -28,13 +28,13 @@ func GetEntitiesHandlerWebSocket(
 	entities, err := service.GetEntitiesService(req.Token)
 
 	if err != nil {
-		sendError(conn, initialRoute, map[string]interface{}{
+		sendError(conn, initialRoute, "", map[string]interface{}{
 			"message": "Error while getting entities",
 		})
 		return
 	}
 
-	sendResponse(conn, initialRoute, map[string]interface{}{
+	sendResponse(conn, initialRoute, "", map[string]interface{}{
 		"entities": entities,
 	})
 }

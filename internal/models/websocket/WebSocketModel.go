@@ -5,11 +5,12 @@ import (
 )
 
 type WebSocketMessage struct {
-	Action string `json:"action"`
+	Action   string `json:"action"`
+	Checksum string `json:"checksum"`
 }
 
 type WebSocketDispatcher struct {
 	Name      string
-	Handler   func(*websocket.Conn, []byte, func(*websocket.Conn, string, map[string]interface{}), func(*websocket.Conn, string, map[string]interface{}))
+	Handler   func(*websocket.Conn, []byte, func(*websocket.Conn, string, string, map[string]interface{}), func(*websocket.Conn, string, string, map[string]interface{}))
 	Protected bool
 }

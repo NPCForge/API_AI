@@ -11,7 +11,7 @@ import (
 	"strings"
 )
 
-func talkTo(Checksum string, message string, interlocutor string) (string, error, bool) {
+func talkTo(Checksum string, message string, interlocutorChecksum string) (string, error, bool) {
 	EntityId, err := services.GetEntityIdByChecksum(Checksum)
 
 	if err != nil {
@@ -32,7 +32,7 @@ func talkTo(Checksum string, message string, interlocutor string) (string, error
 	}
 
 	systemPrompt += "\n" + prompt
-	userPrompt := "Interlocutor: " + interlocutor + "\nDiscussion: { " + message + " }"
+	userPrompt := "Interlocutor: " + interlocutorChecksum + "\nDiscussion: { " + message + " }"
 
 	back, err := GptSimpleRequest(userPrompt, systemPrompt)
 
@@ -55,7 +55,7 @@ func talkTo(Checksum string, message string, interlocutor string) (string, error
 	}
 }
 
-func getAllDiscussionsForEntity(EntityChecksum string, InterlocutorNames []string) (string, error) {
+func getAllDiscussionsForEntity(EntityChecksum string, InterlocutorChecksums []string) (string, error) {
 	EntityID, err := services.GetEntityIdByChecksum(EntityChecksum)
 
 	if err != nil {
@@ -65,15 +65,15 @@ func getAllDiscussionsForEntity(EntityChecksum string, InterlocutorNames []strin
 
 	var allDiscussions string
 
-	for _, name := range InterlocutorNames {
-		interlocutorID, err := services.GetEntityIDByName(name)
+	for _, checksum := range InterlocutorChecksums {
+		interlocutorID, err := services.GetEntityIdByChecksum(checksum)
 
 		if err != nil {
-			pkg.DisplayContext("Cannot get Interlocutor ID using name: "+name, pkg.Error, err)
+			pkg.DisplayContext("Cannot get Interlocutor ID using checksum: "+checksum, pkg.Error, err)
 			return "", err
 		}
 
-		discussion, err := services.GetDiscussion(strconv.Itoa(EntityID), interlocutorID)
+		discussion, err := services.GetDiscussion(strconv.Itoa(EntityID), strconv.Itoa(interlocutorID))
 
 		if err != nil {
 			pkg.DisplayContext("Cannot get Discussion", pkg.Error, err)
@@ -84,7 +84,7 @@ func getAllDiscussionsForEntity(EntityChecksum string, InterlocutorNames []strin
 
 		for _, msg := range discussion {
 			sb.WriteString(fmt.Sprintf("[%s -> %s: %s], ",
-				msg.SenderName, msg.ReceiverNames, msg.Message))
+				msg.SenderChecksum, msg.ReceiverChecksums, msg.Message))
 		}
 
 		allDiscussions += sb.String()
@@ -124,25 +124,25 @@ func handleTalkToLogic(Decision string, Checksum string) (string, error) {
 	matches := re.FindStringSubmatch(Decision)
 
 	if len(matches) > 1 {
-		names := strings.Split(matches[1], ", ")
-		namesString := "[" + strings.Join(names, ", ") + "]"
+		checksums := strings.Split(matches[1], ", ")
+		checksumsString := "[" + strings.Join(checksums, ", ") + "]"
 
-		discussions, err := getAllDiscussionsForEntity(Checksum, names)
+		discussions, err := getAllDiscussionsForEntity(Checksum, checksums)
 
 		if err != nil {
 			pkg.DisplayContext("Cannot get Discussions using checksum", pkg.Error, err)
 			return "", err
 		}
 
-		message, err, _ := talkTo(Checksum, discussions, namesString) // should finish is not used. Must implement
+		message, err, _ := talkTo(Checksum, discussions, checksumsString) // should finish is not used. Must implement
 
 		if err != nil {
 			pkg.DisplayContext("TalkToPreprocess failed: ", pkg.Error, err)
 			return "", err
 		}
-		return "TalkTo: " + namesString + "\nMessage: " + message, nil
+		return "TalkTo: " + checksumsString + "\nMessage: " + message, nil
 	}
-	return "", fmt.Errorf("Cannot find interlocutor names: " + Decision)
+	return "", fmt.Errorf("Cannot find interlocutor checksums: " + Decision)
 }
 
 func interpretLLMDecision(Decision string, Checksum string) (string, error) {
@@ -180,7 +180,7 @@ func MakeDecisionService(Message string, Checksum string, Token string) (string,
 	task, err := interpretLLMDecision(decision, Checksum)
 
 	if err != nil {
-		pkg.DisplayContext("Error after decision making: ", pkg.Error, err)
+		pkg.DisplayContext("Error after llm response interpretation: ", pkg.Error, err)
 		return "", err
 	}
 

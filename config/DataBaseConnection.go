@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"database/sql"
 	"fmt"
-	"my-api/pkg"
 	. "my-api/pkg"
 	"os"
 	"strings"
@@ -53,8 +52,6 @@ func InitDB() {
 		connStr += " port=" + GetEnvVariable("POSTGRES_PORT") + " sslmode=disable"
 		maxRetries := 4
 		retryDelay := 10 * time.Second
-
-		pkg.DisplayContext(fmt.Sprintf("Connected to postgres with : %s", connStr), pkg.Update)
 
 		for retries := 0; retries < maxRetries; retries++ {
 			// Tenter d'ouvrir la connexion

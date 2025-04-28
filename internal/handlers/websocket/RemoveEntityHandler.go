@@ -11,27 +11,27 @@ import (
 func RemoveEntityHandlerWebSocket(
 	conn *websocket.Conn,
 	message []byte,
-	sendResponse func(*websocket.Conn, string, map[string]interface{}),
-	sendError func(*websocket.Conn, string, map[string]interface{}),
+	sendResponse func(*websocket.Conn, string, string, map[string]interface{}),
+	sendError func(*websocket.Conn, string, string, map[string]interface{}),
 ) {
 	const route = "RemoveEntity"
 
 	var req sharedModel.RemoveEntityRequest
 	if err := json.Unmarshal(message, &req); err != nil {
-		sendError(conn, route, map[string]interface{}{
+		sendError(conn, route, "", map[string]interface{}{
 			"message": "Error decoding JSON payload",
 		})
 		return
 	}
 
 	if err := service.RemoveEntityService(req.Checksum, req.Token); err != nil {
-		sendError(conn, route, map[string]interface{}{
+		sendError(conn, route, "", map[string]interface{}{
 			"message": err.Error(),
 		})
 		return
 	}
 
-	sendResponse(conn, route, map[string]interface{}{
+	sendResponse(conn, route, "", map[string]interface{}{
 		"message": "Entity successfully deleted",
 	})
 }

@@ -11,22 +11,22 @@ import (
 
 func MakeDecisionHandlerWebSocket(
 	conn *websocket.Conn, message []byte,
-	sendResponse func(*websocket.Conn, string, map[string]interface{}),
-	sendError func(*websocket.Conn, string, map[string]interface{}),
+	sendResponse func(*websocket.Conn, string, string, map[string]interface{}),
+	sendError func(*websocket.Conn, string, string, map[string]interface{}),
 ) {
 	var req sharedModel.MakeDecisionRequest
 	var initialRoute = "MakeDecision"
 
 	err := json.Unmarshal(message, &req)
 	if err != nil {
-		sendError(conn, initialRoute, map[string]interface{}{
+		sendError(conn, initialRoute, req.Checksum, map[string]interface{}{
 			"message": "Error while decoding JSON message",
 		})
 		return
 	}
 
 	if req.Message == "" || req.Checksum == "" {
-		sendError(conn, initialRoute, map[string]interface{}{
+		sendError(conn, initialRoute, req.Checksum, map[string]interface{}{
 			"message": "Missing required fields in the JSON message",
 		})
 		return
@@ -36,13 +36,13 @@ func MakeDecisionHandlerWebSocket(
 
 	if err != nil {
 		pkg.DisplayContext("internal server error", pkg.Error, err)
-		sendError(conn, initialRoute, map[string]interface{}{
+		sendError(conn, initialRoute, req.Checksum, map[string]interface{}{
 			"message": "Internal server error",
 		})
 		return
 	}
 
-	sendResponse(conn, initialRoute, map[string]interface{}{
+	sendResponse(conn, initialRoute, req.Checksum, map[string]interface{}{
 		"message": msg,
 	})
 }

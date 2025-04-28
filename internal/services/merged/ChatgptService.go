@@ -34,6 +34,8 @@ func GptSimpleRequest(userPrompt string, systemPrompt string) (string, error) {
 		},
 	}
 
+	//pkg.DisplayContext("SystemPrompt = "+systemPrompt+"UserPrompt = "+userPrompt, pkg.Debug)
+
 	// Create the request body
 	body := sharedModels.ChatGptSimpleRequestBody{
 		Model:    "gpt-3.5-turbo",

@@ -8,7 +8,6 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-// LogErrorUtils affiche les erreurs avec le nom du fichier et la ligne, en rouge
 func LogErrorUtils(context string, err error) {
 	if err != nil {
 		_, file, line, ok := runtime.Caller(1)
@@ -20,11 +19,11 @@ func LogErrorUtils(context string, err error) {
 	}
 }
 
-// SendResponse envoie une réponse WebSocket de succès et l'affiche joliment
-func SendResponse(conn *websocket.Conn, initialRoute string, fields map[string]interface{}) {
+func SendResponse(conn *websocket.Conn, initialRoute string, entityChecksum string, fields map[string]interface{}) {
 	resp := map[string]interface{}{
-		"status": "success",
-		"route":  initialRoute,
+		"status":   "success",
+		"route":    initialRoute,
+		"checksum": entityChecksum,
 	}
 
 	for key, value := range fields {
@@ -37,11 +36,11 @@ func SendResponse(conn *websocket.Conn, initialRoute string, fields map[string]i
 	conn.WriteJSON(resp)
 }
 
-// SendError envoie une réponse WebSocket d'erreur et l'affiche joliment
-func SendError(conn *websocket.Conn, initialRoute string, fields map[string]interface{}) {
+func SendError(conn *websocket.Conn, initialRoute string, entityChecksum string, fields map[string]interface{}) {
 	resp := map[string]interface{}{
-		"status": "error",
-		"route":  initialRoute,
+		"status":   "error",
+		"route":    initialRoute,
+		"checksum": entityChecksum,
 	}
 
 	for key, value := range fields {

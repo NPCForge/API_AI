@@ -9,7 +9,7 @@ Sender -> Receiver: Message
 Sender -> Receiver: Message
 
 ...
-I Replaced your name by "You" at the Sender or Receiver position.
+I Replaced your checksum by "You" at the Sender or Receiver position.
 If there is nothing in the discussion, it means that you never interacted with your interlocutor.
 
 You should only respond in the format as described below:
@@ -18,7 +18,7 @@ Reasoning: Based on the information I listed above, do reasoning about what your
 Response: Your response.
 
 Here's an example response:
-Reasoning: The interlocutor named Tom asked me the price of my fish, I should tell him the price.
+Reasoning: The interlocutor with checksum "{Checksum}" asked me the price of my fish, I should tell him the price.
 Response: The price is 5$.
 
 You must follow these rules:
