@@ -26,6 +26,7 @@ func help() {
 	color.Green("status\t: Retourne le nombre de personnes connectées.")
 	color.Green("reset\t: Supprime tous les utilisateurs de la BDD et réinitialise le statut.")
 	color.Green("stop\t: Coupe l'API.")
+	color.Green("resetdiscussions\t: Supprime toutes les discussions de tous les utilisateurs.")
 	color.Green("help\t: Affiche les informations sur les différentes commandes.")
 	color.Cyan("-------------------------------------------------------------------------------------\n")
 }
@@ -39,6 +40,16 @@ func reset() {
 	color.Cyan("💥 %d ligne(s) supprimée(s)", rowsAffected)
 	pkg.ClearTokenStore()
 	color.Cyan("💥 Tokenstore vidé.")
+}
+
+func resetDiscussions() {
+	err := services.DropDiscussions()
+
+	if err != nil {
+		pkg.DisplayContext("Cannot reset discussions: ", pkg.Error, err)
+		return
+	}
+	pkg.DisplayContext("Discussions successfully deleted!", pkg.Update)
 }
 
 func Commande() {
@@ -80,6 +91,9 @@ func Commande() {
 
 		case "reset":
 			reset()
+
+		case "resetdiscussions":
+			resetDiscussions()
 
 		case "help":
 			help()

@@ -18,7 +18,7 @@ func talkTo(Checksum string, message string, interlocutorChecksum string) (strin
 		return "", err, false
 	}
 
-	prompt, err := services.GetPromptByID(strconv.Itoa(EntityId))
+	roleDescription, err := services.GetPromptByID(strconv.Itoa(EntityId))
 
 	if err != nil {
 		pkg.DisplayContext("Cannot get prompt using entity ID", pkg.Error, err)
@@ -30,12 +30,11 @@ func talkTo(Checksum string, message string, interlocutorChecksum string) (strin
 		return "", fmt.Errorf("error retrieving the system prompt: %w", err), false
 	}
 
-	systemPrompt += "\n" + prompt
+	systemPrompt = strings.Replace(systemPrompt, "{Role Description Here}", roleDescription, 1)
+
 	userPrompt := "Interlocutor: " + interlocutorChecksum + "\nDiscussion: { " + message + " }"
 
 	back, err := services.GptSimpleRequest(userPrompt, systemPrompt)
-
-	//pkg.DisplayContext("TalkTo GPT request = "+back, pkg.Debug)
 
 	if helpers.NeedToFinish(back) {
 		pkg.DisplayContext("After this, need to finish", pkg.Debug)
@@ -49,7 +48,9 @@ func talkTo(Checksum string, message string, interlocutorChecksum string) (strin
 		//pkg.DisplayContext("Expected response: "+response, pkg.Debug)
 		return response, nil, helpers.NeedToFinish(back)
 	} else {
-		pkg.DisplayContext("Response pattern not found in GPT output: "+back, pkg.Error)
+		pkg.DisplayContext("userPrompt = "+userPrompt, pkg.Debug)
+		pkg.DisplayContext("systemPrompt = "+systemPrompt, pkg.Debug)
+		pkg.DisplayContext("Response pattern not found in GPT output: "+back, pkg.Error, true)
 		return "", fmt.Errorf("error during the process"), false
 	}
 }

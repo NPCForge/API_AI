@@ -27,13 +27,14 @@ func askLLMForDecision(Message string, Checksum string) (string, error) {
 
 	Message += "\nNew Messages: {" + strings.Join(newMessages, ", ") + "}"
 
-	pkg.DisplayContext("NewMessages = "+strings.Join(newMessages, ", "), pkg.Debug)
-
 	// Read the "curriculum.txt" file to get the system prompt
 	systemPrompt, err := services.ReadPromptFromFile("prompts/curriculum.txt")
 	if err != nil {
 		return "", fmt.Errorf("error retrieving the system prompt: %w", err)
 	}
+
+	//pkg.DisplayContext("userPrompt = "+Message, pkg.Debug)
+	//pkg.DisplayContext("systemPrompt = "+systemPrompt, pkg.Debug)
 
 	decision, err := services.GptSimpleRequest(Message, systemPrompt)
 	if err != nil {

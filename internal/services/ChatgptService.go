@@ -5,12 +5,10 @@ import (
 	"fmt"
 	"github.com/go-resty/resty/v2"
 	"io/ioutil"
-
 	"my-api/config"
 	sharedModels "my-api/internal/models/shared"
 )
 
-// Function to read the content of a file
 func ReadPromptFromFile(filePath string) (string, error) {
 	content, err := ioutil.ReadFile(filePath)
 	if err != nil {
