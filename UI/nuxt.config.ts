@@ -7,4 +7,8 @@ export default defineNuxtConfig({
 		'bootstrap/dist/css/bootstrap.min.css',
 		'assets/css/global.css'
 	],
+	server: {
+		port: 4000,  // Le port sur lequel Nuxt.js sera lancé
+		host: '0.0.0.0',  // Pour permettre l'accès à partir de n'importe quelle interface
+	},
 })
