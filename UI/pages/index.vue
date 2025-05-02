@@ -9,14 +9,28 @@
 
 <script setup>
     import { connect } from "~/services/npcforge.js"
-    const identifier = ref("");
-    const password = ref("");
+    import { ref } from 'vue'
+    import { useRouter } from 'vue-router'
 
-    const connection = () => {
-        console.log(identifier.value, password.value)
-        connect(identifier.value, password.value)
+    const router = useRouter()
+
+    const identifier = ref("")
+    const password = ref("")
+
+    const connection = async () => {
+        try {
+            const res = await connect(identifier.value, password.value)
+            if (res) {
+                router.push('/Secure')
+            } else {
+                console.error('Connexion échouée')
+            }
+        } catch (error) {
+            console.error('Erreur lors de la connexion:', error)
+        }
     }
 </script>
+
 
 <style scoped>
     .input {

@@ -1,31 +1,33 @@
-const adresse = "http://0.0.0.0:3000/"
+// Exemple de code pour se connecter et stocker le token
+export const connect = async (identifier, password) => {
+    try {
+        const response = await fetch('http://0.0.0.0:3000/Connect', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                identifier: identifier,
+                password: password,
+            }),
+        })
 
-export const connect = (identifier, password) => {
-    fetch(adresse + "Connect", {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-            identifier: identifier,
-            password: password
-        }),
-    })
-    .then(response => {
         if (!response.ok) {
-            throw new Error(`HTTP error! Status: ${response.status}`); // Vérifie si la réponse est correcte
+            throw new Error(`HTTP error! Status: ${response.status}`)
         }
-        return response.json();
-    })
-    .then(data => {
-        console.log(data);
-        if (data.status == 200 && data.token != "") {
+
+        const data = await response.json()
+
+        // Si le token est présent, le stocker dans localStorage
+        if (data.token) {
+            localStorage.setItem('token', data.token)  // Stocker le token dans localStorage
             return true
+        } else {
+            return false
         }
-    })
-    .catch(error => {
-        console.error('Erreur:', error);
+    } catch (error) {
+        console.error('Erreur de connexion:', error)
         return false
-    });
-    return false
+    }
 }
+
