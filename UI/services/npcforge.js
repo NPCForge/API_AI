@@ -33,11 +33,39 @@ export const connect = async (identifier, password) => {
 
 export const getPrompts = async () => {
     try {
-        const response = await fetch('/api/getPrompts');
+        const response = await fetch('/api/Prompts/getAll');
         const data = await response.json();
         console.log('Prompts récupérés:', data);
         return data;
     } catch (error) {
         console.error('Erreur lors de la récupération des prompts:', error);
+    }
+};
+
+export const editPrompt = async (name, content) => {
+    try {
+        const response = await fetch(`/api/Prompts/${name}/edit`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json', // Assurez-vous que le body est en JSON
+            },
+            body: JSON.stringify({
+                content: content,
+            }),
+        });
+
+        // Vérifie si la réponse est OK (code HTTP 2xx)
+        if (!response.ok) {
+            throw new Error(`Erreur du serveur: ${response.statusText}`);
+        }
+
+        // Récupérer les données de la réponse
+        const data = await response.json();
+
+        // Retourner les données
+        return data;
+    } catch (error) {
+        console.error('Erreur lors de la mise à jour du prompt:', error);
+        throw error; // Relance l'erreur pour pouvoir la gérer au niveau supérieur
     }
 };
