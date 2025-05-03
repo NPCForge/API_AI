@@ -31,3 +31,13 @@ export const connect = async (identifier, password) => {
     }
 }
 
+export const getPrompts = async () => {
+    try {
+        const response = await fetch('/api/getPrompts');
+        const data = await response.json();
+        console.log('Prompts récupérés:', data);
+        return data;
+    } catch (error) {
+        console.error('Erreur lors de la récupération des prompts:', error);
+    }
+};

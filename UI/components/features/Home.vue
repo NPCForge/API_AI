@@ -1,7 +1,6 @@
 <template>
     <div class="body">
         <h3>{{ pageName }}</h3>
-        
     </div>
 </template>
 
