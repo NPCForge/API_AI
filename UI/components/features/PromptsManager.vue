@@ -91,7 +91,7 @@
 
     const handleEditPrompt = async () => {
         try {
-            let res = await(editPrompt(prompts.value[currentPrompt.value].fileName, prompts.value[currentPrompt.value].content));
+            let res = await(editPrompt(prompts.value[currentPrompt.value].fileName, editor.value.getHTML()));
             console.log(res)
         } catch (e) {
             console.error(e)

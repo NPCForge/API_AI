@@ -11,12 +11,16 @@ export default defineEventHandler(async (event): Promise<Prompt | { error: strin
     // Résoudre le chemin absolu vers le dossier 'prompts'
     const promptsDirectory = "../prompts";
 
+    console.log(await fs.promises.readdir(promptsDirectory))
+
     // Récupérer l'ID depuis l'URL
     const { id } = event.context.params;  // Récupère l'ID de l'URL (par exemple: api/Prompt/[id]/edit)
-
+    console.log(id)
     // Lire le corps de la requête (nouveau contenu)
     const body = await readBody(event);  // Récupère le body envoyé dans la requête
     const newContent = body.content;  // Le nouveau contenu est passé avec la clé 'content'
+
+    console.log(newContent)
 
     if (!newContent) {
         return { error: 'No content provided in the request body' };
