@@ -66,6 +66,49 @@ export const editPrompt = async (name, content) => {
         return data;
     } catch (error) {
         console.error('Erreur lors de la mise à jour du prompt:', error);
-        throw error; // Relance l'erreur pour pouvoir la gérer au niveau supérieur
+        throw error;
     }
 };
+
+export const removePrompt = async (name) => {
+    try {
+        const response = await fetch(`/api/Prompts/${name}/remove`, { method: 'POST' });
+
+        // Vérifie si la réponse est OK (code HTTP 2xx)
+        if (!response.ok) {
+            throw new Error(`Erreur du serveur: ${response.statusText}`);
+        }
+
+        // Retourner les données
+        return true
+    } catch (error) {
+        console.error('Erreur lors de la mise à jour du prompt:', error);
+        throw error;
+    }
+};
+
+export const createPrompt = async (name) => {
+    try {
+        // Changer la méthode HTTP en POST pour envoyer des données
+        const response = await fetch(`/api/Prompts/${name}/create`, {
+            method: 'POST',  // Utilisation de POST pour envoyer les données
+            headers: {
+                'Content-Type': 'application/json',  // Le serveur attend du JSON
+            },
+            body: JSON.stringify({ name })  // Envoi du nom du fichier dans le corps
+        });
+
+        // Vérification de la réponse du serveur
+        if (!response.ok) {
+            throw new Error(`Erreur du serveur: ${response.statusText}`);
+        }
+
+        // Retourner un message de succès
+        return true;
+    } catch (error) {
+        console.error('Erreur lors de la mise à jour du prompt:', error);
+        throw error;
+    }
+};
+
+

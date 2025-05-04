@@ -3,42 +3,44 @@
         <div class="d-flex justify-content-start align-items-center" style="height: 7%; width: 100%;">
             <h1>{{ pageName }}</h1>
         </div>
-        <div class="d-flex justify-content-center align-items-center" style="height: 100%; width: 100%; overflow-y: scroll;">
-            <leftBar :prompts="prompts" @changePrompt="changeCurrentPrompt" />
+        <div class="d-flex justify-content-center align-items-center"
+            style="height: 100%; width: 100%; overflow-y: scroll;">
+            <leftBar :prompts="prompts" @changePrompt="changeCurrentPrompt" @addPrompt="handleAddPrompt"/>
 
-
-
-            <div class="d-flex flex-column justify-content-center align-items-center" style="height: 100%; width: 100%; padding: 1% 1%; border-left: 1px solid black">
-                <div v-if="currentPrompt !== -1" class="d-flex justify-content-between align-items-center" style="width: 100%; height: 7%; margin-bottom: 1%;">
-                    <div style="width: 40%; height: 100%; overflow: hidden;" class="d-flex justify-content-start align-items-end">
+            <div class="d-flex flex-column justify-content-center align-items-center"
+                style="height: 100%; width: 100%; padding: 1% 1%; border-left: 1px solid black">
+                <div v-if="currentPrompt !== -1 && prompts[currentPrompt]"
+                    class="d-flex justify-content-between align-items-center"
+                    style="width: 100%; height: 7%; margin-bottom: 1%;">
+                    <div style="width: 40%; height: 100%; overflow: hidden;"
+                        class="d-flex justify-content-start align-items-end">
                         <h4>{{ prompts[currentPrompt].fileName }}</h4>
                     </div>
                     <div style="width: 60%; height: 100%;" class="action d-flex justify-content-end align-items-center">
-                        <Icon class="icon" name="material-symbols:save" size="3vh" style="color: black" @click="handleEditPrompt"/>
-                        <Icon class="icon" name="material-symbols:delete" size="3vh" style="color: black" />
-                        <Icon class="icon" name="material-symbols:refresh" size="3vh" style="color: black" @click="handleGetPrompts"/>
+                        <Icon v-if="editor.getHTML() !== prompts[currentPrompt].content" class="icon"
+                            name="material-symbols:save" size="3vh" style="color: black" @click="handleEditPrompt" />
+                        <Icon class="icon" name="material-symbols:delete" size="3vh" style="color: black"
+                            @click="handleRemovePrompt(prompts[currentPrompt].fileName)" />
+                        <Icon class="icon" name="material-symbols:refresh" size="3vh" style="color: black"
+                            @click="handleGetPrompts" />
                     </div>
                 </div>
 
-
-
-                <div v-if="currentPrompt !== -1" style="width: 100%; height: 100%; overflow-y: scroll;">
-                    <EditorContent :editor="editor" style="width: 100%; height: 100%;"/>
+                <div v-if="currentPrompt !== -1 && prompts[currentPrompt]"
+                    style="width: 100%; height: 100%; overflow-y: scroll;">
+                    <EditorContent :editor="editor" style="width: 100%; height: 100%;" />
                 </div>
                 <div v-else>
                     <p>Veuillez sélectionner un prompt.</p>
                 </div>
             </div>
-
-
-
         </div>
     </div>
 </template>
 
 <script setup>
     import { ref, onMounted, onBeforeUnmount } from 'vue';
-    import { getPrompts, editPrompt } from '~/services/npcforge.js';
+    import { getPrompts, editPrompt, removePrompt } from '~/services/npcforge.js';
     import { useEditor, EditorContent } from '@tiptap/vue-3';
     import StarterKit from '@tiptap/starter-kit';
     import leftBar from '~/components/features/prompt/leftBar.vue'
@@ -56,7 +58,6 @@
     });
 
     onBeforeUnmount(() => {
-        // Nettoyer l'éditeur avant la destruction du composant
         editor?.destroy();
     });
 
@@ -70,7 +71,6 @@
     };
 
     const convertTextToHtml = (text) => {
-        // Remplacer les retours à la ligne par des balises <p> ou <br>
         return text.replace(/\n/g, '<p></p>');
     };
 
@@ -80,10 +80,16 @@
         }
     };
 
+    const handleAddPrompt = (newPrompt) => {
+        prompts.value.push(newPrompt);
+    };
+
     const handleGetPrompts = async () => {
         try {
             prompts.value = await getPrompts();
-            console.log(prompts.value);
+            if (prompts.value.length > 0 && currentPrompt.value === -1) {
+                currentPrompt.value = 0; // Sélectionner le premier prompt par défaut
+            }
         } catch (error) {
             console.error('Erreur lors de la récupération des prompts:', error);
         }
@@ -91,12 +97,23 @@
 
     const handleEditPrompt = async () => {
         try {
-            let res = await(editPrompt(prompts.value[currentPrompt.value].fileName, editor.value.getHTML()));
-            console.log(res)
+            if (prompts.value[currentPrompt.value]) {
+                await editPrompt(prompts.value[currentPrompt.value].fileName, editor.value.getHTML());
+                handleGetPrompts();
+            }
         } catch (e) {
-            console.error(e)
+            console.error(e);
         }
-    }
+    };
+
+    const handleRemovePrompt = async (name) => {
+        try {
+            await removePrompt(name);
+            handleGetPrompts();
+        } catch (e) {
+            console.error(e);
+        }
+    };
 
     onMounted(() => {
         handleGetPrompts();
