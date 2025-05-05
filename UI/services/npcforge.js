@@ -31,6 +31,33 @@ export const connect = async (identifier, password) => {
     }
 }
 
+export const disconnect = async () => {
+    try {
+        if (!data.token)
+            return true
+        const response = await fetch('http://0.0.0.0:3000/Disconnect', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                token: localStorage.getItem("token")
+            }),
+        })
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`)
+        }
+
+        localStorage.removeItem('token')
+        return true
+
+    } catch (error) {
+        console.error('Erreur de connexion:', error)
+        return false
+    }
+}
+
 export const getPrompts = async () => {
     try {
         const response = await fetch('/api/Prompts/getAll');

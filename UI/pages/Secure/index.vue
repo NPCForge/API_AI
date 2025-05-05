@@ -29,53 +29,56 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
-import ButtonGroup from '~/components/ButtonGroup.vue'
+    import { ref } from 'vue'
+    import ButtonGroup from '~/components/ButtonGroup.vue'
 
-import Home from "~/components/features/Home.vue"
-import Settings from "~/components/features/Settings.vue"
-import EntitiesManager from "~/components/features/EntitiesManager.vue"
-import PromptsManager from "~/components/features/PromptsManager.vue"
-import UsersManager from "~/components/features/UsersManager.vue"
+    import Home from "~/components/features/Home.vue"
+    import Settings from "~/components/features/Settings.vue"
+    import EntitiesManager from "~/components/features/EntitiesManager.vue"
+    import PromptsManager from "~/components/features/PromptsManager.vue"
+    import UsersManager from "~/components/features/UsersManager.vue"
 
-const currentPage = ref("Home")
+    const currentPage = ref("Home")
 
-const changePage = (page) => {
-    currentPage.value = page
-}
+    const changePage = (page) => {
+        currentPage.value = page
+    }
 
-const buttons = ref([
-    {
-        label: 'Home',
-        dropdown: false,
-    },
-    {
-        label: 'Simulate',
-        dropdown: true,
-        menuItems: ['Connect', 'Register', 'Disconnect', 'RemoveUser', 'CreateEntity', 'RemoveEntity', 'GetEntities', 'NewMessage', 'MakeDecision'],
-    },
-    {
-        label: 'Entities Manager',
-        dropdown: false,
-    },
-    {
-        label: 'Users Manager',
-        dropdown: false,
-    },
-    {
-        label: 'Prompts Manager',
-        dropdown: false,
-    },
-    {
-        label: 'Settings',
-        dropdown: false,
-    },
-    {
-        label: 'Disconnect',
-        dropdown: false,
-    },
-])
+    const buttons = ref([
+        {
+            label: 'Home',
+            dropdown: false,
+        },
+        {
+            label: 'Simulate',
+            dropdown: true,
+            menuItems: ['Connect', 'Register', 'Disconnect', 'RemoveUser', 'CreateEntity', 'RemoveEntity', 'GetEntities', 'NewMessage', 'MakeDecision'],
+        },
+        {
+            label: 'Entities Manager',
+            dropdown: false,
+        },
+        {
+            label: 'Users Manager',
+            dropdown: false,
+        },
+        {
+            label: 'Prompts Manager',
+            dropdown: false,
+        },
+        {
+            label: 'Settings',
+            dropdown: false,
+        },
+        {
+            label: 'Disconnect',
+            dropdown: false,
+        },
+    ])
 
+    definePageMeta({
+        middleware: 'auth',
+    });
 </script>
 
 <style scoped>

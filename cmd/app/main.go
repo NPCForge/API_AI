@@ -61,6 +61,7 @@ func main() {
 	protected.HandleFunc("/RemoveEntity", httpHandlers.RemoveEntityHandler).Methods("POST")
 	protected.HandleFunc("/NewMessage", httpHandlers.NewMessageHandler).Methods("POST")
 	protected.HandleFunc("/GetEntities", httpHandlers.GetEntitiesHandler).Methods("GET")
+	protected.HandleFunc("/Status", httpHandlers.GetEntitiesHandler).Methods("GET")
 
 	// Health check route
 	r.HandleFunc("/health", Health).Methods("GET")

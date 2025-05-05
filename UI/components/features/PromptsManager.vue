@@ -9,6 +9,7 @@
 
             <div class="d-flex flex-column justify-content-center align-items-center"
                 style="height: 100%; width: 100%; padding: 1% 1%; border-left: 1px solid black">
+                <!-- header -->
                 <div v-if="currentPrompt !== -1 && prompts[currentPrompt]"
                     class="d-flex justify-content-between align-items-center"
                     style="width: 100%; height: 7%; margin-bottom: 1%;">
@@ -17,7 +18,7 @@
                         <h4>{{ prompts[currentPrompt].fileName }}</h4>
                     </div>
                     <div style="width: 60%; height: 100%;" class="action d-flex justify-content-end align-items-center">
-                        <Icon v-if="editor.getHTML() !== prompts[currentPrompt].content" class="icon"
+                        <Icon v-if="editor.getText() !== prompts[currentPrompt].content" class="icon"
                             name="material-symbols:save" size="3vh" style="color: black" @click="handleEditPrompt" />
                         <Icon class="icon" name="material-symbols:delete" size="3vh" style="color: black"
                             @click="handleRemovePrompt(prompts[currentPrompt].fileName)" />
@@ -25,7 +26,7 @@
                             @click="handleGetPrompts" />
                     </div>
                 </div>
-
+                <!-- body -->
                 <div v-if="currentPrompt !== -1 && prompts[currentPrompt]"
                     style="width: 100%; height: 100%; overflow-y: scroll;">
                     <EditorContent :editor="editor" style="width: 100%; height: 100%;" />
@@ -87,9 +88,6 @@
     const handleGetPrompts = async () => {
         try {
             prompts.value = await getPrompts();
-            if (prompts.value.length > 0 && currentPrompt.value === -1) {
-                currentPrompt.value = 0; // Sélectionner le premier prompt par défaut
-            }
         } catch (error) {
             console.error('Erreur lors de la récupération des prompts:', error);
         }
@@ -98,7 +96,7 @@
     const handleEditPrompt = async () => {
         try {
             if (prompts.value[currentPrompt.value]) {
-                await editPrompt(prompts.value[currentPrompt.value].fileName, editor.value.getHTML());
+                await editPrompt(prompts.value[currentPrompt.value].fileName, editor.value.getText());
                 handleGetPrompts();
             }
         } catch (e) {
@@ -109,6 +107,7 @@
     const handleRemovePrompt = async (name) => {
         try {
             await removePrompt(name);
+            currentPrompt.value = -1
             handleGetPrompts();
         } catch (e) {
             console.error(e);
