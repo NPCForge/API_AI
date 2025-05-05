@@ -1,4 +1,5 @@
-// Exemple de code pour se connecter et stocker le token
+// services/npcforge.js
+
 export const connect = async (identifier, password, simulate = false) => {
     try {
         const response = await fetch('http://0.0.0.0:3000/Connect', {
@@ -43,6 +44,48 @@ export const connect = async (identifier, password, simulate = false) => {
     }
 }
 
+export const register = async (identifier, password, API_TOKEN) => {
+    console.log(identifier, password, API_TOKEN)
+    try {
+        const response = await fetch('http://0.0.0.0:3000/Register', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                identifier: identifier,
+                password: password,
+                API_KEY: API_TOKEN
+            }),
+        })
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(`HTTP error! Status: ${response.status} - Message: ${errorData.message || 'Unknown error'}`);
+        }
+
+        const data = await response.json();
+
+        if (data.token) {
+            return {
+                Status: "Success",
+                Data: data
+            };
+        } else {
+            return {
+                Status: "Failed",
+                Data: data
+            };
+        }
+    } catch (error) {
+        console.error('Erreur de connexion:', error.message);
+        return {
+            Status: "Failed",
+            Data: null,
+            Message: error.message
+        };
+    }
+}
 
 export const status = async () => {
     try {

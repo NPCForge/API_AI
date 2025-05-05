@@ -11,6 +11,10 @@
                 <span class="input-group-text" id="basic-addon2">Token</span>
                 <input type="text" class="form-control" placeholder="Authorization Token" aria-label="Authorization Token" aria-describedby="basic-addon2" v-model="AuthorizationToken" @change="updateEnv('AuthorizationToken', AuthorizationToken)">
             </div>
+            <div class="input-group mb-3">
+                <span class="input-group-text" id="basic-addon2">API Token</span>
+                <input type="text" class="form-control" placeholder="Api Token" aria-label="Api Token" aria-describedby="basic-addon2" v-model="ApiToken" @input="updateEnv('ApiToken', ApiToken)">
+            </div>
         </div>
     </div>
 </template>
@@ -27,12 +31,17 @@
     import { setEnvVariable, getEnvVariable } from '~/services/env';
 
     const AuthorizationToken = ref("")
+    const ApiToken = ref("")
 
     onMounted(() => {
         try {
-            const tmp = getEnvVariable('AuthorizationToken')
+            let tmp = getEnvVariable('AuthorizationToken')
             if (tmp) {
                 AuthorizationToken.value = tmp
+            }
+            tmp = getEnvVariable('ApiToken')
+            if (tmp) {
+                ApiToken.value = tmp
             }
         } catch (e) {
             console.error(e)
