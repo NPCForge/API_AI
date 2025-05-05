@@ -8,11 +8,6 @@ import (
 )
 
 func StatusHandler(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		http.Error(w, "Unauthorized method", http.StatusMethodNotAllowed)
-		return
-	}
-
 	res := sharedModel.StatusResponse{
 		Message: "Authentified",
 		Status:  200,
