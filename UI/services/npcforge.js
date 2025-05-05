@@ -15,7 +15,7 @@ export const connect = async (identifier, password) => {
         if (!response.ok) {
             throw new Error(`HTTP error! Status: ${response.status}`)
         }
-
+        console.log("ok")
         const data = await response.json()
 
         // Si le token est présent, le stocker dans localStorage
@@ -30,6 +30,7 @@ export const connect = async (identifier, password) => {
         return false
     }
 }
+
 export const status = async () => {
     try {
         const token = localStorage.getItem("token");
@@ -43,8 +44,10 @@ export const status = async () => {
             }
         });
         console.log(response)
-        if (!response.ok)
+        if (!response.ok) {
+            localStorage.removeItem('token')
             throw new Error(`HTTP error! Status: ${response.status}`);
+        }
         return true;
     } catch (error) {
         // Gestion des erreurs, loggez l'erreur et renvoyez false
@@ -53,25 +56,24 @@ export const status = async () => {
     }
 };
 
-
 export const disconnect = async () => {
     try {
-        if (!data.token)
-            return true
+        const token = localStorage.getItem("token");
+        if (!token)
+            return true;
+        console.log("disconnect")
         const response = await fetch('http://0.0.0.0:3000/Disconnect', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                token: localStorage.getItem("token")
-            }),
-        })
+                'Authorization': `${token}`
+            }
+        });
 
         if (!response.ok) {
             throw new Error(`HTTP error! Status: ${response.status}`)
         }
-
+        console.log("disconnect ok  ")
         localStorage.removeItem('token')
         return true
 

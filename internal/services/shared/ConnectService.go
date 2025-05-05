@@ -11,6 +11,7 @@ import (
 // ConnectService authenticates a user by password and identifier, generates a JWT token, and stores it.
 func ConnectService(password string, identifier string) (string, string, error) {
 	id, err := services.Connect(password, identifier)
+
 	if err != nil {
 		return "", "", errors.New("error connecting service")
 	}

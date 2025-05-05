@@ -534,7 +534,7 @@ func Connect(password string, identifier string) (int, error) {
 	}
 
 	if !pkg.CheckPasswordHash(password, pass) {
-		err = fmt.Errorf("error while connecting user")
+		return -1, fmt.Errorf("error while connecting user")
 	}
 
 	return userId, nil

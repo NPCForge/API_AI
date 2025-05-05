@@ -29,6 +29,7 @@
 </template>
 
 <script setup>
+    import { useRouter } from 'vue-router'
     import { ref } from 'vue'
     import ButtonGroup from '~/components/ButtonGroup.vue'
 
@@ -37,10 +38,17 @@
     import EntitiesManager from "~/components/features/EntitiesManager.vue"
     import PromptsManager from "~/components/features/PromptsManager.vue"
     import UsersManager from "~/components/features/UsersManager.vue"
+    import { disconnect } from '~/services/npcforge'
 
     const currentPage = ref("Home")
+    const router = useRouter()
 
     const changePage = (page) => {
+        if (page === "Disconnect") {
+            disconnect()
+            router.push('/')
+            return
+        }
         currentPage.value = page
     }
 
