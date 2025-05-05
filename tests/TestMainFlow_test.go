@@ -31,6 +31,15 @@ func TestMainFlow(t *testing.T) {
 	}
 
 	fmt.Println("Connexion success...")
+	fmt.Println("Testing Status...")
+
+	t.Run("Status", func(t *testing.T) {
+		if err := Status(); err == nil {
+			isConnexionSuccess = true
+		}
+	})
+
+	fmt.Println("Status success...")
 	fmt.Println("Testing create entity...")
 
 	t.Run("CreateEntity", func(t *testing.T) {
