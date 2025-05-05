@@ -87,6 +87,47 @@ export const register = async (identifier, password, API_TOKEN) => {
     }
 }
 
+export const removeUser = async (identifier=null, API_TOKEN) => {
+    try {
+        const response = await fetch('http://0.0.0.0:3000/RemoveUser', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': API_TOKEN
+            },
+            body: JSON.stringify({
+                username: identifier,
+            }),
+        })
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(`HTTP error! Status: ${response.status} - Message: ${errorData.message || 'Unknown error'}`);
+        }
+
+        const data = await response.json();
+
+        if (data.token) {
+            return {
+                Status: "Success",
+                Data: data
+            };
+        } else {
+            return {
+                Status: "Failed",
+                Data: data
+            };
+        }
+    } catch (error) {
+        console.error('Erreur de connexion:', error.message);
+        return {
+            Status: "Failed",
+            Data: null,
+            Message: error.message
+        };
+    }
+}
+
 export const status = async () => {
     try {
         const token = localStorage.getItem("token");
