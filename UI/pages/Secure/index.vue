@@ -24,6 +24,11 @@
                 v-if="currentPage === 'UsersManager'"
                 :pageName="'Users Manager'"
             />
+            <Simulate
+                v-if="currentPage.split('_')[0] === 'Simulate'"
+                :pageName="'Simulate'"
+                :current="currentPage.split('_')[1]"
+            />
         </div>
     </div>
 </template>
@@ -38,6 +43,7 @@
     import EntitiesManager from "~/components/features/EntitiesManager.vue"
     import PromptsManager from "~/components/features/PromptsManager.vue"
     import UsersManager from "~/components/features/UsersManager.vue"
+    import Simulate from "~/components/features/Simulate.vue"
     import { disconnect } from '~/services/npcforge'
 
     const currentPage = ref("Home")
