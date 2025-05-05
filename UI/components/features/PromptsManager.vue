@@ -18,7 +18,7 @@
                         <h4>{{ prompts[currentPrompt].fileName }}</h4>
                     </div>
                     <div style="width: 60%; height: 100%;" class="action d-flex justify-content-end align-items-center">
-                        <Icon v-if="editor.getText() !== prompts[currentPrompt].content" class="icon"
+                        <Icon v-if="isModified" class="icon"
                             name="material-symbols:save" size="3vh" style="color: black" @click="handleEditPrompt" />
                         <Icon class="icon" name="material-symbols:delete" size="3vh" style="color: black"
                             @click="handleRemovePrompt(prompts[currentPrompt].fileName)" />
@@ -48,6 +48,7 @@
 
     const prompts = ref([]);
     const currentPrompt = ref(-1);
+    const isModified = ref(false)
 
     defineProps({
         pageName: String
@@ -56,10 +57,17 @@
     const editor = useEditor({
         extensions: [StarterKit],
         content: '',
+        onUpdate: ({ editor }) => {
+            if (editor.getText() !== prompts.value[currentPrompt.value].content) {
+                isModified.value = true;
+            } else {
+                isModified.value = false;
+            }
+        },
     });
 
     onBeforeUnmount(() => {
-        editor?.destroy();
+        editor.value?.destroy()
     });
 
     const changeCurrentPrompt = (i) => {
@@ -72,8 +80,10 @@
     };
 
     const convertTextToHtml = (text) => {
-        return text.replace(/\n/g, '<p></p>');
+        // Remplacer les retours à la ligne par <br /> sans générer de nouveaux paragraphes
+        return text.replace(/\n/g, '<br />');
     };
+
 
     const updateEditorContent = (content) => {
         if (editor.value) {
@@ -96,7 +106,13 @@
     const handleEditPrompt = async () => {
         try {
             if (prompts.value[currentPrompt.value]) {
-                await editPrompt(prompts.value[currentPrompt.value].fileName, editor.value.getText());
+                // Récupère le texte de l'éditeur
+                const editorText = editor.value.getText();
+                // Convertir le texte en HTML (en utilisant la nouvelle méthode)
+                const htmlContent = convertTextToHtml(editorText);
+                // Enregistrer les changements en envoyant le contenu HTML
+                await editPrompt(prompts.value[currentPrompt.value].fileName, htmlContent);
+                // Recharger les prompts après l'enregistrement
                 handleGetPrompts();
             }
         } catch (e) {

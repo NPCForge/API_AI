@@ -1,11 +1,15 @@
 <template>
     <div class="d-flex flex-column justify-content-center align-items-center vh-100">
         <h1>Welcome</h1>
-        <input type="text" class="input" v-model="identifier" placeholder="Identifier">
-        <input type="password" class="input" v-model="password" placeholder="Password">
+
+        <input type="text" class="input" v-model="identifier" placeholder="Identifier" autocomplete="username" name="username">
+
+        <input type="password" class="input" v-model="password" placeholder="Password" autocomplete="current-password" name="password">
+
         <button class="btn btn-primary" @click="connection">Connexion</button>
     </div>
 </template>
+
 
 <script setup>
     import { connect } from "~/services/npcforge.js"
