@@ -1,4 +1,5 @@
 <template>
+    <Env />
     <div class="d-flex justify-content-start align-items-start vh-100">
         <div class="d-flex flex-column justify-content-start align-items-start vw-15 vh-100 leftBar">
             <ButtonGroup :buttons="buttons" @change="changePage"/>
@@ -45,6 +46,7 @@
     import UsersManager from "~/components/features/UsersManager.vue"
     import Simulate from "~/components/features/Simulate.vue"
     import { disconnect } from '~/services/npcforge'
+    import Env from '~/components/Env.vue'
 
     const currentPage = ref("Home")
     const router = useRouter()

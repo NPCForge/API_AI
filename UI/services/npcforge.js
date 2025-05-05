@@ -1,5 +1,5 @@
 // Exemple de code pour se connecter et stocker le token
-export const connect = async (identifier, password) => {
+export const connect = async (identifier, password, simulate = false) => {
     try {
         const response = await fetch('http://0.0.0.0:3000/Connect', {
             method: 'POST',
@@ -13,23 +13,36 @@ export const connect = async (identifier, password) => {
         })
 
         if (!response.ok) {
-            throw new Error(`HTTP error! Status: ${response.status}`)
+            const errorData = await response.json();
+            throw new Error(`HTTP error! Status: ${response.status} - Message: ${errorData.message || 'Unknown error'}`);
         }
-        console.log("ok")
-        const data = await response.json()
 
-        // Si le token est présent, le stocker dans localStorage
+        const data = await response.json();
+
         if (data.token) {
-            localStorage.setItem('token', data.token)  // Stocker le token dans localStorage
-            return true
+            if (!simulate) {
+                localStorage.setItem('token', data.token);
+            }
+            return {
+                Status: "Success",
+                Data: data
+            };
         } else {
-            return false
+            return {
+                Status: "Failed",
+                Data: data
+            };
         }
     } catch (error) {
-        console.error('Erreur de connexion:', error)
-        return false
+        console.error('Erreur de connexion:', error.message);
+        return {
+            Status: "Failed",
+            Data: null,
+            Message: error.message
+        };
     }
 }
+
 
 export const status = async () => {
     try {
@@ -56,12 +69,20 @@ export const status = async () => {
     }
 };
 
-export const disconnect = async () => {
+export const disconnect = async (tokenSimulation = null) => {
     try {
-        const token = localStorage.getItem("token");
-        if (!token)
-            return true;
-        console.log("disconnect")
+        let token = null;
+
+        // Utiliser le token soit de localStorage, soit fourni par le paramètre
+        if (!tokenSimulation) {
+            token = localStorage.getItem("token");
+            if (!token) {
+                return { Status: "Failed", Message: "Token is missing" };
+            }
+        } else {
+            token = tokenSimulation;
+        }
+
         const response = await fetch('http://0.0.0.0:3000/Disconnect', {
             method: 'POST',
             headers: {
@@ -71,17 +92,26 @@ export const disconnect = async () => {
         });
 
         if (!response.ok) {
-            throw new Error(`HTTP error! Status: ${response.status}`)
+            const errorData = await response.json();
+            throw new Error(`HTTP error! Status: ${response.status} - Message: ${errorData.message || 'Unknown error'}`);
         }
-        console.log("disconnect ok  ")
-        localStorage.removeItem('token')
-        return true
+        if (!tokenSimulation)
+            localStorage.removeItem('token');
+
+        return {
+            Status: "Success",
+            Message: "Disconnected successfully"
+        };
 
     } catch (error) {
-        console.error('Erreur de connexion:', error)
-        return false
+        console.error('Error during disconnection:', error);
+        return {
+            Status: "Failed",
+            Message: error.message || "An error occurred during disconnection"
+        };
     }
-}
+};
+
 
 export const getPrompts = async () => {
     try {

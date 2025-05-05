@@ -24,7 +24,8 @@
     const connection = async () => {
         try {
             const res = await connect(identifier.value, password.value)
-            if (res) {
+            // console.log(res)
+            if (res.Status === "Success") {
                 router.push('/Secure')
             } else {
                 console.error('Connexion échouée')
