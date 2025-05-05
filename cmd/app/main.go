@@ -61,7 +61,7 @@ func main() {
 	protected.HandleFunc("/RemoveEntity", httpHandlers.RemoveEntityHandler).Methods("POST")
 	protected.HandleFunc("/NewMessage", httpHandlers.NewMessageHandler).Methods("POST")
 	protected.HandleFunc("/GetEntities", httpHandlers.GetEntitiesHandler).Methods("GET")
-	protected.HandleFunc("/Status", httpHandlers.GetEntitiesHandler).Methods("GET")
+	protected.HandleFunc("/Status", httpHandlers.StatusHandler).Methods("GET")
 
 	// Health check route
 	r.HandleFunc("/health", Health).Methods("GET")
@@ -70,7 +70,7 @@ func main() {
 	c := cors.New(cors.Options{
 		AllowedOrigins: []string{"http://localhost:8001"}, // Ajouter ton origine front-end
 		AllowedMethods: []string{"GET", "POST", "OPTIONS"},
-		AllowedHeaders: []string{"Content-Type"},
+		AllowedHeaders: []string{"Content-Type", "Authorization"},
 	})
 
 	// Appliquer CORS aux routes

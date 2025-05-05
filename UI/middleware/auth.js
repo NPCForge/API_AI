@@ -1,12 +1,19 @@
 // middleware/auth.js
 
-export default defineNuxtRouteMiddleware((to, from) => {
-    // Vérifier si nous sommes en environnement client
+import { status } from '~/services/npcforge.js';
+
+export default defineNuxtRouteMiddleware(async (to, from) => {
     if (process.client) {
-        const token = localStorage.getItem('token')  // Utiliser localStorage uniquement côté client
+        const token = localStorage.getItem('token'); // Utiliser localStorage uniquement côté client
 
         if (!token) {
-            return navigateTo('/')  // Rediriger vers la page de login si aucun token n'est trouvé
+            return navigateTo('/'); // Rediriger vers la page de login si aucun token n'est trouvé
+        }
+
+        const isAuthenticated = await status(); // Appeler la fonction status
+
+        if (!isAuthenticated) {
+            return navigateTo('/'); // Si la connexion est invalide, rediriger vers la page de login
         }
     }
-})
+});

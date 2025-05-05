@@ -30,6 +30,29 @@ export const connect = async (identifier, password) => {
         return false
     }
 }
+export const status = async () => {
+    try {
+        const token = localStorage.getItem("token");
+        if (!token)
+            return false;
+        const response = await fetch('http://0.0.0.0:3000/Status', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `${token}`
+            }
+        });
+        console.log(response)
+        if (!response.ok)
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        return true;
+    } catch (error) {
+        // Gestion des erreurs, loggez l'erreur et renvoyez false
+        console.error('Erreur de connexion:', error);
+        return false;
+    }
+};
+
 
 export const disconnect = async () => {
     try {
