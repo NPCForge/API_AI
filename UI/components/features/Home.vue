@@ -1,6 +1,20 @@
 <template>
     <div class="body">
         <h3>{{ pageName }}</h3>
+        <div class="hb"></div>
+        <br>
+        <ul>
+            <li>✅ Connect</li>
+            <li>✅ Disconnect</li>
+            <li>❌ Register</li>
+            <li>❌ RemoveUser</li>
+            <li>❌ Status</li>
+            <li>❌ CreateEntity</li>
+            <li>❌ RemoveEntity</li>
+            <li>❌ GetEntities</li>
+            <li>❌ MakeDecision</li>
+            <li>❌ NewMessage</li>
+        </ul>
     </div>
 </template>
 
