@@ -11,8 +11,8 @@
             <li class="">✅ Status</li>
             <li class="">✅ CreateEntity</li>
             <li class="">✅ RemoveEntity</li>
-            <li class="orange">❌ GetEntities</li>
-            <li class="">❌ MakeDecision</li>
+            <li class="">✅ GetEntities</li>
+            <li class="orange">❌ MakeDecision</li>
             <li class="">❌ NewMessage</li>
         </ul>
     </div>

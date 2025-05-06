@@ -356,3 +356,33 @@ export const RemoveEntity = async (checksum, token) => {
         };
     }
 };
+
+export const GetEntities = async (token) => {
+    try {
+        const response = await fetch('http://0.0.0.0:3000/GetEntities', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `${token}`
+            }
+        });
+        console.log(response)
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            localStorage.removeItem('token');
+            throw new Error(`HTTP error! Status: ${response.status} - Message: ${errorData.message || 'Unknown error'}`);
+        }
+        const responseBody = await response.json();
+        return {
+            Status: "Success",
+            Message: responseBody
+        };
+    } catch (error) {
+        console.error('Erreur de connexion:', error.message);
+        return {
+            Status: "Failed",
+            Message: error.message || "An error occurred during the status check"
+        };
+    }
+};
