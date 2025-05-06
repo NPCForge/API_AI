@@ -153,10 +153,10 @@ export const status = async (token = null) => {
             localStorage.removeItem('token');
             throw new Error(`HTTP error! Status: ${response.status} - Message: ${errorData.message || 'Unknown error'}`);
         }
-
+        const Data = await response.json();
         return {
             Status: "Success",
-            Message: "Status request successful"
+            Message: Data
         };
     } catch (error) {
         console.error('Erreur de connexion:', error.message);
@@ -325,3 +325,34 @@ export const CreateEntity = async (name, checksum, prompt, token) => {
     }
 };
 
+export const RemoveEntity = async (checksum, token) => {
+    try {
+        const response = await fetch('http://0.0.0.0:3000/RemoveEntity', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `${token}`
+            },
+            body: JSON.stringify({
+                checksum: checksum,
+            })
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            localStorage.removeItem('token');
+            throw new Error(`HTTP error! Status: ${response.status} - Message: ${errorData.message || 'Unknown error'}`);
+        }
+        const responseBody = await response.json();
+        return {
+            Status: "Success",
+            Message: responseBody
+        };
+    } catch (error) {
+        console.error('Erreur de connexion:', error.message);
+        return {
+            Status: "Failed",
+            Message: error.message || "An error occurred during the status check"
+        };
+    }
+};

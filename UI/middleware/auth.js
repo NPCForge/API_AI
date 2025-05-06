@@ -12,7 +12,7 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
 
         const isAuthenticated = await status(); // Appeler la fonction status
 
-        if (!isAuthenticated) {
+        if (isAuthenticated.Status === "Failed") {
             return navigateTo('/'); // Si la connexion est invalide, rediriger vers la page de login
         }
     }
