@@ -4,16 +4,16 @@
         <div class="hb"></div>
         <br>
         <ul>
-            <li>✅ Connect</li>
-            <li>✅ Disconnect</li>
-            <li>✅ Register</li>
-            <li>✅ RemoveUser (fonctionnel mais a fixer)</li>
-            <li>✅ Status</li>
-            <li>❌ CreateEntity</li>
-            <li>❌ RemoveEntity</li>
-            <li>❌ GetEntities</li>
-            <li>❌ MakeDecision</li>
-            <li>❌ NewMessage</li>
+            <li class="">✅ Connect</li>
+            <li class="">✅ Disconnect</li>
+            <li class="">✅ Register</li>
+            <li class="">✅ RemoveUser (fonctionnel mais a fixer)</li>
+            <li class="">✅ Status</li>
+            <li class="">✅ CreateEntity</li>
+            <li class="orange">❌ RemoveEntity</li>
+            <li class="">❌ GetEntities</li>
+            <li class="">❌ MakeDecision</li>
+            <li class="">❌ NewMessage</li>
         </ul>
     </div>
 </template>

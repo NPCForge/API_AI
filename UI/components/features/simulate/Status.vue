@@ -8,7 +8,7 @@
             <div style="width: 100%; padding: 1%;" class="d-flex flex-column justify-content-start align-items-start">
                 <label for="Action">Action</label>
                 <input type="text" placeholder="Action" disabled value="Status" name="Action">
-                <label for="Identifier">Authorization Token</label>
+                <label for="AuthorizationToken">Authorization Token</label>
                 <input type="text" placeholder="Authorization Token" name="AuthorizationToken" v-model="AuthorizationToken">
             </div>
             <div style="width: 100%; padding: 1%;" class="d-flex justify-content-end align-items-start">
