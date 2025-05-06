@@ -7,8 +7,8 @@
             <li>✅ Connect</li>
             <li>✅ Disconnect</li>
             <li>✅ Register</li>
-            <li>🟠 RemoveUser (fonctionnel mais a fixer)</li>
-            <li>❌ Status</li>
+            <li>✅ RemoveUser (fonctionnel mais a fixer)</li>
+            <li>✅ Status</li>
             <li>❌ CreateEntity</li>
             <li>❌ RemoveEntity</li>
             <li>❌ GetEntities</li>

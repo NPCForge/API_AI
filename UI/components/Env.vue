@@ -8,7 +8,7 @@
         </div>
         <div class="offcanvas-body">
             <div class="input-group mb-3">
-                <span class="input-group-text" id="basic-addon2">Token</span>
+                <span class="input-group-text" id="basic-addon2">Auth Token</span>
                 <input type="text" class="form-control" placeholder="Authorization Token" aria-label="Authorization Token" aria-describedby="basic-addon2" v-model="AuthorizationToken" @change="updateEnv('AuthorizationToken', AuthorizationToken)">
             </div>
             <div class="input-group mb-3">

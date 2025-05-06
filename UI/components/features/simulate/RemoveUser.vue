@@ -7,7 +7,7 @@
             <Loader v-if="isLoading" :Text="LoadingMessage" />
             <div style="width: 100%; padding: 1%;" class="d-flex flex-column justify-content-start align-items-start">
                 <label for="Action">Action</label>
-                <input type="text" placeholder="Action" disabled value="Register" name="Action">
+                <input type="text" placeholder="Action" disabled value="RemoveUser" name="Action">
                 <label for="Identifier">Identifier (optional)</label>
                 <input type="text" placeholder="Identifier" name="Identifier" v-model="identifier">
                 <label for="AuthorizationToken">Authorization Token</label>

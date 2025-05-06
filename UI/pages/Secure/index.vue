@@ -9,22 +9,22 @@
                 v-if="currentPage === 'Home'"
                 :pageName="'Home'"
             />
-            <Settings
+            <!-- <Settings
                 v-if="currentPage === 'Settings'"
                 :pageName="'Settings'"
-            />
-            <EntitiesManager
+            /> -->
+            <!-- <EntitiesManager
                 v-if="currentPage === 'EntitiesManager'"
                 :pageName="'Entities Manager'"
-            />
+            /> -->
             <PromptsManager
                 v-if="currentPage === 'PromptsManager'"
                 :pageName="'Prompts Manager'"
             />
-            <UsersManager
+            <!-- <UsersManager
                 v-if="currentPage === 'UsersManager'"
                 :pageName="'Users Manager'"
-            />
+            /> -->
             <Simulate
                 v-if="currentPage.split('_')[0] === 'Simulate'"
                 :pageName="'Simulate'"
@@ -68,24 +68,24 @@
         {
             label: 'Simulate',
             dropdown: true,
-            menuItems: ['Connect', 'Register', 'Disconnect', 'RemoveUser', 'CreateEntity', 'RemoveEntity', 'GetEntities', 'NewMessage', 'MakeDecision'],
-        },
-        {
-            label: 'Entities Manager',
-            dropdown: false,
-        },
-        {
-            label: 'Users Manager',
-            dropdown: false,
+            menuItems: ['Connect', 'Register', 'Disconnect', 'Status', 'RemoveUser', 'CreateEntity', 'RemoveEntity', 'GetEntities', 'NewMessage', 'MakeDecision'],
         },
         {
             label: 'Prompts Manager',
             dropdown: false,
         },
-        {
-            label: 'Settings',
-            dropdown: false,
-        },
+        // {
+        //     label: 'Entities Manager',
+        //     dropdown: false,
+        // },
+        // {
+        //     label: 'Users Manager',
+        //     dropdown: false,
+        // },
+        // {
+        //     label: 'Settings',
+        //     dropdown: false,
+        // },
         {
             label: 'Disconnect',
             dropdown: false,

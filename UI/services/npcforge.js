@@ -128,11 +128,18 @@ export const removeUser = async (identifier=null, API_TOKEN) => {
     }
 }
 
-export const status = async () => {
+export const status = async (token = null) => {
     try {
-        const token = localStorage.getItem("token");
-        if (!token)
-            return false;
+        if (!token) {
+            token = localStorage.getItem("token");
+        }
+        if (!token) {
+            return {
+                Status: "Failed",
+                Message: "Token is missing"
+            };
+        }
+
         const response = await fetch('http://0.0.0.0:3000/Status', {
             method: 'GET',
             headers: {
@@ -140,16 +147,23 @@ export const status = async () => {
                 'Authorization': `${token}`
             }
         });
-        console.log(response)
+
         if (!response.ok) {
-            localStorage.removeItem('token')
-            throw new Error(`HTTP error! Status: ${response.status}`);
+            const errorData = await response.json();
+            localStorage.removeItem('token');
+            throw new Error(`HTTP error! Status: ${response.status} - Message: ${errorData.message || 'Unknown error'}`);
         }
-        return true;
+
+        return {
+            Status: "Success",
+            Message: "Status request successful"
+        };
     } catch (error) {
-        // Gestion des erreurs, loggez l'erreur et renvoyez false
-        console.error('Erreur de connexion:', error);
-        return false;
+        console.error('Erreur de connexion:', error.message);
+        return {
+            Status: "Failed",
+            Message: error.message || "An error occurred during the status check"
+        };
     }
 };
 
