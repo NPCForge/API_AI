@@ -68,7 +68,7 @@ func getAllDiscussionsForEntity(EntityChecksum string, InterlocutorChecksums []s
 			return "", err
 		}
 
-		discussion, err := services.GetDiscussion(strconv.Itoa(EntityID), strconv.Itoa(interlocutorID))
+		discussion, err := services.GetDiscussionFromBy(strconv.Itoa(EntityID), strconv.Itoa(interlocutorID))
 		if err != nil {
 			pkg.DisplayContext("Cannot retrieve discussion", pkg.Error, err)
 			return "", err
@@ -83,6 +83,25 @@ func getAllDiscussionsForEntity(EntityChecksum string, InterlocutorChecksums []s
 	return allDiscussions.String(), nil
 }
 
+func getAllDiscussions(EntityChecksum string) (string, error) {
+	discussions, err := services.GetDiscussions(EntityChecksum)
+
+	if err != nil {
+		pkg.DisplayContext("Cannot retrieve discussions", pkg.Error, err)
+		return "", err
+	}
+
+	var allDiscussions strings.Builder
+
+	for _, msg := range discussions {
+		allDiscussions.WriteString(fmt.Sprintf("[%s -> %s: %s], ", msg.SenderChecksum, msg.ReceiverChecksums, msg.Message))
+	}
+
+	allDiscussions.WriteString("\n")
+
+	return allDiscussions.String(), nil
+}
+
 // HandleTalkToLogic parses the decision string, gathers discussions, and generates a response for the entity to speak to the interlocutors.
 func HandleTalkToLogic(Decision string, Checksum string) (string, error) {
 	re := regexp.MustCompile(`\[(.*?)\]`)
@@ -92,7 +111,7 @@ func HandleTalkToLogic(Decision string, Checksum string) (string, error) {
 		checksums := strings.Split(matches[1], ", ")
 		checksumsString := "[" + strings.Join(checksums, ", ") + "]"
 
-		discussions, err := getAllDiscussionsForEntity(Checksum, checksums)
+		discussions, err := getAllDiscussions(Checksum)
 		if err != nil {
 			pkg.DisplayContext("Cannot get discussions using checksum", pkg.Error, err)
 			return "", err

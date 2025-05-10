@@ -220,7 +220,78 @@ func GetNewMessages(ReceiverEntityChecksum string) ([]string, error) {
 	return formatedMessages, nil
 }
 
-func GetDiscussion(from string, to string) ([]sharedModel.Message, error) {
+func GetDiscussions(EntityChecksum string) ([]sharedModel.Message, error) {
+	db := config.GetDB()
+
+	limitRows := 10
+
+	query := `WITH filtered_messages AS (
+    SELECT m.id, m.sender_entity_id, m.message, m.timestamp
+    FROM messages m
+    JOIN message_receivers mr ON m.id = mr.message_id
+    ORDER BY m.timestamp
+    LIMIT $1
+)
+SELECT 
+    fm.sender_entity_id,
+    sender_entity.checksum AS SenderChecksum,
+    fm.message,
+    ARRAY_AGG(receiver_entity.checksum) AS ReceiverChecksum
+FROM filtered_messages fm
+JOIN entities sender_entity ON fm.sender_entity_id = sender_entity.id
+JOIN message_receivers mr ON fm.id = mr.message_id
+JOIN entities receiver_entity ON mr.receiver_entity_id = receiver_entity.id
+GROUP BY fm.id, fm.sender_entity_id, sender_entity.checksum, fm.message, fm.timestamp
+ORDER BY fm.timestamp;
+`
+	rows, err := db.Query(query, limitRows)
+	if err != nil {
+		pkg.DisplayContext("Error after GetDiscussion query:", pkg.Error, err)
+		return nil, err
+	}
+	defer func(rows *sql.Rows) {
+		err := rows.Close()
+		if err != nil {
+			pkg.DisplayContext("Error after row close:", pkg.Error, err)
+		}
+	}(rows)
+
+	var messages []sharedModel.Message
+
+	for rows.Next() {
+		var senderEntityID int
+		var msg sharedModel.Message
+		var receiverChecksums pq.StringArray
+
+		err := rows.Scan(&senderEntityID, &msg.SenderChecksum, &msg.Message, &receiverChecksums)
+		if err != nil {
+			pkg.DisplayContext("Error after row scan:", pkg.Error, err)
+			return nil, err
+		}
+		msg.ReceiverChecksums = receiverChecksums
+
+		if fmt.Sprintf("%d", senderEntityID) == EntityChecksum {
+			msg.SenderChecksum = "You"
+		}
+
+		for i, r := range receiverChecksums {
+			if r == EntityChecksum {
+				receiverChecksums[i] = "You"
+			}
+		}
+
+		messages = append(messages, msg)
+	}
+
+	if err := rows.Err(); err != nil {
+		pkg.DisplayContext("Error after row scan:", pkg.Error, err)
+		return nil, err
+	}
+
+	return messages, nil
+}
+
+func GetDiscussionFromBy(from string, to string) ([]sharedModel.Message, error) {
 	db := config.GetDB()
 
 	limitRows := 10
