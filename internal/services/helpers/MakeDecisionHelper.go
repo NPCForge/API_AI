@@ -1,7 +1,9 @@
 package helpers
 
 import (
+	"fmt"
 	"my-api/internal/services"
+	"my-api/pkg"
 	"strconv"
 	"strings"
 )
@@ -25,4 +27,23 @@ func NeedToFinish(msg string) bool {
 		}
 	}
 	return false
+}
+
+func GetAllDiscussions(EntityChecksum string) (string, error) {
+	discussions, err := services.GetDiscussions(EntityChecksum)
+
+	if err != nil {
+		pkg.DisplayContext("Cannot retrieve discussions", pkg.Error, err)
+		return "", err
+	}
+
+	var allDiscussions strings.Builder
+
+	for _, msg := range discussions {
+		allDiscussions.WriteString(fmt.Sprintf("[%s -> %s: %s], ", msg.SenderChecksum, msg.ReceiverChecksums, msg.Message))
+	}
+
+	allDiscussions.WriteString("\n")
+
+	return allDiscussions.String(), nil
 }

@@ -22,6 +22,9 @@ func ReadPromptFromFile(filePath string) (string, error) {
 func GptSimpleRequest(userPrompt string, systemPrompt string) (string, error) {
 	GptClient := resty.New()
 
+	//pkg.DisplayContext("SystemPrompt = "+systemPrompt, pkg.Debug)
+	//pkg.DisplayContext("userPrompt = "+userPrompt, pkg.Debug)
+
 	// Prepare the chat messages
 	messages := []sharedModels.ChatGptSimpleRequestBodyMessage{
 		{

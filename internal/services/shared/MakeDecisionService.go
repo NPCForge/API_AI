@@ -22,12 +22,12 @@ func interpretLLMDecision(Decision string, Checksum string) (string, error) {
 
 // askLLMForDecision builds a user prompt, sends it to the LLM, and returns the generated decision.
 func askLLMForDecision(Message string, Checksum string) (string, error) {
-	newMessages, err := services.GetNewMessages(Checksum)
+	discussion, err := helpers.GetAllDiscussions(Checksum)
 	if err != nil {
 		return "", err
 	}
 
-	Message += "\nNew Messages: {" + strings.Join(newMessages, ", ") + "}"
+	Message += "\nDiscussion: {" + discussion + "}"
 
 	// Read the "Decision.txt" file to get the system prompt
 	systemPrompt, err := services.ReadPromptFromFile("prompts/Decision.txt")
@@ -44,6 +44,39 @@ func askLLMForDecision(Message string, Checksum string) (string, error) {
 	return decision, nil
 }
 
+func shouldMakeDecision(Message string, Checksum string) (bool, error) {
+	discussion, err := helpers.GetAllDiscussions(Checksum)
+	if err != nil {
+		return false, err
+	}
+
+	Message += "\nDiscussion: {" + discussion + "}"
+
+	// Read the "ShouldTalk.txt" file to get the system prompt
+	systemPrompt, err := services.ReadPromptFromFile("prompts/ShouldTalk.txt")
+
+	if err != nil {
+		return false, fmt.Errorf("error retrieving the system prompt: %w", err)
+	}
+
+	response, err := services.GptSimpleRequest(Message, systemPrompt)
+	if err != nil {
+		pkg.DisplayContext("GptSimpleRequest failed:", pkg.Error, err)
+		return false, err
+	}
+
+	if strings.Contains(response, "Speak: yes") {
+		pkg.DisplayContext("IA decided to speak", pkg.Debug)
+		return true, nil
+	} else if strings.Contains(response, "Speak: no") {
+		pkg.DisplayContext("IA decided not to speak : "+response, pkg.Debug)
+		return false, nil
+	} else {
+		pkg.DisplayContext("Cannot get response format in shouldMakeDecision", pkg.Error)
+		return false, fmt.Errorf("cannot get response format in shouldMakeDecision")
+	}
+}
+
 // MakeDecisionService checks access rights, queries the LLM for a decision, and interprets the response.
 func MakeDecisionService(Message string, Checksum string, Token string) (string, error) {
 	id, err := utils.GetUserIDFromJWT(Token)
@@ -58,6 +91,16 @@ func MakeDecisionService(Message string, Checksum string, Token string) (string,
 
 	if !val {
 		return "", errors.New("access denied to this entity")
+	}
+
+	shouldDecision, err := shouldMakeDecision(Message, Checksum)
+
+	if err != nil {
+		return "", err
+	}
+
+	if !shouldDecision {
+		return "No Action", nil
 	}
 
 	decision, err := askLLMForDecision(Message, Checksum)
