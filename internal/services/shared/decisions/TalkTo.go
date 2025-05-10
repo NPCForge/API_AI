@@ -24,7 +24,7 @@ func talkTo(Checksum string, message string, interlocutorChecksum string) (strin
 		return "", err, false
 	}
 
-	systemPrompt, err := services.ReadPromptFromFile("prompts/discussion.txt")
+	systemPrompt, err := services.ReadPromptFromFile("prompts/Talk.txt")
 	if err != nil {
 		return "", fmt.Errorf("error retrieving the system prompt: %w", err), false
 	}
