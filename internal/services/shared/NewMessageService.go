@@ -21,8 +21,6 @@ func NewBroadcastMessage(Token string, ChecksumEntitySending string, Message str
 
 	intUserID, err := strconv.Atoi(UserID)
 
-	//pkg.DisplayContext("NewBroadcastMessage: UserId = "+UserID+", EntityChecksum = "+ChecksumEntitySending, pkg.Debug)
-
 	_, err = services.BroadcastMessage(intUserID, sendingID, Message)
 	if err != nil {
 		return err

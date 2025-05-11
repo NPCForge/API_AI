@@ -396,7 +396,17 @@ func GetUserEntities(userID int) ([]int, error) {
 }
 
 func BroadcastMessage(userID int, senderId int, message string) (int64, error) {
+	db := config.GetDB()
 	receiverIDs, err := GetUserEntities(userID)
+
+	if err != nil {
+		return -1, err
+	}
+
+	query := `INSERT INTO messages (sender_entity_id, message) VALUES ($1, $2) RETURNING id`
+
+	var id int64
+	err = db.QueryRow(query, senderId, message).Scan(&id)
 
 	if err != nil {
 		return -1, err
@@ -409,9 +419,12 @@ func BroadcastMessage(userID int, senderId int, message string) (int64, error) {
 	//}
 
 	for _, receiverID := range receiverIDs {
-		_, err = NewMessage(senderId, receiverID, message)
+		query = `INSERT INTO message_receivers (message_id, receiver_entity_id) VALUES ($1, $2)`
+
+		_, err = db.Exec(query, id, receiverID)
+
 		if err != nil {
-			return -1, err
+			return 0, fmt.Errorf("error while insert message : %w", err)
 		}
 	}
 

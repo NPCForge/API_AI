@@ -40,7 +40,11 @@ func GetAllDiscussions(EntityChecksum string) (string, error) {
 	var allDiscussions strings.Builder
 
 	for _, msg := range discussions {
-		allDiscussions.WriteString(fmt.Sprintf("[%s -> %s: %s], ", msg.SenderChecksum, msg.ReceiverChecksums, msg.Message))
+		name, err := services.GetEntityNameByChecksum(msg.SenderChecksum)
+		if err != nil {
+			return "", err
+		}
+		allDiscussions.WriteString(fmt.Sprintf("[%s -> %s: %s], ", name, msg.ReceiverChecksums, msg.Message))
 	}
 
 	allDiscussions.WriteString("\n")

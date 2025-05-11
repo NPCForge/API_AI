@@ -44,10 +44,7 @@ func talkTo(Checksum string, message string, interlocutorChecksum string) (strin
 		response := match[1]
 		return response, nil, helpers.NeedToFinish(back)
 	} else {
-		pkg.DisplayContext("userPrompt = "+userPrompt, pkg.Debug)
-		pkg.DisplayContext("systemPrompt = "+systemPrompt, pkg.Debug)
-		pkg.DisplayContext("Response pattern not found in GPT output: "+back, pkg.Error)
-		return "", fmt.Errorf("error during the process"), false
+		return talkTo(Checksum, message, interlocutorChecksum)
 	}
 }
 
