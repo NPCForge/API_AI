@@ -59,7 +59,6 @@ func main() {
 	protected.HandleFunc("/MakeDecision", httpHandlers.MakeDecisionHandler).Methods("POST")
 	protected.HandleFunc("/CreateEntity", httpHandlers.CreateEntityHandler).Methods("POST")
 	protected.HandleFunc("/RemoveEntity", httpHandlers.RemoveEntityHandler).Methods("POST")
-	protected.HandleFunc("/NewMessage", httpHandlers.NewMessageHandler).Methods("POST")
 	protected.HandleFunc("/GetEntities", httpHandlers.GetEntitiesHandler).Methods("GET")
 	protected.HandleFunc("/Status", httpHandlers.StatusHandler).Methods("GET")
 

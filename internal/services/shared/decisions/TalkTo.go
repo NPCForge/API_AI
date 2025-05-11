@@ -24,13 +24,13 @@ func talkTo(Checksum string, message string, interlocutorChecksum string) (strin
 		return "", err, false
 	}
 
-	systemPrompt, err := services.ReadPromptFromFile("prompts/discussion.txt")
+	systemPrompt, err := services.ReadPromptFromFile("prompts/Talk.txt")
 	if err != nil {
 		return "", fmt.Errorf("error retrieving the system prompt: %w", err), false
 	}
 
 	systemPrompt = strings.Replace(systemPrompt, "{Role Description Here}", roleDescription, 1)
-	userPrompt := "Interlocutor: " + interlocutorChecksum + "\nDiscussion: { " + message + " }"
+	userPrompt := "Discussion: { " + message + " }"
 
 	back, err := services.GptSimpleRequest(userPrompt, systemPrompt)
 	if helpers.NeedToFinish(back) {
@@ -44,10 +44,7 @@ func talkTo(Checksum string, message string, interlocutorChecksum string) (strin
 		response := match[1]
 		return response, nil, helpers.NeedToFinish(back)
 	} else {
-		pkg.DisplayContext("userPrompt = "+userPrompt, pkg.Debug)
-		pkg.DisplayContext("systemPrompt = "+systemPrompt, pkg.Debug)
-		pkg.DisplayContext("Response pattern not found in GPT output: "+back, pkg.Error, true)
-		return "", fmt.Errorf("error during the process"), false
+		return talkTo(Checksum, message, interlocutorChecksum)
 	}
 }
 
@@ -68,7 +65,7 @@ func getAllDiscussionsForEntity(EntityChecksum string, InterlocutorChecksums []s
 			return "", err
 		}
 
-		discussion, err := services.GetDiscussion(strconv.Itoa(EntityID), strconv.Itoa(interlocutorID))
+		discussion, err := services.GetDiscussionFromBy(strconv.Itoa(EntityID), strconv.Itoa(interlocutorID))
 		if err != nil {
 			pkg.DisplayContext("Cannot retrieve discussion", pkg.Error, err)
 			return "", err
@@ -85,25 +82,38 @@ func getAllDiscussionsForEntity(EntityChecksum string, InterlocutorChecksums []s
 
 // HandleTalkToLogic parses the decision string, gathers discussions, and generates a response for the entity to speak to the interlocutors.
 func HandleTalkToLogic(Decision string, Checksum string) (string, error) {
-	re := regexp.MustCompile(`\[(.*?)\]`)
-	matches := re.FindStringSubmatch(Decision)
-
-	if len(matches) > 1 {
-		checksums := strings.Split(matches[1], ", ")
-		checksumsString := "[" + strings.Join(checksums, ", ") + "]"
-
-		discussions, err := getAllDiscussionsForEntity(Checksum, checksums)
-		if err != nil {
-			pkg.DisplayContext("Cannot get discussions using checksum", pkg.Error, err)
-			return "", err
-		}
-
-		message, err, _ := talkTo(Checksum, discussions, checksumsString) // shouldFinish flag not used yet
-		if err != nil {
-			pkg.DisplayContext("TalkToPreprocess failed:", pkg.Error, err)
-			return "", err
-		}
-		return "TalkTo: " + checksumsString + "\nMessage: " + message, nil
+	discussions, err := helpers.GetAllDiscussions(Checksum)
+	if err != nil {
+		pkg.DisplayContext("Cannot get discussions using checksum", pkg.Error, err)
+		return "", err
 	}
-	return "", fmt.Errorf("Cannot find interlocutor checksums: " + Decision)
+
+	message, err, _ := talkTo(Checksum, discussions, "[Everyone]") // shouldFinish flag not used yet
+	if err != nil {
+		pkg.DisplayContext("TalkToPreprocess failed:", pkg.Error, err)
+		return "", err
+	}
+	return "TalkTo: [Everyone]\nMessage: " + message, nil
+
+	//re := regexp.MustCompile(`\[(.*?)\]`)
+	//matches := re.FindStringSubmatch(Decision)
+	//
+	//if len(matches) > 1 {
+	//	checksums := strings.Split(matches[1], ", ")
+	//	checksumsString := "[" + strings.Join(checksums, ", ") + "]"
+	//
+	//	discussions, err := helpers.GetAllDiscussions(Checksum)
+	//	if err != nil {
+	//		pkg.DisplayContext("Cannot get discussions using checksum", pkg.Error, err)
+	//		return "", err
+	//	}
+	//
+	//	message, err, _ := talkTo(Checksum, discussions, checksumsString) // shouldFinish flag not used yet
+	//	if err != nil {
+	//		pkg.DisplayContext("TalkToPreprocess failed:", pkg.Error, err)
+	//		return "", err
+	//	}
+	//	return "TalkTo: " + checksumsString + "\nMessage: " + message, nil
+	//}
+	//return "", fmt.Errorf("Cannot find interlocutor checksums: " + Decision)
 }

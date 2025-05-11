@@ -26,7 +26,7 @@ func MakeDecisionHandlerWebSocket(
 		return
 	}
 
-	if req.Message == "" || req.Checksum == "" {
+	if req.Checksum == "" {
 		sendError(conn, initialRoute, req.Checksum, map[string]interface{}{
 			"message": "Missing required fields in the JSON body",
 		})

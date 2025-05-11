@@ -48,16 +48,6 @@ var actions = []websocketModels.WebSocketDispatcher{
 		Protected: true,
 	},
 	{
-		Name:      "NewMessage",
-		Handler:   NewMessageHandlerWebSocket,
-		Protected: true,
-	},
-	// {
-	//	Name:      "ResetGame",
-	//	Handler:   ResetGameWebsocket,
-	//	Protected: false,
-	// },
-	{
 		Name:      "CreateEntity",
 		Handler:   CreateEntityHandlerWebSocket,
 		Protected: true,
