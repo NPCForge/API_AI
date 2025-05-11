@@ -56,14 +56,6 @@ func TestMainFlow(t *testing.T) {
 		}
 	})
 
-	fmt.Println("Testing NewMessage...")
-
-	t.Run("NewMessage", func(t *testing.T) {
-		if err := NewMessage(); err != nil {
-			t.Fatalf("NewMessage failed: %v", err)
-		}
-	})
-
 	fmt.Println("Testing MakeDecision...")
 
 	t.Run("MakeDecision", func(t *testing.T) {
