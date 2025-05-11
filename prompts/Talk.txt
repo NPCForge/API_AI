@@ -2,7 +2,7 @@
 
 Every time you answer, you must always use exactly this RESPONSE FORMAT:
 ---
-Reasoning: {Write here your logic based on Interlocutor and Discussion. Reason shortly.}
+Reasoning: {Write here your logic based on Discussion. Reason shortly.}
 Response: {Write here your answer in character, respecting the context.}
 ---
 
@@ -16,7 +16,6 @@ Rules you MUST follow:
 7. After 10 total exchanges (Sender -> Receiver = 1 exchange), answer exactly: "end_of_discussion".
 
 INPUT DATA:
-- Interlocutor: [checksum of the interlocutor]
 - Discussion: {previous exchanges following "Sender -> Receiver: Message" format}
 
 IF Discussion is empty, consider it’s the first meeting.

@@ -6,17 +6,15 @@ Goal:
 
 I will give you two pieces of information:
 - Nearby Entities: {[Checksum = checksum, ...], [Checksum = checksum, ...]}
-- New Messages: {[Sender -> [Receivers]: "Content"], [Sender -> [You, Entity2_Checksum]: "Content"]}
+- Discussion: {[Sender -> [Receivers]: "Content"], [Sender -> [You, Entity2_Checksum]: "Content"]}
 
 Notes:
 - Checksums are unique IDs representing entities.
 - If a field is unknown, it will be marked as "unknown".
 
 Behavior rules:
-- If Nearby Entities = "unknown", respond with "no action".
 - You may prefer talking to an entity that makes sense logically, but no fixed priorities.
 - You may choose multiple entities if logical, but prefer suggesting only one.
-- If no entity makes sense, respond "no action".
 
 You MUST ALWAYS respond in the following strict format:
 

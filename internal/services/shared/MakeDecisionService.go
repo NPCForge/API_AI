@@ -8,6 +8,7 @@ import (
 	"my-api/internal/services/shared/decisions"
 	"my-api/internal/utils"
 	"my-api/pkg"
+	"regexp"
 	"strings"
 )
 
@@ -22,15 +23,15 @@ func interpretLLMDecision(Decision string, Checksum string) (string, error) {
 
 // askLLMForDecision builds a user prompt, sends it to the LLM, and returns the generated decision.
 func askLLMForDecision(Message string, Checksum string) (string, error) {
-	newMessages, err := services.GetNewMessages(Checksum)
+	discussion, err := helpers.GetAllDiscussions(Checksum)
 	if err != nil {
 		return "", err
 	}
 
-	Message += "\nNew Messages: {" + strings.Join(newMessages, ", ") + "}"
+	Message += "\nDiscussion: {" + discussion + "}"
 
-	// Read the "curriculum.txt" file to get the system prompt
-	systemPrompt, err := services.ReadPromptFromFile("prompts/curriculum.txt")
+	// Read the "Decision.txt" file to get the system prompt
+	systemPrompt, err := services.ReadPromptFromFile("prompts/Decision.txt")
 	if err != nil {
 		return "", fmt.Errorf("error retrieving the system prompt: %w", err)
 	}
@@ -42,6 +43,39 @@ func askLLMForDecision(Message string, Checksum string) (string, error) {
 	}
 
 	return decision, nil
+}
+
+func shouldMakeDecision(Message string, Checksum string) (bool, error) {
+	discussion, err := helpers.GetAllDiscussions(Checksum)
+	if err != nil {
+		return false, err
+	}
+
+	Message += "\nDiscussion: {" + discussion + "}"
+
+	// Read the "ShouldTalk.txt" file to get the system prompt
+	systemPrompt, err := services.ReadPromptFromFile("prompts/ShouldTalk.txt")
+
+	if err != nil {
+		return false, fmt.Errorf("error retrieving the system prompt: %w", err)
+	}
+
+	response, err := services.GptSimpleRequest(Message, systemPrompt)
+	if err != nil {
+		pkg.DisplayContext("GptSimpleRequest failed:", pkg.Error, err)
+		return false, err
+	}
+
+	if strings.Contains(response, "Speak: yes") {
+		pkg.DisplayContext("IA decided to speak", pkg.Debug)
+		return true, nil
+	} else if strings.Contains(response, "Speak: no") {
+		pkg.DisplayContext("IA decided not to speak : "+response, pkg.Debug)
+		return false, nil
+	} else {
+		pkg.DisplayContext("Cannot get response format in shouldMakeDecision", pkg.Error)
+		return false, fmt.Errorf("cannot get response format in shouldMakeDecision")
+	}
 }
 
 // MakeDecisionService checks access rights, queries the LLM for a decision, and interprets the response.
@@ -60,16 +94,50 @@ func MakeDecisionService(Message string, Checksum string, Token string) (string,
 		return "", errors.New("access denied to this entity")
 	}
 
-	decision, err := askLLMForDecision(Message, Checksum)
+	shouldDecision, err := shouldMakeDecision(Message, Checksum)
+
 	if err != nil {
-		pkg.DisplayContext("Error after decision making:", pkg.Error, err)
 		return "", err
 	}
+
+	if !shouldDecision {
+		return "No Action", nil
+	}
+
+	//decision, err := askLLMForDecision(Message, Checksum)
+	//if err != nil {
+	//	pkg.DisplayContext("Error after decision making:", pkg.Error, err)
+	//	return "", err
+	//}
+
+	// Talk to everyone by default
+	decision := "Reasoning: {Short reasoning based on Nearby Entities and New Messages. Be clear, prefer simple logic.}\nTalkTo: [Everyone]"
 
 	task, err := interpretLLMDecision(decision, Checksum)
 	if err != nil {
 		pkg.DisplayContext("Error after LLM response interpretation:", pkg.Error, err)
 		return "", err
+	}
+
+	re := regexp.MustCompile(`TalkTo:\s*\[(.*?)\]\s*Message:\s*(.*)`)
+	match := re.FindStringSubmatch(task)
+
+	if len(match) == 3 {
+		talkTo := match[1]
+		message := match[2]
+
+		if strings.Contains(talkTo, "Everyone") {
+			err = NewMessageService(Checksum, []string{"Everyone"}, message, Token)
+			if err != nil {
+				pkg.DisplayContext("Error after inserting new message:", pkg.Error, err)
+				return "", err
+			}
+		} else {
+			// should call NewMessageService with array of receivers
+			pkg.DisplayContext("Message is not for everyone: "+talkTo, pkg.Error, true)
+		}
+	} else {
+		pkg.DisplayContext("No match found", pkg.Error, true)
 	}
 
 	return task, nil

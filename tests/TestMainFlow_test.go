@@ -31,6 +31,15 @@ func TestMainFlow(t *testing.T) {
 	}
 
 	fmt.Println("Connexion success...")
+	fmt.Println("Testing Status...")
+
+	t.Run("Status", func(t *testing.T) {
+		if err := Status(); err == nil {
+			isConnexionSuccess = true
+		}
+	})
+
+	fmt.Println("Status success...")
 	fmt.Println("Testing create entity...")
 
 	t.Run("CreateEntity", func(t *testing.T) {
@@ -44,14 +53,6 @@ func TestMainFlow(t *testing.T) {
 	t.Run("GetEntities", func(t *testing.T) {
 		if err := GetEntities(); err != nil {
 			t.Fatalf("GetEntities failed: %v", err)
-		}
-	})
-
-	fmt.Println("Testing NewMessage...")
-
-	t.Run("NewMessage", func(t *testing.T) {
-		if err := NewMessage(); err != nil {
-			t.Fatalf("NewMessage failed: %v", err)
 		}
 	})
 

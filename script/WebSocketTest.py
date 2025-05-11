@@ -67,7 +67,7 @@ def listen_to_stdin(ws):
                 message = json.dumps({
                     "action": "MakeDecision",
                     "token": token,
-                    "message": "Nearby Entities: {[Checksum = TomChecksum]}",
+                    "message": "",
                     "checksum": "TomChecksum",
                 })
             else:

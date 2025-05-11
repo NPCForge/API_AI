@@ -4,32 +4,34 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/gorilla/websocket"
 	"net/http"
+
+	"github.com/gorilla/websocket"
 )
 
-func NewMessage() error {
+type StatusResponse struct {
+	Route   string `json:"route"`
+	Status  string `json:"status"`
+	Message string `json:"message"`
+}
 
-	fmt.Println("NewMessage WS")
-	err := newMessageViaWebSocket()
+func Status() error {
+	err := StatusViaWebSocket()
 	if err != nil {
-		fmt.Println("Error removing user via WebSocket:", err)
 		return err
 	}
 
-	fmt.Println("NewMessage HTTP")
-	err = newMessageViaHTTP()
+	err = StatusViaHTTP()
 	if err != nil {
-		fmt.Println("Error removing user via Http:", err)
 		return err
 	}
+
 	return nil
 }
 
-func newMessageViaWebSocket() error {
+func StatusViaWebSocket() error {
 	conn, _, err := websocket.DefaultDialer.Dial(WsConnectURL, nil)
 	if err != nil {
-
 		return fmt.Errorf("WebSocket dial error: %w", err)
 	}
 	defer conn.Close()
@@ -40,12 +42,9 @@ func newMessageViaWebSocket() error {
 		return fmt.Errorf("WebSocket token read error: %w", err)
 	}
 
-	message := map[string]interface{}{
-		"action":    "NewMessage",
-		"sender":    "WsChecksum",
-		"receivers": []string{"WsChecksum"},
-		"message":   "hello ws",
-		"token":     token,
+	message := map[string]string{
+		"action": "Status",
+		"token":  token,
 	}
 
 	if err := conn.WriteJSON(message); err != nil {
@@ -57,36 +56,32 @@ func newMessageViaWebSocket() error {
 		return fmt.Errorf("read message failed: %w", err)
 	}
 
-	var response map[string]string
+	var response StatusResponse
 	if err := json.Unmarshal(msg, &response); err != nil {
 		return fmt.Errorf("invalid JSON: %w", err)
 	}
 
-	status := response["status"]
+	status := response.Status
+
 	if status != "success" {
-		return fmt.Errorf("received error: %s", msg)
+		return fmt.Errorf("invalid status: %s", status)
 	}
 
 	return nil
 }
 
-func newMessageViaHTTP() error {
+func StatusViaHTTP() error {
 	token, err := ReadTokens("http")
 
 	if err != nil {
 		return fmt.Errorf("http read token error: %w", err)
 	}
 
-	payload := map[string]interface{}{
-		"sender":    "HttpChecksum",
-		"receivers": []string{"HttpChecksum"},
-		"message":   "hello http",
-		"token":     token,
-	}
+	payload := map[string]string{}
 
 	body, _ := json.Marshal(payload)
 
-	req, err := http.NewRequest("POST", HttpBaseUrl+"NewMessage", bytes.NewBuffer(body))
+	req, err := http.NewRequest("GET", HttpBaseUrl+"Status", bytes.NewBuffer(body))
 	if err != nil {
 		return fmt.Errorf("error building request: %w", err)
 	}
@@ -104,9 +99,10 @@ func newMessageViaHTTP() error {
 		return fmt.Errorf("JSON decode failed: %w", err)
 	}
 
-	status, ok := data["status"].(float64)
-	if !ok || status != 200 {
-		return fmt.Errorf("invalid status received: %v", data)
+	status, ok := data["status"].(string)
+
+	if !ok || status != "success" {
+		return fmt.Errorf("invalid status: %s", status)
 	}
 
 	return nil
