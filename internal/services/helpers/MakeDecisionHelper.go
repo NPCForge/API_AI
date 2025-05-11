@@ -40,7 +40,15 @@ func GetAllDiscussions(EntityChecksum string) (string, error) {
 	var allDiscussions strings.Builder
 
 	for _, msg := range discussions {
-		name, err := services.GetEntityNameByChecksum(msg.SenderChecksum)
+		var SenderChecksum string
+
+		if msg.SenderChecksum == "You" {
+			SenderChecksum = EntityChecksum
+		} else {
+			SenderChecksum = msg.SenderChecksum
+		}
+
+		name, err := services.GetEntityNameByChecksum(SenderChecksum)
 		if err != nil {
 			return "", err
 		}

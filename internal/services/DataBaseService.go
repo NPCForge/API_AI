@@ -744,7 +744,7 @@ func GetEntityNameByChecksum(checksum string) (string, error) {
 	var name string
 	err := db.QueryRow(query, checksum).Scan(&name)
 	if err != nil {
-		return "", fmt.Errorf("erreur lors de la récupération de l'utilisateur : %w", err)
+		return "", fmt.Errorf("error while getting entity name from checksum = %s : %w", checksum, err)
 	}
 
 	return name, nil
