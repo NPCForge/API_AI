@@ -8,6 +8,7 @@ import (
 	"my-api/internal/services/shared/decisions"
 	"my-api/internal/utils"
 	"my-api/pkg"
+	"regexp"
 	"strings"
 )
 
@@ -103,16 +104,40 @@ func MakeDecisionService(Message string, Checksum string, Token string) (string,
 		return "No Action", nil
 	}
 
-	decision, err := askLLMForDecision(Message, Checksum)
-	if err != nil {
-		pkg.DisplayContext("Error after decision making:", pkg.Error, err)
-		return "", err
-	}
+	//decision, err := askLLMForDecision(Message, Checksum)
+	//if err != nil {
+	//	pkg.DisplayContext("Error after decision making:", pkg.Error, err)
+	//	return "", err
+	//}
+
+	// Talk to everyone by default
+	decision := "Reasoning: {Short reasoning based on Nearby Entities and New Messages. Be clear, prefer simple logic.}\nTalkTo: [Everyone]"
 
 	task, err := interpretLLMDecision(decision, Checksum)
 	if err != nil {
 		pkg.DisplayContext("Error after LLM response interpretation:", pkg.Error, err)
 		return "", err
+	}
+
+	re := regexp.MustCompile(`TalkTo:\s*\[(.*?)\]\s*Message:\s*(.*)`)
+	match := re.FindStringSubmatch(task)
+
+	if len(match) == 3 {
+		talkTo := match[1]
+		message := match[2]
+
+		if strings.Contains(talkTo, "Everyone") {
+			err = NewMessageService(Checksum, []string{"Everyone"}, message, Token)
+			if err != nil {
+				pkg.DisplayContext("Error after inserting new message:", pkg.Error, err)
+				return "", err
+			}
+		} else {
+			// should call NewMessageService with array of receivers
+			pkg.DisplayContext("Message is not for everyone: "+talkTo, pkg.Error, true)
+		}
+	} else {
+		pkg.DisplayContext("No match found", pkg.Error, true)
 	}
 
 	return task, nil

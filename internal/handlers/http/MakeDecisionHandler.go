@@ -17,7 +17,7 @@ func MakeDecisionHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if req.Message == "" || req.Checksum == "" {
+	if req.Checksum == "" {
 		http.Error(w, "Missing required fields in the JSON body", http.StatusBadRequest)
 		return
 	}

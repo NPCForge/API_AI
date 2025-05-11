@@ -3,13 +3,12 @@ package services
 import (
 	"database/sql"
 	"fmt"
+	"github.com/lib/pq"
 	"my-api/config"
 	"my-api/internal/models"
 	sharedModel "my-api/internal/models/shared"
 	"my-api/pkg"
 	"strings"
-
-	"github.com/lib/pq"
 )
 
 // GetIDByChecksum get entity id for a given checksum
@@ -225,24 +224,10 @@ func GetDiscussions(EntityChecksum string) ([]sharedModel.Message, error) {
 
 	limitRows := 10
 
-	query := `WITH filtered_messages AS (
-    SELECT m.id, m.sender_entity_id, m.message, m.timestamp
+	query := `SELECT m.sender_entity_id, m.message
     FROM messages m
-    JOIN message_receivers mr ON m.id = mr.message_id
     ORDER BY m.timestamp
     LIMIT $1
-)
-SELECT 
-    fm.sender_entity_id,
-    sender_entity.checksum AS SenderChecksum,
-    fm.message,
-    ARRAY_AGG(receiver_entity.checksum) AS ReceiverChecksum
-FROM filtered_messages fm
-JOIN entities sender_entity ON fm.sender_entity_id = sender_entity.id
-JOIN message_receivers mr ON fm.id = mr.message_id
-JOIN entities receiver_entity ON mr.receiver_entity_id = receiver_entity.id
-GROUP BY fm.id, fm.sender_entity_id, sender_entity.checksum, fm.message, fm.timestamp
-ORDER BY fm.timestamp;
 `
 	rows, err := db.Query(query, limitRows)
 	if err != nil {
@@ -261,24 +246,33 @@ ORDER BY fm.timestamp;
 	for rows.Next() {
 		var senderEntityID int
 		var msg sharedModel.Message
-		var receiverChecksums pq.StringArray
 
-		err := rows.Scan(&senderEntityID, &msg.SenderChecksum, &msg.Message, &receiverChecksums)
+		err := rows.Scan(&senderEntityID, &msg.Message)
 		if err != nil {
 			pkg.DisplayContext("Error after row scan:", pkg.Error, err)
 			return nil, err
 		}
-		msg.ReceiverChecksums = receiverChecksums
 
-		if fmt.Sprintf("%d", senderEntityID) == EntityChecksum {
+		//default Everyone
+		msg.ReceiverChecksums = []string{"Everyone"}
+
+		SenderChecksum, err := GetEntityChecksumById(senderEntityID)
+
+		if err != nil {
+			return nil, err
+		}
+
+		if SenderChecksum == EntityChecksum {
 			msg.SenderChecksum = "You"
+		} else {
+			msg.SenderChecksum = SenderChecksum
 		}
 
-		for i, r := range receiverChecksums {
-			if r == EntityChecksum {
-				receiverChecksums[i] = "You"
-			}
-		}
+		//for i, r := range receiverChecksums {
+		//	if r == EntityChecksum {
+		//		receiverChecksums[i] = "You"
+		//	}
+		//}
 
 		messages = append(messages, msg)
 	}
@@ -342,7 +336,7 @@ ORDER BY fm.timestamp;
 			pkg.DisplayContext("Error after row scan:", pkg.Error, err)
 			return nil, err
 		}
-		msg.ReceiverChecksums = receiverChecksums
+		//msg.ReceiverChecksums = receiverChecksums
 
 		if fmt.Sprintf("%d", senderEntityID) == from {
 			msg.SenderChecksum = "You"
@@ -363,6 +357,65 @@ ORDER BY fm.timestamp;
 	}
 
 	return messages, nil
+}
+
+func GetUserEntities(userID int) ([]int, error) {
+	db := config.GetDB()
+
+	query := `SELECT id FROM entities WHERE user_id = $1`
+
+	rows, err := db.Query(query, userID)
+
+	if err != nil {
+		pkg.DisplayContext("Broadcast message, cannot get user entities:", pkg.Error, err)
+		return nil, err
+	}
+	defer func(rows *sql.Rows) {
+		err := rows.Close()
+		if err != nil {
+			pkg.DisplayContext("Error after row close:", pkg.Error, err)
+		}
+	}(rows)
+
+	var entities []int
+
+	for rows.Next() {
+		var entityID int
+		err := rows.Scan(&entityID)
+		if err != nil {
+			pkg.DisplayContext("Error after row scan:", pkg.Error, err)
+			return nil, err
+		}
+		entities = append(entities, entityID)
+	}
+	if err := rows.Err(); err != nil {
+		pkg.DisplayContext("Error after row scan:", pkg.Error, err)
+		return nil, err
+	}
+	return entities, nil
+}
+
+func BroadcastMessage(userID int, senderId int, message string) (int64, error) {
+	receiverIDs, err := GetUserEntities(userID)
+
+	if err != nil {
+		return -1, err
+	}
+
+	//self := gobalHelpers.IntContains(receiverIDs, senderId)
+	//
+	//if self != -1 {
+	//	receiverIDs = gobalHelpers.RemoveIntAtIndex(receiverIDs, self)
+	//}
+
+	for _, receiverID := range receiverIDs {
+		_, err = NewMessage(senderId, receiverID, message)
+		if err != nil {
+			return -1, err
+		}
+	}
+
+	return 0, nil
 }
 
 func NewMessage(senderId int, receiverId int, message string) (int64, error) {
@@ -699,6 +752,21 @@ WHERE id = $1
 	}
 
 	return name, nil
+}
+
+func GetEntityChecksumById(id int) (string, error) {
+	db := config.GetDB()
+	query := `
+SELECT checksum
+FROM entities
+WHERE id = $1
+`
+	var checksum string
+	err := db.QueryRow(query, id).Scan(&checksum)
+	if err != nil {
+		return "", fmt.Errorf("error while fetching entity checksum: %w", err)
+	}
+	return checksum, nil
 }
 
 func GetEntityIdByChecksum(checksum string) (int, error) {
