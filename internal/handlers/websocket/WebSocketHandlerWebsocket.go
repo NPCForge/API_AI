@@ -62,6 +62,11 @@ var actions = []websocketModels.WebSocketDispatcher{
 		Handler:   GetEntitiesHandlerWebSocket,
 		Protected: true,
 	},
+	{
+		Name:      "Status",
+		Handler:   StatusHandlerWebSocket,
+		Protected: true,
+	},
 }
 
 // handleWebSocketMessage dispatches an incoming WebSocket message to the appropriate handler based on the action field.
