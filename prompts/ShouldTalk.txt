@@ -13,7 +13,6 @@ Rules:
 - You may speak more often when there are relevant messages or active discussion involving you.
 
 Response format (STRICT):
----
 Reasoning: {Brief explanation why you should or should not speak. Max 200 characters.}
 Speak: yes
 ---

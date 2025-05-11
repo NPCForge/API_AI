@@ -660,7 +660,7 @@ func GetEntitiesOwnerByChecksum(checksum string) (int, error) {
 	var id int
 	err := db.QueryRow(query, checksum).Scan(&id)
 	if err != nil {
-		return -1, fmt.Errorf("erreur lors de la récupération de l'utilisateur : %w", err)
+		return -1, fmt.Errorf("error while fetching entity owner by checksum: %s : %w", checksum, err)
 	}
 
 	return id, nil
@@ -713,7 +713,7 @@ func GetEntityIdByChecksum(checksum string) (int, error) {
 	var id int
 	err := db.QueryRow(query, checksum).Scan(&id)
 	if err != nil {
-		return -1, fmt.Errorf("erreur lors de la récupération de l'utilisateur : %w", err)
+		return -1, fmt.Errorf("error while getting entity id by checksum : %s : %w", checksum, err)
 	}
 
 	return id, nil
