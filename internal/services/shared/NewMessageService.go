@@ -6,7 +6,6 @@ import (
 	"my-api/internal/utils"
 	"my-api/pkg"
 	"strconv"
-	"strings"
 )
 
 func NewBroadcastMessage(Token string, ChecksumEntitySending string, Message string) error {
@@ -35,8 +34,6 @@ func NewMessageService(
 	Message string,
 	Token string,
 ) error {
-	pkg.DisplayContext("New message from "+ChecksumEntitySending+" for ["+strings.Join(ChecksumEntityReceiving, ",")+"]", pkg.Debug)
-
 	idEntitySending, err := services.GetEntityIdByChecksum(ChecksumEntitySending)
 	if err != nil {
 		return err

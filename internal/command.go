@@ -1,8 +1,9 @@
-package utils
+package internal
 
 import (
 	"bufio"
 	"my-api/internal/services"
+	"my-api/internal/utils"
 	"os"
 	"strings"
 
@@ -73,7 +74,7 @@ func Commande() {
 		if strings.HasPrefix(input, "new route ") {
 			name := strings.TrimPrefix(input, "new route ")
 			name = strings.TrimSpace(name)
-			GenerateNewRoute(name)
+			utils.GenerateNewRoute(name)
 			continue
 		}
 

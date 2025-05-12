@@ -534,7 +534,7 @@ func IsExistById(id string) (bool, error) {
 
 // === Refacto === ✅
 
-func Register(password string, identifier string) (int, error) {
+func Register(password string, identifier string, gamePrompt string) (int, error) {
 	db := config.GetDB()
 
 	// Hasher le mot de passe
@@ -545,13 +545,13 @@ func Register(password string, identifier string) (int, error) {
 	}
 
 	query := `
-		INSERT INTO users (name, password_hash, created)
-		VALUES ($1, $2, CURRENT_DATE)
+		INSERT INTO users (name, password_hash, game_prompt)
+		VALUES ($1, $2, $3)
 		RETURNING id
 	`
 
 	var id int
-	err = db.QueryRow(query, identifier, pass).Scan(&id)
+	err = db.QueryRow(query, identifier, pass, gamePrompt).Scan(&id)
 	if err != nil {
 		return -1, fmt.Errorf("error while registering user: %w", err)
 	}
@@ -748,6 +748,19 @@ func GetEntityNameByChecksum(checksum string) (string, error) {
 	}
 
 	return name, nil
+}
+
+func GetGamePromptByUserID(UserID string) (string, error) {
+	db := config.GetDB()
+
+	query := `SELECT game_prompt FROM users WHERE id = $1`
+
+	var prompt string
+	err := db.QueryRow(query, UserID).Scan(&prompt)
+	if err != nil {
+		return "", fmt.Errorf("error while fetching prompt from JWT: %w", err)
+	}
+	return prompt, nil
 }
 
 func GetEntityNameByID(id int) (string, error) {

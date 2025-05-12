@@ -32,8 +32,8 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if req.Password != "" && req.Identifier != "" {
-		private, id, err := sharedServices.RegisterService(req.Password, req.Identifier)
+	if req.Password != "" && req.Identifier != "" && req.GamePrompt != "" {
+		private, id, err := sharedServices.RegisterService(req.Password, req.Identifier, req.GamePrompt)
 
 		if err != nil {
 			http.Error(w, "Server Error", http.StatusInternalServerError)
