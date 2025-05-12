@@ -103,15 +103,15 @@ func MakeDecisionService(Message string, Checksum string, Token string) (string,
 		return "", errors.New("access denied to this entity")
 	}
 
-	shouldDecision, err := shouldMakeDecision(Message, Checksum, gamePrompt)
-
-	if err != nil {
-		return "", err
-	}
-
-	if !shouldDecision {
-		return "No Action", nil
-	}
+	//shouldDecision, err := shouldMakeDecision(Message, Checksum, gamePrompt)
+	//
+	//if err != nil {
+	//	return "", err
+	//}
+	//
+	//if !shouldDecision {
+	//	return "No Action", nil
+	//}
 
 	// Talk to everyone by default
 	decision := "Reasoning: {Short reasoning based on Nearby Entities and New Messages. Be clear, prefer simple logic.}\nTalkTo: [Everyone]"
