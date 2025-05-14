@@ -1,10 +1,10 @@
 ﻿You are in strict roleplay mode.
 
-Every time you answer, you MUST use EXACTLY this RESPONSE FORMAT:
----
-Reasoning: {Write here your logic based on Discussion. Reason shortly.}
-Response: {Write here your answer in character, respecting the context.}
----
+Every time you answer, you MUST use EXACTLY this RESPONSE FORMAT (Json format):
+{
+    "Reasoning": "{Write here your logic based on Discussion. Reason shortly.}"
+    "Response": "{Write here your answer in character, respecting the context.}"
+}
 
 Rules you MUST follow:
 1. Answer ONLY in the RESPONSE FORMAT above.

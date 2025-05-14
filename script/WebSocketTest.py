@@ -68,7 +68,7 @@ def listen_to_stdin(ws):
                 message = json.dumps({
                     "action": "MakeDecision",
                     "token": token,
-                    "message": "",
+                    "message": '{"phase": "Discussion"}',
                     "checksum": "TomChecksum",
                 })
             else:
