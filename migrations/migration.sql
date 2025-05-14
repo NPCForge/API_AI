@@ -3,7 +3,8 @@ CREATE TABLE IF NOT EXISTS users (
     name VARCHAR(255) NOT NULL UNIQUE,
     permission INT DEFAULT 0,
     password_hash VARCHAR(1080) NOT NULL,
-    created DATE DEFAULT CURRENT_DATE
+    game_prompt TEXT NOT NULL,
+    created DATE DEFAULT NOW()
 );
 
 CREATE TABLE IF NOT EXISTS entities (
@@ -12,7 +13,7 @@ CREATE TABLE IF NOT EXISTS entities (
     name VARCHAR(255) NOT NULL,
     checksum VARCHAR(1080) NOT NULL UNIQUE,
     prompt VARCHAR(2000) NOT NULL,
-    created DATE DEFAULT CURRENT_DATE,
+    created DATE DEFAULT NOW(),
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
@@ -20,7 +21,7 @@ CREATE TABLE IF NOT EXISTS messages (
     id SERIAL PRIMARY KEY,
     sender_entity_id INT NOT NULL,
     message TEXT NOT NULL,
-    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    timestamp TIMESTAMP DEFAULT NOW(),
     FOREIGN KEY (sender_entity_id) REFERENCES entities(id) ON DELETE CASCADE
 );
 

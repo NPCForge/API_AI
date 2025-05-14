@@ -27,7 +27,7 @@ func RegisterHandlerWebsocket(
 		return
 	}
 
-	if msg.Action == "" || msg.Token == "" || msg.Identifier == "" || msg.Password == "" {
+	if msg.Action == "" || msg.Token == "" || msg.Identifier == "" || msg.Password == "" || msg.GamePrompt == "" {
 		sendError(conn, initialRoute, "", map[string]interface{}{
 			"message": "Missing required fields in the JSON body",
 		})
@@ -43,7 +43,7 @@ func RegisterHandlerWebsocket(
 		return
 	}
 
-	private, id, err := sharedServices.RegisterService(msg.Password, msg.Identifier)
+	private, id, err := sharedServices.RegisterService(msg.Password, msg.Identifier, msg.GamePrompt)
 	if err != nil {
 		sendError(conn, initialRoute, "", map[string]interface{}{
 			"message": err.Error(),

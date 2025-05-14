@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"my-api/config"
+	"my-api/internal"
 	"my-api/pkg"
 	"net/http"
 
@@ -39,7 +40,7 @@ func main() {
 
 	// Launches a goroutine for CLI commands if not running in Docker
 	if !utils.IsRunningInDocker() {
-		go utils.Commande()
+		go internal.Commande()
 	}
 
 	// WebSocket handler
