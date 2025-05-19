@@ -39,6 +39,11 @@ func interpretLLMDecision(Phase string, Checksum string, GamePrompt string) (str
 		return decisions.HandleTalkToLogic(Checksum, GamePrompt, roleDescription)
 	case "Voting":
 		return decisions.HandleVotingLogic(Checksum, GamePrompt, roleDescription)
+	case "Night":
+		if role != "Werewolf" {
+			return "No Action", nil
+		}
+		return decisions.HandleVotingLogic(Checksum, GamePrompt, roleDescription)
 	default:
 		pkg.DisplayContext("Unknown data phase.", pkg.Error)
 		return "", fmt.Errorf(`unknown data phase "%s"`, Phase)
