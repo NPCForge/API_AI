@@ -559,17 +559,17 @@ func Register(password string, identifier string, gamePrompt string) (int, error
 	return id, nil
 }
 
-func CreateEntity(name string, prompt string, checksum string, id_owner string) (int, error) {
+func CreateEntity(name string, prompt string, checksum string, id_owner string, role string) (int, error) {
 	db := config.GetDB()
 
 	query := `
-		INSERT INTO entities (user_id, name, checksum, prompt, created)
-		VALUES ($1, $2, $3, $4, CURRENT_DATE)
+		INSERT INTO entities (user_id, name, checksum, prompt, role)
+		VALUES ($1, $2, $3, $4, $5)
 		RETURNING id
 	`
 
 	var id int
-	err := db.QueryRow(query, id_owner, name, checksum, prompt).Scan(&id)
+	err := db.QueryRow(query, id_owner, name, checksum, prompt, role).Scan(&id)
 	if err != nil {
 		return -1, fmt.Errorf("error while registering user: %w", err)
 	}
@@ -761,6 +761,21 @@ func GetGamePromptByUserID(UserID string) (string, error) {
 		return "", fmt.Errorf("error while fetching prompt from JWT: %w", err)
 	}
 	return prompt, nil
+}
+
+func GetEntityRoleByChecksum(checksum string) (string, error) {
+	db := config.GetDB()
+
+	query := `SELECT role FROM entities WHERE checksum = $1`
+
+	var role string
+	err := db.QueryRow(query, checksum).Scan(&role)
+
+	if err != nil {
+		return "", fmt.Errorf("error while fetching role from checksum = %s : %w", checksum, err)
+	}
+
+	return role, nil
 }
 
 func GetEntityNameByID(id int) (string, error) {

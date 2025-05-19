@@ -10,14 +10,14 @@ import (
 	"strings"
 )
 
-func voteFor(Checksum string, Discussion string, GamePrompt string) (string, error) {
+func voteFor(Checksum string, Discussion string, GamePrompt string, Role string) (string, error) {
 	EntityId, err := services.GetEntityIdByChecksum(Checksum)
 	if err != nil {
 		pkg.DisplayContext("Cannot get Entity ID using checksum", pkg.Error, err)
 		return "", err
 	}
 
-	roleDescription, err := services.GetPromptByID(strconv.Itoa(EntityId))
+	personalityDescription, err := services.GetPromptByID(strconv.Itoa(EntityId))
 	if err != nil {
 		pkg.DisplayContext("Cannot get prompt using entity ID", pkg.Error, err)
 		return "", err
@@ -28,7 +28,8 @@ func voteFor(Checksum string, Discussion string, GamePrompt string) (string, err
 		return "", fmt.Errorf("error retrieving the system prompt: %w", err)
 	}
 
-	systemPrompt = strings.Replace(systemPrompt, "{Role Description Here}", roleDescription, 1)
+	systemPrompt = strings.Replace(systemPrompt, "{Personality Description Here}", personalityDescription, 1)
+	systemPrompt = strings.Replace(systemPrompt, "{Role Description Here}", Role, 1)
 	systemPrompt = strings.Replace(systemPrompt, "{Game Prompt Here}", GamePrompt, 1)
 
 	userPrompt := "Discussion: { " + Discussion + " }"
@@ -44,20 +45,20 @@ func voteFor(Checksum string, Discussion string, GamePrompt string) (string, err
 	}
 
 	if data["VoteFor"] == "" {
-		return voteFor(Checksum, Discussion, GamePrompt)
+		return voteFor(Checksum, Discussion, GamePrompt, Role)
 	} else {
 		return data["VoteFor"], nil
 	}
 }
 
-func HandleVotingLogic(Checksum string, GamePrompt string) (string, error) {
+func HandleVotingLogic(Checksum string, GamePrompt string, Role string) (string, error) {
 	discussions, err := helpers.GetAllDiscussions(Checksum)
 	if err != nil {
 		pkg.DisplayContext("Cannot get discussions using checksum", pkg.Error, err)
 		return "", err
 	}
 
-	name, err := voteFor(Checksum, discussions, GamePrompt)
+	name, err := voteFor(Checksum, discussions, GamePrompt, Role)
 
 	if err != nil {
 		pkg.DisplayContext("voteFor failed:", pkg.Error, err)

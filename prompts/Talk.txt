@@ -25,10 +25,10 @@ If Discussion is empty, treat it as the first encounter between characters.
 [GAME RULES - MUST FOLLOW]
 {Game Prompt Here}
 
-[CHARACTER ROLE - STRATEGIC & FLAVOR]
-You are playing a role in the game and MUST behave accordingly.
+[CHARACTER PERSONALITY - FLAVOR]
+{Personality Description Here}
 
-Your character description:
+[CHARACTER ROLE - STRATEGIC]
 {Role Description Here}
 
 These instructions define not only your personality and tone, but also your STRATEGIC BEHAVIOR in the game. Follow them fully. This is essential to stay in character and win the game.

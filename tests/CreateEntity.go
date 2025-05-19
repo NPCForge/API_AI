@@ -43,6 +43,7 @@ func createEntityViaWebSocket() (string, error) {
 		"name":     "WsEntity",
 		"prompt":   "WsPrompt",
 		"checksum": "WsChecksum",
+		"role":     "WsRole",
 		"token":    token,
 	}
 
@@ -78,6 +79,7 @@ func createEntityViaHTTP() (string, error) {
 	payload := map[string]string{
 		"name":     "HttpEntity",
 		"prompt":   "HttpPrompt",
+		"role":     "HttpRole",
 		"checksum": "HttpChecksum",
 	}
 

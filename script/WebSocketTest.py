@@ -58,6 +58,7 @@ def listen_to_stdin(ws):
                     "name": "tom_entity",
                     "prompt": "a fisherman named tom_entity",
                     "checksum": "TomChecksum",
+                    "role": "Villager",
                     "token": token,
                 })
             else:

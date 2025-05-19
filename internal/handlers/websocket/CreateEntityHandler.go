@@ -26,14 +26,14 @@ func CreateEntityHandlerWebSocket(
 		return
 	}
 
-	if req.Checksum == "" || req.Name == "" || req.Prompt == "" {
+	if req.Checksum == "" || req.Name == "" || req.Prompt == "" || req.Role == "" {
 		sendError(conn, initialRoute, "", map[string]interface{}{
 			"message": "Missing required fields in the payload",
 		})
 		return
 	}
 
-	id, err := sharedServices.CreateEntityService(req.Name, req.Prompt, req.Checksum, req.Token)
+	id, err := sharedServices.CreateEntityService(req.Name, req.Prompt, req.Checksum, req.Token, req.Role)
 	if err != nil {
 		sendError(conn, initialRoute, "", map[string]interface{}{
 			"message": "Error while creating entity",

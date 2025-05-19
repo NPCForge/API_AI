@@ -5,6 +5,7 @@ type RequestCreateEntity struct {
 	Name     string `json:"name"`
 	Prompt   string `json:"prompt"`
 	Checksum string `json:"checksum"`
+	Role     string `json:"role"`
 	Token    string `json:"token"`
 }
 

@@ -13,6 +13,7 @@ CREATE TABLE IF NOT EXISTS entities (
     name VARCHAR(255) NOT NULL,
     checksum VARCHAR(1080) NOT NULL UNIQUE,
     prompt VARCHAR(2000) NOT NULL,
+    role VARCHAR(255) NOT NULL,
     created DATE DEFAULT NOW(),
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
