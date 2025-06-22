@@ -11,22 +11,22 @@ import (
 )
 
 // talkTo generates a message for an entity to communicate with a specific interlocutor using GPT based on their checksums.
-func talkTo(Checksum string, message string, interlocutorChecksum string, GamePrompt string, Role string) (string, error, bool) {
+func talkTo(Checksum string, message string, interlocutorChecksum string, GamePrompt string, Role string) (string, string, error, bool) {
 	EntityId, err := services.GetEntityIdByChecksum(Checksum)
 	if err != nil {
 		pkg.DisplayContext("Cannot get Entity ID using checksum", pkg.Error, err)
-		return "", err, false
+		return "", "", err, false
 	}
 
 	characterDescription, err := services.GetPromptByID(strconv.Itoa(EntityId))
 	if err != nil {
 		pkg.DisplayContext("Cannot get prompt using entity ID", pkg.Error, err)
-		return "", err, false
+		return "", "", err, false
 	}
 
 	systemPrompt, err := services.ReadPromptFromFile("prompts/Talk.txt")
 	if err != nil {
-		return "", fmt.Errorf("error retrieving the system prompt: %w", err), false
+		return "", "", fmt.Errorf("error retrieving the system prompt: %w", err), false
 	}
 
 	systemPrompt = strings.Replace(systemPrompt, "{Personality Description Here}", characterDescription, 1)
@@ -45,14 +45,14 @@ func talkTo(Checksum string, message string, interlocutorChecksum string, GamePr
 	err = json.Unmarshal([]byte(back), &data)
 	if err != nil {
 		pkg.DisplayContext("Cannot unmarshal gpt response data:", pkg.Error, err)
-		return "", err, false
+		return "", "", err, false
 	}
 
-	if data["Response"] == "" {
+	if data["Response"] == "" || data["Reasoning"] == "" {
 		return talkTo(Checksum, message, interlocutorChecksum, GamePrompt, Role)
 	}
 
-	return data["Response"], nil, false
+	return data["Response"], data["Reasoning"], nil, false
 }
 
 // getAllDiscussionsForEntity retrieves all discussions for an entity against a list of interlocutors.
@@ -95,10 +95,10 @@ func HandleTalkToLogic(Checksum string, GamePrompt string, Role string) (string,
 		return "", err
 	}
 
-	message, err, _ := talkTo(Checksum, discussions, "[Everyone]", GamePrompt, Role) // shouldFinish flag not used yet
+	response, reasoning, err, _ := talkTo(Checksum, discussions, "[Everyone]", GamePrompt, Role) // shouldFinish flag not used yet
 	if err != nil {
 		pkg.DisplayContext("TalkToPreprocess failed:", pkg.Error, err)
 		return "", err
 	}
-	return `{"Action": "TalkTo", "TalkTo": "[Everyone]", "Message": "` + message + `"}`, nil
+	return `{"Action": "TalkTo", "TalkTo": "[Everyone]", "Message": "` + response + `", "Reasoning": "` + reasoning + `"}`, nil
 }
