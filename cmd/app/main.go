@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"log"
 	"my-api/config"
@@ -28,6 +29,14 @@ func Health(w http.ResponseWriter, r *http.Request) {
 
 // main initializes the server, database, and routes, then starts the HTTP server.
 func main() {
+	useGUI := flag.Bool("gui", false, "Lancer aussi l'interface graphique")
+	flag.Parse()
+
+	if *useGUI {
+		fs := http.FileServer(http.Dir("./UI/dist"))
+		http.Handle("/", fs)
+	}
+
 	log.SetFlags(log.Lshortfile)
 
 	r := mux.NewRouter()

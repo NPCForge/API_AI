@@ -2,7 +2,7 @@ package sharedServices
 
 import (
 	"my-api/internal/services"
-	"my-api/internal/services/gobalHelpers"
+	"my-api/internal/services/globalHelpers"
 	"my-api/internal/utils"
 	"my-api/pkg"
 	"strconv"
@@ -39,7 +39,7 @@ func NewMessageService(
 		return err
 	}
 
-	if gobalHelpers.StringContains(ChecksumEntityReceiving, "Everyone") != -1 {
+	if globalHelpers.StringContains(ChecksumEntityReceiving, "Everyone") != -1 {
 		pkg.DisplayContext("Adding broadcast message", pkg.Update)
 		return NewBroadcastMessage(Token, ChecksumEntitySending, Message)
 	}

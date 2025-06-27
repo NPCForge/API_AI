@@ -1,4 +1,4 @@
-package gobalHelpers
+package globalHelpers
 
 func StringContains(arr []string, target string) int {
 	for index, s := range arr {

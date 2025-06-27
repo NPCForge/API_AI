@@ -3,12 +3,13 @@ package services
 import (
 	"database/sql"
 	"fmt"
-	"github.com/lib/pq"
 	"my-api/config"
 	"my-api/internal/models"
 	sharedModel "my-api/internal/models/shared"
 	"my-api/pkg"
 	"strings"
+
+	"github.com/lib/pq"
 )
 
 // GetIDByChecksum get entity id for a given checksum
@@ -412,10 +413,10 @@ func BroadcastMessage(userID int, senderId int, message string) (int64, error) {
 		return -1, err
 	}
 
-	//self := gobalHelpers.IntContains(receiverIDs, senderId)
+	//self := globalHelpers.IntContains(receiverIDs, senderId)
 	//
 	//if self != -1 {
-	//	receiverIDs = gobalHelpers.RemoveIntAtIndex(receiverIDs, self)
+	//	receiverIDs = globalHelpers.RemoveIntAtIndex(receiverIDs, self)
 	//}
 
 	for _, receiverID := range receiverIDs {
