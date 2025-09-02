@@ -5,6 +5,7 @@ type RegisterRequest struct {
 	Token      string `json:"API_KEY"`
 	Identifier string `json:"identifier"`
 	Password   string `json:"password"`
+	GamePrompt string `json:"game_prompt"`
 }
 
 type RegisterResponse struct {

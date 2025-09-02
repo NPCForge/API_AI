@@ -43,6 +43,7 @@ def listen_to_stdin(ws):
                 "API_KEY": "VDCAjPZ8jhDmXfsSufW2oZyU8SFZi48dRhA8zyKUjSRU3T1aBZ7E8FFIjdEM2X1d",
                 "identifier": "tom_user",
                 "password": "password",
+                "game_prompt": "A werewolf game but every messages should rime"
             })
         elif user_input.lower() == "connect":
             message = json.dumps({
@@ -57,6 +58,7 @@ def listen_to_stdin(ws):
                     "name": "tom_entity",
                     "prompt": "a fisherman named tom_entity",
                     "checksum": "TomChecksum",
+                    "role": "Villager",
                     "token": token,
                 })
             else:
@@ -67,7 +69,7 @@ def listen_to_stdin(ws):
                 message = json.dumps({
                     "action": "MakeDecision",
                     "token": token,
-                    "message": "",
+                    "message": '{"phase": "Discussion"}',
                     "checksum": "TomChecksum",
                 })
             else:

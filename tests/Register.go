@@ -60,10 +60,11 @@ func testWebSocketRegister() (string, error) {
 	defer conn.Close()
 
 	msg := map[string]string{
-		"action":     "Register",
-		"API_KEY":    ApiKey,
-		"identifier": WsID,
-		"password":   Password,
+		"action":      "Register",
+		"API_KEY":     ApiKey,
+		"identifier":  WsID,
+		"password":    Password,
+		"game_prompt": "game_prompt",
 	}
 
 	if err := conn.WriteJSON(msg); err != nil {
@@ -89,9 +90,10 @@ func testWebSocketRegister() (string, error) {
 
 func testHTTPRegister() (string, error) {
 	reqData := map[string]string{
-		"API_KEY":    ApiKey,
-		"Identifier": HttpID,
-		"Password":   Password,
+		"API_KEY":     ApiKey,
+		"Identifier":  HttpID,
+		"Password":    Password,
+		"game_prompt": "game_prompt",
 	}
 	payload, _ := json.Marshal(reqData)
 

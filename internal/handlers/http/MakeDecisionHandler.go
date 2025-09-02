@@ -5,6 +5,7 @@ import (
 	sharedModel "my-api/internal/models/shared"
 	sharedServices "my-api/internal/services/shared"
 	"net/http"
+	"strconv"
 )
 
 // MakeDecisionHandler handles POST requests where an entity makes a decision based on a message.
@@ -24,19 +25,16 @@ func MakeDecisionHandler(w http.ResponseWriter, r *http.Request) {
 
 	token := r.Header.Get("Authorization")
 
-	msg, err := sharedServices.MakeDecisionService(req.Message, req.Checksum, token)
+	data, err := sharedServices.MakeDecisionService(req.Message, req.Checksum, token)
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	res := sharedModel.MakeDecisionResponse{
-		Message: msg,
-		Status:  200,
-	}
+	data["Status"] = strconv.Itoa(200)
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(res)
+	json.NewEncoder(w).Encode(data)
 }

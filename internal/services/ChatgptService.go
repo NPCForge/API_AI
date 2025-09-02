@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"my-api/config"
 	sharedModels "my-api/internal/models/shared"
+	"my-api/pkg"
 )
 
 // ReadPromptFromFile reads the content of a file and returns it as a string.
@@ -62,8 +63,9 @@ func GptSimpleRequest(userPrompt string, systemPrompt string) (string, error) {
 
 	// Check if there are valid choices in the response
 	if len(response.Choices) > 0 {
-		//pkg.DisplayContext("Response = "+response.Choices[0].Message.Content, pkg.Debug)
+		pkg.DisplayContext("Response = "+response.Choices[0].Message.Content, pkg.Debug)
 		return response.Choices[0].Message.Content, nil
+
 	}
 
 	return "", fmt.Errorf("[GptSimpleRequest]: no response available")
