@@ -3,7 +3,7 @@
         <h3>Simulation route "Register"</h3>
         <div class="hb"></div>
         <div class="d-flex justify-content-center align-items-start rounded"
-            style="margin: 1%; height: 30vh; position: relative; overflow: hidden;">
+            style="margin: 1%; height: 32vh; position: relative; overflow: hidden;">
             <Loader v-if="isLoading" :Text="LoadingMessage" />
             <div style="width: 100%; padding: 1%;" class="d-flex flex-column justify-content-start align-items-start">
                 <label for="Action">Action</label>
@@ -14,6 +14,8 @@
                 <input type="text" placeholder="Password" name="Password" v-model="password">
                 <label for="API_TOKEN">Token API</label>
                 <input type="text" placeholder="Api Token" name="Api_Token" v-model="API_TOKEN" />
+                <label for="gamePrompt">Game Prompt</label>
+                <input type="text" placeholder="Game Prompt" name="gamePrompt" v-model="gamePrompt" />
             </div>
             <div style="width: 100%; padding: 1%;" class="d-flex justify-content-end align-items-start">
                 <button class="btn btn-primary mx-1" @click="RunHttp">Run HTTP Request</button>
@@ -67,6 +69,7 @@
     const identifier = ref("User42")
     const password = ref("Password")
     const API_TOKEN = ref("")
+    const gamePrompt = ref("")
     const res = ref("")
 
     onMounted(() => {
@@ -87,7 +90,7 @@
         try {
             isLoading.value = true
             LoadingMessage.value = "Running Http Request"
-            res.value = await register(identifier.value, password.value, API_TOKEN.value) // Passer le token
+            res.value = await register(identifier.value, password.value, API_TOKEN.value, gamePrompt.value) // Passer le token
         } catch (e) {
             console.error(e)
         } finally {
