@@ -1,9 +1,15 @@
-#!/bin/bash
+#!/usr/bin/env bash
+set -euo pipefail
 
-echo "⏳ Waiting for PostgreSQL..."
+PGHOST="${PGHOST:-postgres}"
+PGPORT="${PGPORT:-5432}"
+PGUSER="${PGUSER:-API}"
 
-until pg_isready -h postgres -p 5432 -U "API"; do
-  sleep 2
+echo "⏳ Waiting for PostgreSQL at ${PGHOST}:${PGPORT} (user: ${PGUSER})..."
+
+until pg_isready -h "$PGHOST" -p "$PGPORT" -U "$PGUSER" >/dev/null 2>&1; do
+    echo "  ...still waiting"
+    sleep 2
 done
 
 echo "✅ PostgreSQL is ready. Launching app..."
