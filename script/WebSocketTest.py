@@ -21,11 +21,13 @@ def on_error(ws, error):
     print(f"Erreur : {error}")
 
 def on_close(ws, close_status_code, close_msg):
+    global token
+    token = None
     print("Connexion fermée")
 
 def on_open(ws):
     print("Connexion ouverte")
-    print("Entrez une commande (Register, Connect, MakeDecision, Disconnect, Remove, NewMessage, CreateEntity) ou 'exit' pour quitter.")
+    print("Entrez une commande (Register, Connect, MakeDecision, Disconnect, Remove, NewMessage, CreateEntity, Restart) ou 'exit' pour quitter.")
 
 def listen_to_stdin(ws):
     global token, action
@@ -84,6 +86,15 @@ def listen_to_stdin(ws):
             else:
                 print("Erreur : Aucun token disponible. Veuillez vous connecter ou vous enregistrer d'abord.")
                 continue
+        elif user_input.lower() == "restart":
+            if token:
+                message = json.dumps({
+                    "action": "Restart",
+                    "token": token
+                })
+            else:
+                print("Erreur : Aucun token disponible. Veuillez vous connecter ou vous enregistrer d'abord.")
+                continue
         elif user_input.lower() == "newmessage":
             if token:
                 message = json.dumps({
@@ -97,7 +108,7 @@ def listen_to_stdin(ws):
                 print("Erreur : Aucun token disponible. Veuillez vous connecter ou vous enregistrer d'abord.")
                 continue
         else:
-            print("Commande inconnue. Essayez 'Register', 'Connect', 'MakeDecision', 'Disconnect', 'Remove', 'NewMessage', 'CreateEntity' 'exit'.")
+            print("Commande inconnue. Essayez 'Register', 'Connect', 'MakeDecision', 'Disconnect', 'Remove', 'NewMessage', 'CreateEntity', 'Restart' ou 'exit'.")
             continue
 
         action = user_input.lower()
