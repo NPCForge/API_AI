@@ -34,18 +34,17 @@ func interpretLLMDecision(Phase string, Checksum string, GamePrompt string) (str
 
 	roleDescription := getRoleDescription(role)
 
+	pkg.DisplayContext("Phase = "+Phase, pkg.Debug)
+
 	switch Phase {
 	case "Discussion":
-		pkg.DisplayContext("Phase = "+Phase, pkg.Debug)
 		return decisions.HandleTalkToLogic(Checksum, GamePrompt, roleDescription)
 	case "Voting":
-		pkg.DisplayContext("Phase = "+Phase, pkg.Debug)
 		return decisions.HandleVotingLogic(Checksum, GamePrompt, roleDescription)
 	case "Night":
 		if role != "Werewolf" {
-			return "No Action", nil
+			return `{"Action": "No Action"}`, nil
 		}
-		pkg.DisplayContext("Phase = "+Phase, pkg.Debug)
 		return decisions.HandleVotingLogic(Checksum, GamePrompt, roleDescription)
 	default:
 		pkg.DisplayContext("Unknown data phase.", pkg.Error)
@@ -161,6 +160,8 @@ func MakeDecisionService(EnvironmentData string, Checksum string, Token string) 
 			pkg.DisplayContext("Error after inserting new message:", pkg.Error, err)
 			return nil, err
 		}
+		return data, nil
+	} else if data["Action"] == "VoteFor" {
 		return data, nil
 	} else if data["Action"] == "VoteFor" {
 		return data, nil

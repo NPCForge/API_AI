@@ -2,8 +2,11 @@ package websocketHandlers
 
 import (
 	"encoding/json"
+	"strconv"
+
 	sharedModel "my-api/internal/models/shared"
 	sharedServices "my-api/internal/services/shared"
+	websocketServices "my-api/internal/services/websocket"
 
 	"github.com/gorilla/websocket"
 )
@@ -38,6 +41,10 @@ func ConnectHandlerWebSocket(
 			"message": err.Error(),
 		})
 		return
+	}
+
+	if intID, convErr := strconv.Atoi(id); convErr == nil {
+		websocketServices.UnmarkUserResetting(intID)
 	}
 
 	sendResponse(conn, initialRoute, "", map[string]interface{}{

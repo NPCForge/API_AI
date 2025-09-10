@@ -2,6 +2,7 @@ package websocketServices
 
 import (
 	"encoding/json"
+	"strconv"
 
 	"github.com/fatih/color"
 	"github.com/gorilla/websocket"
@@ -50,6 +51,28 @@ func LoginMiddlewareWebSocket(
 		color.Red("❌ Invalid JWT: %v", err)
 		utils.SendError(conn, initialRoute, "", map[string]interface{}{
 			"message": "Invalid token",
+		})
+		return false
+	}
+
+	userIDStr, err := utils.GetUserIDFromJWT(msg.Token)
+	if err != nil {
+		utils.SendError(conn, initialRoute, "", map[string]interface{}{
+			"message": "Invalid token",
+		})
+		return false
+	}
+	userID, err := strconv.Atoi(userIDStr)
+	if err != nil {
+		utils.SendError(conn, initialRoute, "", map[string]interface{}{
+			"message": "Invalid token",
+		})
+		return false
+	}
+	if IsUserResetting(userID) {
+		utils.SendError(conn, initialRoute, "", map[string]interface{}{
+			"message": "Locked",
+			"code":    423,
 		})
 		return false
 	}

@@ -58,6 +58,11 @@ var actions = []websocketModels.WebSocketDispatcher{
 		Protected: true,
 	},
 	{
+		Name:      "Restart",
+		Handler:   RestartHandlerWebSocket,
+		Protected: true,
+	},
+	{
 		Name:      "GetEntities",
 		Handler:   GetEntitiesHandlerWebSocket,
 		Protected: true,
