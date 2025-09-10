@@ -3,11 +3,11 @@ package services
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/go-resty/resty/v2"
 	"io/ioutil"
-	"my-api/config"
 	sharedModels "my-api/internal/models/shared"
 	"my-api/pkg"
+
+	"github.com/go-resty/resty/v2"
 )
 
 // ReadPromptFromFile reads the content of a file and returns it as a string.
@@ -40,16 +40,17 @@ func GptSimpleRequest(userPrompt string, systemPrompt string) (string, error) {
 
 	// Create the request body
 	body := sharedModels.ChatGptSimpleRequestBody{
-		Model:    "gpt-4o-mini",
+		Model:    "llama3.1:70b",
 		Messages: messages,
+		Stream:   false,
 	}
 
 	// Send the request to the OpenAI API
 	resp, err := GptClient.R().
 		SetHeader("Content-Type", "application/json").
-		SetHeader("Authorization", "Bearer "+config.GetEnvVariable("CHATGPT_TOKEN")).
+		//SetHeader("Authorization", "Bearer "+config.GetEnvVariable("CHATGPT_TOKEN")).
 		SetBody(body).
-		Post("https://api.openai.com/v1/chat/completions")
+		Post("https://bzcbmeimpcqpvd-11434.proxy.runpod.net/v1/chat/completions")
 
 	if err != nil {
 		return "", fmt.Errorf("error during the request: %w", err)
@@ -65,7 +66,6 @@ func GptSimpleRequest(userPrompt string, systemPrompt string) (string, error) {
 	if len(response.Choices) > 0 {
 		pkg.DisplayContext("Response = "+response.Choices[0].Message.Content, pkg.Debug)
 		return response.Choices[0].Message.Content, nil
-
 	}
 
 	return "", fmt.Errorf("[GptSimpleRequest]: no response available")

@@ -2,7 +2,7 @@
 
 Every time you answer, you MUST use EXACTLY this RESPONSE FORMAT (Json format):
 {
-    "Reasoning": "{Write here your logic based on Discussion. Reason shortly.}"
+    "Reasoning": "{Write here your logic based on Discussion. Reason shortly.}",
     "Response": "{Write here your answer in character, respecting the context.}"
 }
 

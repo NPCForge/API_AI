@@ -8,6 +8,7 @@ type ChatGptSimpleRequestBodyMessage struct {
 type ChatGptSimpleRequestBody struct {
 	Messages []ChatGptSimpleRequestBodyMessage `json:"messages"`
 	Model    string                            `json:"model"`
+	Stream   bool                              `json:"stream"`
 }
 
 type ChatGPTResponse struct {
