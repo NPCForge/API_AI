@@ -1,6 +1,7 @@
 package decisions
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"my-api/internal/services"
@@ -11,7 +12,7 @@ import (
 )
 
 // talkTo generates a message for an entity to communicate with a specific interlocutor using GPT based on their checksums.
-func talkTo(Checksum string, message string, interlocutorChecksum string, GamePrompt string, Role string) (string, string, error, bool) {
+func talkTo(ctx context.Context, Checksum string, message string, interlocutorChecksum string, GamePrompt string, Role string) (string, string, error, bool) {
 	EntityId, err := services.GetEntityIdByChecksum(Checksum)
 	if err != nil {
 		pkg.DisplayContext("Cannot get Entity ID using checksum", pkg.Error, err)
@@ -35,7 +36,7 @@ func talkTo(Checksum string, message string, interlocutorChecksum string, GamePr
 
 	userPrompt := "Discussion: { " + message + " }"
 
-	back, err := services.GptSimpleRequest(userPrompt, systemPrompt)
+	back, err := services.GptSimpleRequest(ctx, userPrompt, systemPrompt)
 	if helpers.NeedToFinish(back) {
 		pkg.DisplayContext("Conversation marked to be finished", pkg.Debug)
 	}
@@ -49,7 +50,7 @@ func talkTo(Checksum string, message string, interlocutorChecksum string, GamePr
 	}
 
 	if data["Response"] == "" || data["Reasoning"] == "" {
-		return talkTo(Checksum, message, interlocutorChecksum, GamePrompt, Role)
+		return talkTo(ctx, Checksum, message, interlocutorChecksum, GamePrompt, Role)
 	}
 
 	return data["Response"], data["Reasoning"], nil, false
@@ -88,14 +89,14 @@ func getAllDiscussionsForEntity(EntityChecksum string, InterlocutorChecksums []s
 }
 
 // HandleTalkToLogic parses the decision string, gathers discussions, and generates a response for the entity to speak to the interlocutors.
-func HandleTalkToLogic(Checksum string, GamePrompt string, Role string) (string, error) {
+func HandleTalkToLogic(ctx context.Context, Checksum string, GamePrompt string, Role string) (string, error) {
 	discussions, err := helpers.GetAllDiscussions(Checksum)
 	if err != nil {
 		pkg.DisplayContext("Cannot get discussions using checksum", pkg.Error, err)
 		return "", err
 	}
 
-	response, reasoning, err, _ := talkTo(Checksum, discussions, "[Everyone]", GamePrompt, Role) // shouldFinish flag not used yet
+	response, reasoning, err, _ := talkTo(ctx, Checksum, discussions, "[Everyone]", GamePrompt, Role) // shouldFinish flag not used yet
 	if err != nil {
 		pkg.DisplayContext("TalkToPreprocess failed:", pkg.Error, err)
 		return "", err
