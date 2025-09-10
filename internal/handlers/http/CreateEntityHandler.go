@@ -19,7 +19,7 @@ func CreateEntityHandler(w http.ResponseWriter, r *http.Request) {
 	var req sharedModel.RequestCreateEntity
 	err := json.NewDecoder(r.Body).Decode(&req)
 
-	if err != nil || req.Checksum == "" || req.Name == "" || req.Prompt == "" {
+	if err != nil || req.Checksum == "" || req.Name == "" || req.Prompt == "" || req.Role == "" {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(sharedModel.ResponseCreateEntity{
 			Id:      "",
@@ -31,7 +31,7 @@ func CreateEntityHandler(w http.ResponseWriter, r *http.Request) {
 
 	token := r.Header.Get("Authorization")
 
-	id, err := sharedServices.CreateEntityService(req.Name, req.Prompt, req.Checksum, token)
+	id, err := sharedServices.CreateEntityService(req.Name, req.Prompt, req.Checksum, token, req.Role)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(sharedModel.ResponseCreateEntity{

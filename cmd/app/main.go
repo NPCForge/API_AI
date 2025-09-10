@@ -1,9 +1,11 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"log"
 	"my-api/config"
+	"my-api/internal"
 	"my-api/pkg"
 	"net/http"
 
@@ -27,6 +29,14 @@ func Health(w http.ResponseWriter, r *http.Request) {
 
 // main initializes the server, database, and routes, then starts the HTTP server.
 func main() {
+	useGUI := flag.Bool("gui", false, "Lancer aussi l'interface graphique")
+	flag.Parse()
+
+	if *useGUI {
+		fs := http.FileServer(http.Dir("./UI/dist"))
+		http.Handle("/", fs)
+	}
+
 	log.SetFlags(log.Lshortfile)
 
 	r := mux.NewRouter()
@@ -39,7 +49,7 @@ func main() {
 
 	// Launches a goroutine for CLI commands if not running in Docker
 	if !utils.IsRunningInDocker() {
-		go utils.Commande()
+		go internal.Commande()
 	}
 
 	// WebSocket handler

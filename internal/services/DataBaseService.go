@@ -3,12 +3,13 @@ package services
 import (
 	"database/sql"
 	"fmt"
-	"github.com/lib/pq"
 	"my-api/config"
 	"my-api/internal/models"
 	sharedModel "my-api/internal/models/shared"
 	"my-api/pkg"
 	"strings"
+
+	"github.com/lib/pq"
 )
 
 // GetIDByChecksum get entity id for a given checksum
@@ -412,10 +413,10 @@ func BroadcastMessage(userID int, senderId int, message string) (int64, error) {
 		return -1, err
 	}
 
-	//self := gobalHelpers.IntContains(receiverIDs, senderId)
+	//self := globalHelpers.IntContains(receiverIDs, senderId)
 	//
 	//if self != -1 {
-	//	receiverIDs = gobalHelpers.RemoveIntAtIndex(receiverIDs, self)
+	//	receiverIDs = globalHelpers.RemoveIntAtIndex(receiverIDs, self)
 	//}
 
 	for _, receiverID := range receiverIDs {
@@ -534,7 +535,7 @@ func IsExistById(id string) (bool, error) {
 
 // === Refacto === ✅
 
-func Register(password string, identifier string) (int, error) {
+func Register(password string, identifier string, gamePrompt string) (int, error) {
 	db := config.GetDB()
 
 	// Hasher le mot de passe
@@ -545,13 +546,13 @@ func Register(password string, identifier string) (int, error) {
 	}
 
 	query := `
-		INSERT INTO users (name, password_hash, created)
-		VALUES ($1, $2, CURRENT_DATE)
+		INSERT INTO users (name, password_hash, game_prompt)
+		VALUES ($1, $2, $3)
 		RETURNING id
 	`
 
 	var id int
-	err = db.QueryRow(query, identifier, pass).Scan(&id)
+	err = db.QueryRow(query, identifier, pass, gamePrompt).Scan(&id)
 	if err != nil {
 		return -1, fmt.Errorf("error while registering user: %w", err)
 	}
@@ -559,17 +560,17 @@ func Register(password string, identifier string) (int, error) {
 	return id, nil
 }
 
-func CreateEntity(name string, prompt string, checksum string, id_owner string) (int, error) {
+func CreateEntity(name string, prompt string, checksum string, id_owner string, role string) (int, error) {
 	db := config.GetDB()
 
 	query := `
-		INSERT INTO entities (user_id, name, checksum, prompt, created)
-		VALUES ($1, $2, $3, $4, CURRENT_DATE)
+		INSERT INTO entities (user_id, name, checksum, prompt, role)
+		VALUES ($1, $2, $3, $4, $5)
 		RETURNING id
 	`
 
 	var id int
-	err := db.QueryRow(query, id_owner, name, checksum, prompt).Scan(&id)
+	err := db.QueryRow(query, id_owner, name, checksum, prompt, role).Scan(&id)
 	if err != nil {
 		return -1, fmt.Errorf("error while registering user: %w", err)
 	}
@@ -748,6 +749,34 @@ func GetEntityNameByChecksum(checksum string) (string, error) {
 	}
 
 	return name, nil
+}
+
+func GetGamePromptByUserID(UserID string) (string, error) {
+	db := config.GetDB()
+
+	query := `SELECT game_prompt FROM users WHERE id = $1`
+
+	var prompt string
+	err := db.QueryRow(query, UserID).Scan(&prompt)
+	if err != nil {
+		return "", fmt.Errorf("error while fetching prompt from JWT: %w", err)
+	}
+	return prompt, nil
+}
+
+func GetEntityRoleByChecksum(checksum string) (string, error) {
+	db := config.GetDB()
+
+	query := `SELECT role FROM entities WHERE checksum = $1`
+
+	var role string
+	err := db.QueryRow(query, checksum).Scan(&role)
+
+	if err != nil {
+		return "", fmt.Errorf("error while fetching role from checksum = %s : %w", checksum, err)
+	}
+
+	return role, nil
 }
 
 func GetEntityNameByID(id int) (string, error) {

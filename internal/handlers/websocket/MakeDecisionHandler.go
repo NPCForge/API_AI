@@ -33,7 +33,7 @@ func MakeDecisionHandlerWebSocket(
 		return
 	}
 
-	msg, err := sharedServices.MakeDecisionService(req.Message, req.Checksum, req.Token)
+	data, err := sharedServices.MakeDecisionService(req.Message, req.Checksum, req.Token)
 	if err != nil {
 		pkg.DisplayContext("Internal server error", pkg.Error, err)
 		sendError(conn, initialRoute, req.Checksum, map[string]interface{}{
@@ -42,7 +42,10 @@ func MakeDecisionHandlerWebSocket(
 		return
 	}
 
-	sendResponse(conn, initialRoute, req.Checksum, map[string]interface{}{
-		"message": msg,
-	})
+	converted := make(map[string]interface{})
+	for k, v := range data {
+		converted[k] = v
+	}
+
+	sendResponse(conn, initialRoute, req.Checksum, converted)
 }

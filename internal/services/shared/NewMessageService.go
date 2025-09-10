@@ -2,11 +2,10 @@ package sharedServices
 
 import (
 	"my-api/internal/services"
-	"my-api/internal/services/gobalHelpers"
+	"my-api/internal/services/globalHelpers"
 	"my-api/internal/utils"
 	"my-api/pkg"
 	"strconv"
-	"strings"
 )
 
 func NewBroadcastMessage(Token string, ChecksumEntitySending string, Message string) error {
@@ -35,14 +34,12 @@ func NewMessageService(
 	Message string,
 	Token string,
 ) error {
-	pkg.DisplayContext("New message from "+ChecksumEntitySending+" for ["+strings.Join(ChecksumEntityReceiving, ",")+"]", pkg.Debug)
-
 	idEntitySending, err := services.GetEntityIdByChecksum(ChecksumEntitySending)
 	if err != nil {
 		return err
 	}
 
-	if gobalHelpers.StringContains(ChecksumEntityReceiving, "Everyone") != -1 {
+	if globalHelpers.StringContains(ChecksumEntityReceiving, "Everyone") != -1 {
 		pkg.DisplayContext("Adding broadcast message", pkg.Update)
 		return NewBroadcastMessage(Token, ChecksumEntitySending, Message)
 	}

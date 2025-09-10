@@ -43,7 +43,7 @@ func makeDecisionViaWebSocket() error {
 	message := map[string]string{
 		"action":   "MakeDecision",
 		"checksum": "WsChecksum",
-		"message":  "Nearby Entities: {[Checksum = WsChecksum]}",
+		"message":  "{\"phase\": \"Discussion\"}",
 		"token":    token,
 	}
 
@@ -78,7 +78,7 @@ func makeDecisionViaHTTP() error {
 
 	payload := map[string]string{
 		"checksum": "HttpChecksum",
-		"message":  "Nearby Entities: {[Checksum = HttpChecksum]}",
+		"message":  "{\"phase\": \"Discussion\"}",
 	}
 
 	body, _ := json.Marshal(payload)
@@ -101,8 +101,8 @@ func makeDecisionViaHTTP() error {
 		return fmt.Errorf("JSON decode failed: %w", err)
 	}
 
-	status, ok := data["status"].(float64)
-	if !ok || status != 200 {
+	status, ok := data["Status"].(string)
+	if !ok || status != "200" {
 		return fmt.Errorf("invalid status received: %v", data)
 	}
 
