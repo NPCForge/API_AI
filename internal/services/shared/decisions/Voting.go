@@ -1,6 +1,7 @@
 package decisions
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"my-api/internal/services"
@@ -10,7 +11,7 @@ import (
 	"strings"
 )
 
-func voteFor(Checksum string, Discussion string, GamePrompt string, Role string) (string, error) {
+func voteFor(ctx context.Context, Checksum string, Discussion string, GamePrompt string, Role string) (string, error) {
 	EntityId, err := services.GetEntityIdByChecksum(Checksum)
 	if err != nil {
 		pkg.DisplayContext("Cannot get Entity ID using checksum", pkg.Error, err)
@@ -34,7 +35,7 @@ func voteFor(Checksum string, Discussion string, GamePrompt string, Role string)
 
 	userPrompt := "Discussion: { " + Discussion + " }"
 
-	back, err := services.GptSimpleRequest(userPrompt, systemPrompt)
+	back, err := services.GptSimpleRequest(ctx, userPrompt, systemPrompt)
 
 	var data map[string]string
 
@@ -45,20 +46,20 @@ func voteFor(Checksum string, Discussion string, GamePrompt string, Role string)
 	}
 
 	if data["VoteFor"] == "" {
-		return voteFor(Checksum, Discussion, GamePrompt, Role)
+		return voteFor(ctx, Checksum, Discussion, GamePrompt, Role)
 	} else {
 		return data["VoteFor"], nil
 	}
 }
 
-func HandleVotingLogic(Checksum string, GamePrompt string, Role string) (string, error) {
+func HandleVotingLogic(ctx context.Context, Checksum string, GamePrompt string, Role string) (string, error) {
 	discussions, err := helpers.GetAllDiscussions(Checksum)
 	if err != nil {
 		pkg.DisplayContext("Cannot get discussions using checksum", pkg.Error, err)
 		return "", err
 	}
 
-	name, err := voteFor(Checksum, discussions, GamePrompt, Role)
+	name, err := voteFor(ctx, Checksum, discussions, GamePrompt, Role)
 
 	if err != nil {
 		pkg.DisplayContext("voteFor failed:", pkg.Error, err)

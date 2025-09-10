@@ -1,6 +1,7 @@
 package services
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -20,7 +21,7 @@ func ReadPromptFromFile(filePath string) (string, error) {
 }
 
 // GptSimpleRequest sends a user prompt and system prompt to the OpenAI API and returns the model's response.
-func GptSimpleRequest(userPrompt string, systemPrompt string) (string, error) {
+func GptSimpleRequest(ctx context.Context, userPrompt string, systemPrompt string) (string, error) {
 	GptClient := resty.New()
 
 	//pkg.DisplayContext("SystemPrompt = "+systemPrompt, pkg.Debug)
@@ -47,12 +48,16 @@ func GptSimpleRequest(userPrompt string, systemPrompt string) (string, error) {
 
 	// Send the request to the OpenAI API
 	resp, err := GptClient.R().
+		SetContext(ctx).
 		SetHeader("Content-Type", "application/json").
 		//SetHeader("Authorization", "Bearer "+config.GetEnvVariable("CHATGPT_TOKEN")).
 		SetBody(body).
 		Post("https://bzcbmeimpcqpvd-11434.proxy.runpod.net/v1/chat/completions")
 
 	if err != nil {
+		if ctx.Err() != nil {
+			return "", ctx.Err()
+		}
 		return "", fmt.Errorf("error during the request: %w", err)
 	}
 

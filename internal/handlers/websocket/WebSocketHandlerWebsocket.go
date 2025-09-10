@@ -3,6 +3,7 @@ package websocketHandlers
 import (
 	"encoding/json"
 	"log"
+	sharedModel "my-api/internal/models/shared"
 	websocketModels "my-api/internal/models/websocket"
 	websocketServices "my-api/internal/services/websocket"
 	"my-api/internal/utils"
@@ -38,11 +39,6 @@ var actions = []websocketModels.WebSocketDispatcher{
 		Protected: true,
 	},
 	{
-		Name:      "MakeDecision",
-		Handler:   MakeDecisionHandlerWebSocket,
-		Protected: true,
-	},
-	{
 		Name:      "RemoveUser",
 		Handler:   RemoveUserHandlerWebSocket,
 		Protected: true,
@@ -75,7 +71,9 @@ var actions = []websocketModels.WebSocketDispatcher{
 }
 
 // handleWebSocketMessage dispatches an incoming WebSocket message to the appropriate handler based on the action field.
-func handleWebSocketMessage(conn *websocket.Conn, messageType int, message []byte) {
+// For MakeDecision requests, a latest-wins queue is used so only the most recent
+// request is processed.
+func handleWebSocketMessage(conn *websocket.Conn, messageType int, message []byte, dq *websocketServices.DecisionQueue) {
 	var msg websocketModels.WebSocketMessage
 	var initialRoute = "root"
 
@@ -95,6 +93,19 @@ func handleWebSocketMessage(conn *websocket.Conn, messageType int, message []byt
 	}
 
 	println("Message received: " + msg.Action)
+
+	if msg.Action == "MakeDecision" {
+		if !websocketServices.LoginMiddlewareWebSocket(conn, message, utils.SendResponse, utils.SendError) {
+			return
+		}
+		var req sharedModel.MakeDecisionRequest
+		if err := json.Unmarshal(message, &req); err != nil {
+			utils.SendError(conn, msg.Action, req.Checksum, map[string]interface{}{"message": "Error while decoding JSON message"})
+			return
+		}
+		dq.Submit(conn, req, utils.SendResponse, utils.SendError)
+		return
+	}
 
 	// Handle the action
 	for _, action := range actions {
@@ -122,6 +133,8 @@ func WebsocketHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	log.Println("New WebSocket connection established")
+	dq := websocketServices.NewDecisionQueue()
+	defer dq.Close()
 
 	for {
 		messageType, message, err := conn.ReadMessage()
@@ -130,6 +143,6 @@ func WebsocketHandler(w http.ResponseWriter, r *http.Request) {
 			break
 		}
 
-		handleWebSocketMessage(conn, messageType, message)
+		handleWebSocketMessage(conn, messageType, message, dq)
 	}
 }

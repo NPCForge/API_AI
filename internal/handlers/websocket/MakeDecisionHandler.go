@@ -1,6 +1,7 @@
 package websocketHandlers
 
 import (
+	"context"
 	"encoding/json"
 	sharedModel "my-api/internal/models/shared"
 	sharedServices "my-api/internal/services/shared"
@@ -33,7 +34,7 @@ func MakeDecisionHandlerWebSocket(
 		return
 	}
 
-	data, err := sharedServices.MakeDecisionService(req.Message, req.Checksum, req.Token)
+	data, err := sharedServices.MakeDecisionService(context.Background(), req.Message, req.Checksum, req.Token)
 	if err != nil {
 		pkg.DisplayContext("Internal server error", pkg.Error, err)
 		sendError(conn, initialRoute, req.Checksum, map[string]interface{}{

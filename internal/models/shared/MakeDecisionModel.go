@@ -1,10 +1,11 @@
 package sharedModel
 
 type MakeDecisionRequest struct {
-	Action   string `json:"action"`
-	Checksum string `json:"checksum"`
-	Message  string `json:"message"`
-	Token    string `json:"token"`
+	Action    string `json:"action"`
+	Checksum  string `json:"checksum"`
+	Message   string `json:"message"`
+	Token     string `json:"token"`
+	RequestID string `json:"requestId"`
 }
 
 type MakeDecisionResponse struct {
