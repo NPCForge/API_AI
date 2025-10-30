@@ -5,14 +5,14 @@ services:
     image: postgres:16
     restart: always
     environment:
-      POSTGRES_USER: ${POSTGRES_USER:-npcforge}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-npcforge}
-      POSTGRES_DB: ${POSTGRES_DB:-npcforge}
+      POSTGRES_USER: ${POSTGRES_USER:-API}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-password}
+      POSTGRES_DB: ${POSTGRES_DB:-api_db}
     volumes:
       - db_data:/var/lib/postgresql/data
-      - ./migrations:/docker-entrypoint-initdb.d
+      - ./migrations:/docker-entrypoint-initdb.d:ro
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
       interval: 5s
       timeout: 3s
       retries: 20
@@ -24,12 +24,15 @@ services:
       context: .
       dockerfile: Dockerfile
     restart: always
+    depends_on:
+      postgres:
+        condition: service_healthy
     environment:
       POSTGRES_HOST: postgres
       POSTGRES_PORT: 5432
-      POSTGRES_DB: ${POSTGRES_DB:-npcforge}
-      POSTGRES_USER: ${POSTGRES_USER:-npcforge}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-npcforge}
+      POSTGRES_DB: ${POSTGRES_DB:-api_db}
+      POSTGRES_USER: ${POSTGRES_USER:-API}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-password}
       API_KEY_REGISTER: ${API_KEY_REGISTER:-changeme}
       JWT_SECRET_KEY: ${JWT_SECRET_KEY:-changeme}
       CHATGPT_TOKEN: ${CHATGPT_TOKEN:-none}
