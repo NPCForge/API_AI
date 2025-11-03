@@ -1,6 +1,7 @@
 package httpHandlers
 
 import (
+	"context"
 	"encoding/json"
 	sharedModel "my-api/internal/models/shared"
 	sharedServices "my-api/internal/services/shared"
@@ -25,7 +26,7 @@ func MakeDecisionHandler(w http.ResponseWriter, r *http.Request) {
 
 	token := r.Header.Get("Authorization")
 
-	data, err := sharedServices.MakeDecisionService(req.Message, req.Checksum, token)
+	data, err := sharedServices.MakeDecisionService(context.Background(), req.Message, req.Checksum, token)
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
