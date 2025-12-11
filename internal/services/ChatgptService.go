@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"my-api/config"
 	sharedModels "my-api/internal/models/shared"
 	"my-api/pkg"
 
@@ -40,17 +41,16 @@ func GptSimpleRequest(userPrompt string, systemPrompt string) (string, error) {
 
 	// Create the request body
 	body := sharedModels.ChatGptSimpleRequestBody{
-		Model:    "llama3.1:70b",
+		Model:    "gpt-4o-mini",
 		Messages: messages,
-		Stream:   false,
 	}
 
 	// Send the request to the OpenAI API
 	resp, err := GptClient.R().
 		SetHeader("Content-Type", "application/json").
-		//SetHeader("Authorization", "Bearer "+config.GetEnvVariable("CHATGPT_TOKEN")).
+		SetHeader("Authorization", "Bearer "+config.GetEnvVariable("CHATGPT_TOKEN")).
 		SetBody(body).
-		Post("https://bzcbmeimpcqpvd-11434.proxy.runpod.net/v1/chat/completions")
+		Post("https://api.openai.com/v1/chat/completions")
 
 	if err != nil {
 		return "", fmt.Errorf("error during the request: %w", err)
