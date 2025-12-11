@@ -45,6 +45,7 @@ func ConnectHandlerWebSocket(
 
 	if intID, convErr := strconv.Atoi(id); convErr == nil {
 		websocketServices.UnmarkUserResetting(intID)
+		RegisterClient(conn, intID)
 	}
 
 	sendResponse(conn, initialRoute, "", map[string]interface{}{
