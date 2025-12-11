@@ -72,6 +72,13 @@ func TestMainFlow(t *testing.T) {
 		}
 	})
 
+	fmt.Println("Testing EntityDied...")
+	t.Run("EntityDied", func(t *testing.T) {
+		if err := EntityDied(); err != nil {
+			t.Fatalf("EntityDied failed: %v", err)
+		}
+	})
+
 	fmt.Println("Testing RemoveUser...")
 	t.Run("RemoveUser", func(t *testing.T) {
 		if err := RemoveUser(); err != nil {
