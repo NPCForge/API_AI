@@ -3,11 +3,12 @@ package services
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/go-resty/resty/v2"
 	"io/ioutil"
 	"my-api/config"
 	sharedModels "my-api/internal/models/shared"
 	"my-api/pkg"
+
+	"github.com/go-resty/resty/v2"
 )
 
 // ReadPromptFromFile reads the content of a file and returns it as a string.
@@ -65,7 +66,6 @@ func GptSimpleRequest(userPrompt string, systemPrompt string) (string, error) {
 	if len(response.Choices) > 0 {
 		pkg.DisplayContext("Response = "+response.Choices[0].Message.Content, pkg.Debug)
 		return response.Choices[0].Message.Content, nil
-
 	}
 
 	return "", fmt.Errorf("[GptSimpleRequest]: no response available")

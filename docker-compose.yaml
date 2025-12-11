@@ -1,25 +1,43 @@
+version: "3.9"
+
 services:
+  postgres:
+    image: postgres:16
+    restart: always
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-API}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-password}
+      POSTGRES_DB: ${POSTGRES_DB:-api_db}
+    volumes:
+      - db_data:/var/lib/postgresql/data
+      - ./migrations:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    ports:
+      - "5432:5432"
+
   api:
-    restart: unless-stopped
     build:
       context: .
       dockerfile: Dockerfile
+    restart: always
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: ${POSTGRES_DB:-api_db}
+      POSTGRES_USER: ${POSTGRES_USER:-API}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-password}
+      API_KEY_REGISTER: ${API_KEY_REGISTER:-changeme}
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY:-changeme}
+      CHATGPT_TOKEN: ${CHATGPT_TOKEN:-none}
     ports:
       - "3000:3000"
-    env_file:
-      - .env
-    depends_on:
-      - postgres
-    environment:
-      - CHATGPT_TOKEN=${CHATGPT_TOKEN}
 
-  postgres:
-    image: postgres:15
-    restart: unless-stopped
-    env_file:
-      - .env
-    ports:
-      - "5432:5432"
-    volumes:
-      - ./db_data:/var/lib/postgresql/data
-      - ./migrations:/docker-entrypoint-initdb.d
+volumes:
+  db_data:

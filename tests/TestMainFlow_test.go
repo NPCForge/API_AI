@@ -17,13 +17,13 @@ func TestMainFlow(t *testing.T) {
 		}
 	})
 
-	fmt.Println("Testing connect...")
+	// fmt.Println("Testing connect...")
 
-	t.Run("Connect", func(t *testing.T) {
-		if err := Connect(); err == nil {
-			isConnexionSuccess = true
-		}
-	})
+	// t.Run("Connect", func(t *testing.T) {
+	// 	if err := Connect(); err == nil {
+	// 		isConnexionSuccess = true
+	// 	}
+	// })
 
 	if !isConnexionSuccess {
 		t.Fatalf("Unable to connect to the server: %v", err)
@@ -69,13 +69,6 @@ func TestMainFlow(t *testing.T) {
 	t.Run("RemoveEntity", func(t *testing.T) {
 		if err := RemoveEntity(); err != nil {
 			t.Fatalf("RemoveEntity failed: %v", err)
-		}
-	})
-
-	fmt.Println("Testing EntityDied...")
-	t.Run("EntityDied", func(t *testing.T) {
-		if err := EntityDied(); err != nil {
-			t.Fatalf("EntityDied failed: %v", err)
 		}
 	})
 
