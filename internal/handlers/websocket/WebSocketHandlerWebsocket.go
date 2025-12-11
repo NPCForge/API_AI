@@ -10,8 +10,33 @@ import (
 
 	"net/http"
 
+	"my-api/internal/services"
+	"sync"
+
 	"github.com/gorilla/websocket"
 )
+
+var (
+	ActiveClients      = make(map[*websocket.Conn]int)
+	ActiveClientsMutex sync.Mutex
+)
+
+func RegisterClient(conn *websocket.Conn, userID int) {
+	ActiveClientsMutex.Lock()
+	defer ActiveClientsMutex.Unlock()
+	ActiveClients[conn] = userID
+}
+
+func UnregisterClient(conn *websocket.Conn) int {
+	ActiveClientsMutex.Lock()
+	defer ActiveClientsMutex.Unlock()
+	userID, exists := ActiveClients[conn]
+	if exists {
+		delete(ActiveClients, conn)
+		return userID
+	}
+	return 0
+}
 
 // WebSocket upgrader configuration allowing CORS.
 var upgrader = websocket.Upgrader{
@@ -106,7 +131,7 @@ func handleWebSocketMessage(conn *websocket.Conn, messageType int, message []byt
 				}
 			}
 			// Call the corresponding action handler
-			action.Handler(conn, message, utils.SendResponse, utils.SendError)
+			go action.Handler(conn, message, utils.SendResponse, utils.SendError)
 			return
 		}
 	}
@@ -122,11 +147,24 @@ func WebsocketHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	log.Println("New WebSocket connection established")
+	utils.RegisterConnectionLock(conn)
+
+	defer utils.UnregisterConnectionLock(conn)
 
 	for {
 		messageType, message, err := conn.ReadMessage()
 		if err != nil {
 			log.Println("Error while reading:", err)
+
+			// Cleanup user on disconnect
+			userID := UnregisterClient(conn)
+			if userID != 0 {
+				log.Printf("Cleaning up user ID: %d", userID)
+				if err := services.DropUser(userID); err != nil {
+					log.Printf("Error dropping user %d: %v", userID, err)
+				}
+			}
+
 			break
 		}
 
