@@ -131,7 +131,7 @@ func handleWebSocketMessage(conn *websocket.Conn, messageType int, message []byt
 				}
 			}
 			// Call the corresponding action handler
-			action.Handler(conn, message, utils.SendResponse, utils.SendError)
+			go action.Handler(conn, message, utils.SendResponse, utils.SendError)
 			return
 		}
 	}
@@ -147,6 +147,9 @@ func WebsocketHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	log.Println("New WebSocket connection established")
+	utils.RegisterConnectionLock(conn)
+
+	defer utils.UnregisterConnectionLock(conn)
 
 	for {
 		messageType, message, err := conn.ReadMessage()
