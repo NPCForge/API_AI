@@ -11,13 +11,12 @@ import (
 // RegisterService registers a new user by creating an account, generating a JWT, and storing the token.
 func RegisterService(password string, identifier string, gamePrompt string) (string, string, error) {
 	// Check if user already exists
-	existingUserID, err := services.GetUserIdByName(identifier)
-	if err == nil && existingUserID != -1 {
-		// User exists, delete them
-		err := services.DropUser(existingUserID)
-		if err != nil {
-			return "", "", errors.New("error deleting existing user: " + err.Error())
-		}
+	// We blindly attempt to delete the user by name to ensure we can recreate it.
+	// This avoids race conditions or issues where Select fails but Insert collision occurs.
+	err := services.DropUserByName(identifier)
+	if err != nil {
+		pkg.DisplayContext("Error attempting to delete user by name: "+identifier, pkg.Error, err)
+		// We proceed anyway, as the error might be benign, or the register might fail with a descriptive error.
 	}
 
 	id, err := services.Register(password, identifier, gamePrompt)
