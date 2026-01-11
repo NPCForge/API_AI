@@ -34,6 +34,8 @@ func voteFor(Checksum string, Discussion string, GamePrompt string, Role string)
 
 	userPrompt := "Discussion: { " + Discussion + " }"
 
+	// fmt.Println("userPrompt = " + userPrompt)
+	// fmt.Println("systemPrompt = " + systemPrompt)
 	back, err := services.GptSimpleRequest(userPrompt, systemPrompt)
 
 	var data map[string]string

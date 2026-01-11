@@ -10,7 +10,8 @@ Rules you MUST follow:
 1. Answer ONLY in the RESPONSE FORMAT above.
 2. Keep sentences SHORT and clear.
 3. Use the information such as your character role, your character to determine the best strategic choice.
-4. You can choose not to vote. Just answer "VoteFor: No One".
+
+You can only vote for these people: Mary, Charles, Pascal, Virginie, make sure they are still alive.
 
 INPUT DATA:
 - Discussion: {previous exchanges following "Sender -> Receiver: Message" format}
