@@ -5,6 +5,7 @@ import (
 	"my-api/config"
 	sharedModel "my-api/internal/models/shared"
 	sharedServices "my-api/internal/services/shared"
+	"strconv"
 
 	"github.com/gorilla/websocket"
 )
@@ -49,6 +50,10 @@ func RegisterHandlerWebsocket(
 			"message": err.Error(),
 		})
 		return
+	}
+
+	if intID, err := strconv.Atoi(id); err == nil {
+		RegisterClient(conn, intID)
 	}
 
 	sendResponse(conn, initialRoute, "", map[string]interface{}{

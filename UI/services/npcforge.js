@@ -2,7 +2,7 @@
 
 export const connect = async (identifier, password, simulate = false) => {
     try {
-        const response = await fetch('http://0.0.0.0:3000/Connect', {
+        const response = await fetch('http://127.0.0.1:3000/Connect', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -44,10 +44,10 @@ export const connect = async (identifier, password, simulate = false) => {
     }
 }
 
-export const register = async (identifier, password, API_TOKEN) => {
-    console.log(identifier, password, API_TOKEN)
+export const register = async (identifier, password, API_TOKEN, GamePrompt) => {
+    console.log(identifier, password, API_TOKEN, GamePrompt)
     try {
-        const response = await fetch('http://0.0.0.0:3000/Register', {
+        const response = await fetch('http://127.0.0.1:3000/Register', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -55,7 +55,8 @@ export const register = async (identifier, password, API_TOKEN) => {
             body: JSON.stringify({
                 identifier: identifier,
                 password: password,
-                API_KEY: API_TOKEN
+                API_KEY: API_TOKEN,
+                game_prompt: GamePrompt || ""
             }),
         })
 
@@ -89,7 +90,7 @@ export const register = async (identifier, password, API_TOKEN) => {
 
 export const removeUser = async (identifier=null, API_TOKEN) => {
     try {
-        const response = await fetch('http://0.0.0.0:3000/RemoveUser', {
+        const response = await fetch('http://127.0.0.1:3000/RemoveUser', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -140,7 +141,7 @@ export const status = async (token = null) => {
             };
         }
 
-        const response = await fetch('http://0.0.0.0:3000/Status', {
+        const response = await fetch('http://127.0.0.1:3000/Status', {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -181,7 +182,7 @@ export const disconnect = async (tokenSimulation = null) => {
             token = tokenSimulation;
         }
 
-        const response = await fetch('http://0.0.0.0:3000/Disconnect', {
+        const response = await fetch('http://127.0.0.1:3000/Disconnect', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -293,7 +294,7 @@ export const createPrompt = async (name) => {
 
 export const CreateEntity = async (name, checksum, prompt, token) => {
     try {
-        const response = await fetch('http://0.0.0.0:3000/CreateEntity', {
+        const response = await fetch('http://127.0.0.1:3000/CreateEntity', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -327,7 +328,7 @@ export const CreateEntity = async (name, checksum, prompt, token) => {
 
 export const RemoveEntity = async (checksum, token) => {
     try {
-        const response = await fetch('http://0.0.0.0:3000/RemoveEntity', {
+        const response = await fetch('http://127.0.0.1:3000/RemoveEntity', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -359,7 +360,7 @@ export const RemoveEntity = async (checksum, token) => {
 
 export const GetEntities = async (token) => {
     try {
-        const response = await fetch('http://0.0.0.0:3000/GetEntities', {
+        const response = await fetch('http://127.0.0.1:3000/GetEntities', {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -392,7 +393,7 @@ export const MakeDecision = async (token, checksum, message) => {
     console.log(checksum)
     console.log(message)
     try {
-        const response = await fetch('http://0.0.0.0:3000/MakeDecision', {
+        const response = await fetch('http://127.0.0.1:3000/MakeDecision', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

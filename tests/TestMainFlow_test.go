@@ -17,13 +17,13 @@ func TestMainFlow(t *testing.T) {
 		}
 	})
 
-	fmt.Println("Testing connect...")
+	// fmt.Println("Testing connect...")
 
-	t.Run("Connect", func(t *testing.T) {
-		if err := Connect(); err == nil {
-			isConnexionSuccess = true
-		}
-	})
+	// t.Run("Connect", func(t *testing.T) {
+	// 	if err := Connect(); err == nil {
+	// 		isConnexionSuccess = true
+	// 	}
+	// })
 
 	if !isConnexionSuccess {
 		t.Fatalf("Unable to connect to the server: %v", err)

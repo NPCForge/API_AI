@@ -137,7 +137,7 @@ func MakeDecisionService(EnvironmentData string, Checksum string, Token string) 
 	var data map[string]string
 
 	err = json.Unmarshal([]byte(EnvironmentData), &data)
-	if err != nil {
+	if err != nil { 
 		pkg.DisplayContext("Cannot unmarshal environment data: "+EnvironmentData, pkg.Error, err)
 		return nil, err
 	}

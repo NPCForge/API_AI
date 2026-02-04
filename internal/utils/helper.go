@@ -4,9 +4,34 @@ import (
 	"os"
 	"runtime"
 
+	"sync"
+
 	"github.com/fatih/color"
 	"github.com/gorilla/websocket"
 )
+
+var (
+	connLocks   = make(map[*websocket.Conn]*sync.Mutex)
+	connLocksMu sync.RWMutex
+)
+
+func RegisterConnectionLock(conn *websocket.Conn) {
+	connLocksMu.Lock()
+	defer connLocksMu.Unlock()
+	connLocks[conn] = &sync.Mutex{}
+}
+
+func UnregisterConnectionLock(conn *websocket.Conn) {
+	connLocksMu.Lock()
+	defer connLocksMu.Unlock()
+	delete(connLocks, conn)
+}
+
+func GetConnectionLock(conn *websocket.Conn) *sync.Mutex {
+	connLocksMu.RLock()
+	defer connLocksMu.RUnlock()
+	return connLocks[conn]
+}
 
 func LogErrorUtils(context string, err error) {
 	if err != nil {
@@ -33,6 +58,10 @@ func SendResponse(conn *websocket.Conn, initialRoute string, entityChecksum stri
 	color.Green("✅ Sending success response:")
 	color.Cyan("📤 Payload: %+v", resp)
 
+	if mu := GetConnectionLock(conn); mu != nil {
+		mu.Lock()
+		defer mu.Unlock()
+	}
 	conn.WriteJSON(resp)
 }
 
@@ -50,6 +79,10 @@ func SendError(conn *websocket.Conn, initialRoute string, entityChecksum string,
 	color.Red("🚨 Sending error response:")
 	color.Yellow("📤 Payload: %+v", resp)
 
+	if mu := GetConnectionLock(conn); mu != nil {
+		mu.Lock()
+		defer mu.Unlock()
+	}
 	conn.WriteJSON(resp)
 }
 

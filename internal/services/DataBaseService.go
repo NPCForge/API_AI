@@ -492,6 +492,27 @@ func DropUser(id int) error {
 	return nil
 }
 
+// DropUserByName deletes a user by their name. It returns nil if the user was deleted or didn't exist.
+func DropUserByName(name string) error {
+	db := config.GetDB()
+
+	query := `DELETE FROM users WHERE LOWER(name) = LOWER($1)`
+	result, err := db.Exec(query, name)
+
+	if err != nil {
+		return fmt.Errorf("error deleting user by name: %w", err)
+	}
+
+	rowsAffected, _ := result.RowsAffected()
+	if rowsAffected == 0 {
+		pkg.DisplayContext(fmt.Sprintf("DropUserByName: No user found with name '%s' to delete (checked case-insensitively)", name), pkg.Default)
+	} else {
+		pkg.DisplayContext(fmt.Sprintf("DropUserByName: Successfully deleted user '%s' (%d rows affected)", name, rowsAffected), pkg.Update)
+	}
+
+	return nil
+}
+
 func DropDiscussions() error {
 	db := config.GetDB()
 

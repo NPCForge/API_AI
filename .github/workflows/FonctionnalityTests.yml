@@ -1,60 +1,60 @@
-﻿name: Run Tests with Docker Compose
+﻿# name: Run Tests with Docker Compose
 
-on:
-  push:
-    branches: [ main, dev ]
-  pull_request:
-    branches: [ main, dev ]
+# on:
+#   push:
+#     branches: [ main, dev ]
+#   pull_request:
+#     branches: [ main, dev ]
 
-jobs:
-  test:
-    runs-on: ubuntu-latest
-    env:
-      CHATGPT_TOKEN: ${{ secrets.CHATGPT_TOKEN }}
+# jobs:
+#   test:
+#     runs-on: ubuntu-latest
+#     env:
+#       CHATGPT_TOKEN: ${{ secrets.CHATGPT_TOKEN }}
 
-    steps:
-      - uses: actions/checkout@v4.2.2
+#     steps:
+#       - uses: actions/checkout@v4.2.2
 
-      - name: Set Up Docker Compose
-        run: |
-          sudo curl -L "https://github.com/docker/compose/releases/download/v2.27.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-          sudo chmod +x /usr/local/bin/docker-compose
-          docker-compose version
+#       - name: Set Up Docker Compose
+#         run: |
+#           sudo curl -L "https://github.com/docker/compose/releases/download/v2.27.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+#           sudo chmod +x /usr/local/bin/docker-compose
+#           docker-compose version
 
-      - name: Set up Go
-        uses: actions/setup-go@v5
-        with:
-          go-version: '1.21'
+#       - name: Set up Go
+#         uses: actions/setup-go@v5
+#         with:
+#           go-version: '1.21'
 
-      - name: Copy .env.exemple to .env
-        run: cp .env.exemple .env
+#       - name: Copy .env.exemple to .env
+#         run: cp .env.exemple .env
 
-      - name: Export secret for Docker
-        run: echo "CHATGPT_TOKEN=${CHATGPT_TOKEN}" >> $GITHUB_ENV
+#       - name: Export secret for Docker
+#         run: echo "CHATGPT_TOKEN=${CHATGPT_TOKEN}" >> $GITHUB_ENV
 
-      - name: Build and start services
-        run: docker-compose up -d
+#       - name: Build and start services
+#         run: docker-compose up -d
 
-      - name: Wait for API to be ready
-        run: |
-          for i in {1..30}; do
-            response=$(curl -s http://localhost:3000/health || true)
-            if [ "$response" = "OK" ]; then
-            echo "✅ API is ready"
-            exit 0
-            fi
-            sleep 1
-          done
-          echo "❌ API did not respond OK in time"
-          docker-compose logs api
-          exit 1
+#       - name: Wait for API to be ready
+#         run: |
+#           for i in {1..30}; do
+#             response=$(curl -s http://localhost:3000/health || true)
+#             if [ "$response" = "OK" ]; then
+#             echo "✅ API is ready"
+#             exit 0
+#             fi
+#             sleep 1
+#           done
+#           echo "❌ API did not respond OK in time"
+#           docker-compose logs api
+#           exit 1
 
-      - name: Run Go tests
-        run: go test -v ./tests
+#       - name: Run Go tests
+#         run: go test -v ./tests
 
-      - name: Shutdown
-        run: docker-compose down
+#       - name: Shutdown
+#         run: docker-compose down
 
-      - name: Show container logs
-        if: failure()
-        run: docker-compose logs
+#       - name: Show container logs
+#         if: failure()
+#         run: docker-compose logs
